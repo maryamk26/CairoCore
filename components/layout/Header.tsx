@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { UserButton } from "@/components/auth/UserButton";
+import { SignInButton } from "@/components/auth/SignInButton";
 
 export default function Header() {
   return (
@@ -10,7 +12,8 @@ export default function Header() {
           CairoCore
         </Link>
         <nav className="flex items-center gap-4">
-          {/* Navigation items will be added later */}
+          <SignInButton />
+          <UserButton />
         </nav>
       </div>
     </header>
