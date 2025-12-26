@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  email     String   @unique
+  name      String?
+  avatar    String?
+  bio       String?
+  isPrivate Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  memories     Memory[]
+  savedPlaces  SavedPlace[]
+  placeReviews PlaceReview[]
+  routePlans   RoutePlan[]
+  createdPlaces Place[] @relation("PlaceCreator")
+
+  @@map("users")
+}
+
+model Place {
+  id           String   @id @default(cuid())
+  title        String
+  description  String   @db.Text
+  images       String[] // Array of image URLs
+  latitude     Float
+  longitude    Float
+  address      String
+  vibe         String[] // Array of vibe tags
+  workingHours Json     // Store working hours as JSON
+  entryFees    Float?
+  cameraFees   Float?
+  bestTime     Json     // Store best time to visit as JSON
+  petsFriendly Boolean  @default(false)
+  kidsFriendly Boolean  @default(true)
+  status       String   @default("pending") // approved, pending, rejected
+  createdBy    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  creator      User         @relation("PlaceCreator", fields: [createdBy], references: [id])
+  memories     Memory[]
+  savedPlaces  SavedPlace[]
+  placeReviews PlaceReview[]
+  routePlans   RoutePlanPlace[]
+
+  @@map("places")
+}
+
+model Memory {
+  id        String   @id @default(cuid())
+  userId    String
+  placeId   String
+  images    String[] // Array of image URLs
+  rating    Int      // 1-5 stars
+  pros      String[] // Array of pros
+  cons      String[] // Array of cons
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@map("memories")
+}
+
+model SavedPlace {
+  id        String   @id @default(cuid())
+  userId    String
+  placeId   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, placeId])
+  @@map("saved_places")
+}
+
+model PlaceReview {
+  id        String   @id @default(cuid())
+  userId    String
+  placeId   String
+  rating    Int      // 1-5 stars
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, placeId])
+  @@map("place_reviews")
+}
+
+model RoutePlan {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime
+  createdAt DateTime @default(now())
+
+  // Relations
+  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  places RoutePlanPlace[]
+
+  @@map("route_plans")
+}
+
+model RoutePlanPlace {
+  id                String    @id @default(cuid())
+  routePlanId       String
+  placeId           String
+  order             Int
+  estimatedArrival  DateTime
+  estimatedDeparture DateTime
+
+  // Relations
+  routePlan RoutePlan @relation(fields: [routePlanId], references: [id], onDelete: Cascade)
+  place     Place     @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@map("route_plan_places")
+}
+
