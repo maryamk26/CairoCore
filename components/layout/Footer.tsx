@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
 
 export default function Footer() {
+  const { isSignedIn } = useAuth();
+
   return (
     <footer className="fixed bottom-0 left-0 right-0 bg-white/40 border-t border-white/30 z-50 backdrop-blur-md">
       <nav className="flex justify-around items-center h-16 px-4">
@@ -14,10 +17,17 @@ export default function Footer() {
           <span className="text-2xl">🔍</span>
           <span className="text-xs text-[#5d4e37] font-medium font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Search</span>
         </Link>
-        <Link href="/planner" className="flex flex-col items-center hover:text-[#8b6f47] transition-colors">
-          <span className="text-2xl">🗺️</span>
-          <span className="text-xs text-[#5d4e37] font-medium font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Plan</span>
-        </Link>
+        {isSignedIn ? (
+          <Link href="/planner" className="flex flex-col items-center hover:text-[#8b6f47] transition-colors">
+            <span className="text-2xl">🗺️</span>
+            <span className="text-xs text-[#5d4e37] font-medium font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Plan</span>
+          </Link>
+        ) : (
+          <Link href="/sign-up" className="flex flex-col items-center hover:text-[#8b6f47] transition-colors">
+            <span className="text-2xl">✨</span>
+            <span className="text-xs text-[#5d4e37] font-medium font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Join Us</span>
+          </Link>
+        )}
         <Link href="/profile" className="flex flex-col items-center hover:text-[#8b6f47] transition-colors">
           <span className="text-2xl">👤</span>
           <span className="text-xs text-[#5d4e37] font-medium font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Profile</span>
