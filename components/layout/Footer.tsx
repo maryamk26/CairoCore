@@ -4,23 +4,23 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+    <footer className="fixed bottom-0 left-0 right-0 bg-white/40 border-t border-white/30 z-50 backdrop-blur-md">
       <nav className="flex justify-around items-center h-16 px-4">
-        <Link href="/" className="flex flex-col items-center">
+        <Link href="/" className="flex flex-col items-center hover:text-[#8b6f47] transition-colors">
           <span className="text-2xl">🏠</span>
-          <span className="text-xs">Home</span>
+          <span className="text-xs text-[#5d4e37] font-medium font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Home</span>
         </Link>
-        <Link href="/search" className="flex flex-col items-center">
+        <Link href="/search" className="flex flex-col items-center hover:text-[#8b6f47] transition-colors">
           <span className="text-2xl">🔍</span>
-          <span className="text-xs">Search</span>
+          <span className="text-xs text-[#5d4e37] font-medium font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Search</span>
         </Link>
-        <Link href="/planner" className="flex flex-col items-center">
+        <Link href="/planner" className="flex flex-col items-center hover:text-[#8b6f47] transition-colors">
           <span className="text-2xl">🗺️</span>
-          <span className="text-xs">Plan</span>
+          <span className="text-xs text-[#5d4e37] font-medium font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Plan</span>
         </Link>
-        <Link href="/profile" className="flex flex-col items-center">
+        <Link href="/profile" className="flex flex-col items-center hover:text-[#8b6f47] transition-colors">
           <span className="text-2xl">👤</span>
-          <span className="text-xs">Profile</span>
+          <span className="text-xs text-[#5d4e37] font-medium font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Profile</span>
         </Link>
       </nav>
     </footer>
