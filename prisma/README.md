@@ -179,3 +179,4 @@ After setting up the database:
 - Run `npm run db:generate` after schema changes
 - Restart your TypeScript server in your IDE
 
+

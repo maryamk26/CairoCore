@@ -9,12 +9,18 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section with Background Image */}
-      <section className="relative min-h-screen flex items-center">
-        {/* Background Image with Overlay */}
+      <section 
+        className="relative min-h-screen flex items-center"
+        style={{
+          backgroundImage: 'url(/images/backgrounds/aboutbg.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        {/* Background Overlay */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-[#5d4e37]/80 via-[#8b6f47]/70 to-[#5d4e37]/80"></div>
-          {/* Placeholder for background image - replace with actual image */}
-          <div className="w-full h-full bg-gradient-to-br from-[#3a3428] via-[#5d4e37] to-[#3a3428] opacity-50"></div>
         </div>
 
         {/* Content */}
@@ -55,7 +61,7 @@ export default function AboutPage() {
         onClick={() => setShowModal(false)}
       >
         <div 
-          className={`bg-[#e8ddd4] backdrop-blur-md rounded-2xl shadow-xl border border-white/30 p-8 md:p-12 max-w-2xl w-full max-h-[90vh] overflow-y-auto relative transition-all duration-300 ${
+          className={`bg-[#3d2f1f] backdrop-blur-md rounded-2xl shadow-xl border border-[#5d4e37]/50 p-8 md:p-12 max-w-2xl w-full max-h-[90vh] overflow-y-auto relative transition-all duration-300 ${
             showModal ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-4 pointer-events-none'
           }`}
           onClick={(e) => e.stopPropagation()}
@@ -63,7 +69,7 @@ export default function AboutPage() {
           {/* Close Button */}
           <button
             onClick={() => setShowModal(false)}
-            className="absolute top-4 right-4 text-[#5d4e37] hover:text-[#8b6f47] transition-colors"
+            className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
             aria-label="Close"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,28 +79,28 @@ export default function AboutPage() {
 
           {/* Modal Content */}
           <div className="mt-4">
-            <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-[#5d4e37] mb-6" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-white mb-6" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
               What We Do
             </h2>
             
             <div className="space-y-6">
               <div>
-                <h3 className="font-cinzel text-xl font-semibold text-[#5d4e37] mb-3" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                <h3 className="font-cinzel text-xl font-semibold text-white mb-3" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                   Your Ultimate Cairo Guide
                 </h3>
-                <p className="text-[#5d4e37]/90 leading-relaxed font-cinzel text-lg" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                <p className="text-white/90 leading-relaxed font-cinzel text-lg" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                   Think of us as your bestie who knows all the hidden gems in Cairo. We're a bunch of Cairo enthusiasts who got tired of missing out on the coolest spots in the city. From that insta-worthy cafe you've been searching for to ancient places that'll literally blow your mind.
                 </p>
               </div>
 
               <div>
-                <h3 className="font-cinzel text-xl font-semibold text-[#5d4e37] mb-3" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                <h3 className="font-cinzel text-xl font-semibold text-white mb-3" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                   Making Cairo Exploration Effortless
                 </h3>
-                <p className="text-[#5d4e37]/90 leading-relaxed font-cinzel text-lg mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                <p className="text-white/90 leading-relaxed font-cinzel text-lg mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                   We're making Cairo exploration absolutely effortless and way more fun. We've got all the deets on places you need to check out - photos that'll make you want to book a trip right now, honest reviews from real people, and all the insider tips you won't find anywhere else.
                 </p>
-                <p className="text-[#5d4e37]/90 leading-relaxed font-cinzel text-lg" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                <p className="text-white/90 leading-relaxed font-cinzel text-lg" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                   Want to share that amazing spot you discovered? Go for it. Planning the perfect day out? We got you covered. Looking to connect with other explorers who are just as obsessed with Cairo as you are? You've come to the right place. Let's explore this city together.
                 </p>
               </div>

@@ -21,18 +21,20 @@ export default function Header() {
   ];
 
   const isSearchPage = pathname === "/search";
+  const isAboutPage = pathname === "/about";
+  const isLightHeader = isSearchPage || isAboutPage;
 
   return (
     <header 
-      className={`w-full pt-8 pb-4 absolute top-0 left-0 right-0 z-50 ${isSearchPage ? 'bg-transparent backdrop-blur-0' : 'bg-transparent'}`} 
-      style={isSearchPage ? { backgroundColor: 'transparent', background: 'none' } : {}}
+      className={`w-full pt-8 pb-4 absolute top-0 left-0 right-0 z-50 ${isLightHeader ? 'bg-transparent backdrop-blur-0' : 'bg-transparent'}`} 
+      style={isLightHeader ? { backgroundColor: 'transparent', background: 'none' } : {}}
     >
       <div className="container mx-auto flex items-center justify-between px-4">
         {/* Logo */}
         <Link 
           href="/" 
           className={`font-cinzel text-3xl md:text-4xl font-bold transition-colors ${
-            isSearchPage 
+            isLightHeader 
               ? 'text-white hover:text-white/80' 
               : 'text-[#5d4e37] hover:text-[#8b6f47]'
           }`}
@@ -49,7 +51,7 @@ export default function Header() {
                 key={link.href}
                 href={link.href}
                 className={`font-cinzel text-base md:text-lg font-normal transition-colors hover:underline ${
-                  isSearchPage
+                  isLightHeader
                     ? 'text-white hover:text-white/80'
                     : 'text-[#5d4e37] hover:text-[#8b6f47]'
                 }`}
@@ -67,7 +69,7 @@ export default function Header() {
           <Link
             href="/search"
             className={`p-1 transition-colors ${
-              isSearchPage
+              isLightHeader
                 ? 'text-white hover:text-white/80'
                 : 'text-[#5d4e37] hover:text-[#8b6f47]'
             }`}
@@ -82,7 +84,7 @@ export default function Header() {
           <Link
             href={isSignedIn ? "/profile" : "/sign-in"}
             className={`p-1 transition-colors ${
-              isSearchPage
+              isLightHeader
                 ? 'text-white hover:text-white/80'
                 : 'text-[#5d4e37] hover:text-[#8b6f47]'
             }`}
