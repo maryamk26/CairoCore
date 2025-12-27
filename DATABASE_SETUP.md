@@ -163,3 +163,4 @@ The schema includes optimized indexes for:
 - Geospatial indexes on Place coordinates for location-based queries
 - Consider adding full-text search indexes for title/description searches
 
+
