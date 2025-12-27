@@ -10,57 +10,118 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Enums
+enum PlaceStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PlaceCategory {
+  HISTORICAL
+  MUSEUM
+  MOSQUE
+  CHURCH
+  PARK
+  CAFE
+  RESTAURANT
+  MARKET
+  LIBRARY
+  THEATER
+  OTHER
+}
+
+// User Model
 model User {
   id        String   @id @default(cuid())
+  clerkId   String   @unique // Clerk authentication ID
   username  String   @unique
   email     String   @unique
   name      String?
   avatar    String?
-  bio       String?
+  bio       String?  @db.Text
   isPrivate Boolean  @default(false)
+  location  String?  // User's location (optional)
+  website   String?  // Personal website URL
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  memories     Memory[]
-  savedPlaces  SavedPlace[]
-  placeReviews PlaceReview[]
-  routePlans   RoutePlan[]
-  createdPlaces Place[] @relation("PlaceCreator")
+  memories       Memory[]
+  savedPlaces    SavedPlace[]
+  placeReviews   PlaceReview[]
+  routePlans     RoutePlan[]
+  createdPlaces  Place[]        @relation("PlaceCreator")
+  following      Follow[]       @relation("UserFollowing")
+  followers      Follow[]       @relation("UserFollowers")
+  memoryLikes    MemoryLike[]
+  memoryComments MemoryComment[]
 
+  @@index([clerkId])
+  @@index([username])
+  @@index([email])
   @@map("users")
 }
 
+// Follow Model (for social features)
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String   // User who follows
+  followingId String   // User being followed
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@map("follows")
+}
+
+// Place Model
 model Place {
-  id           String   @id @default(cuid())
+  id           String        @id @default(cuid())
   title        String
-  description  String   @db.Text
-  images       String[] // Array of image URLs
+  description  String        @db.Text
+  images       String[]      // Array of image URLs
   latitude     Float
   longitude    Float
   address      String
-  vibe         String[] // Array of vibe tags
-  workingHours Json     // Store working hours as JSON
+  city         String        @default("Cairo")
+  category     PlaceCategory @default(OTHER)
+  vibe         String[]      // Array of vibe tags (e.g., ["romantic", "photography", "historical"])
+  workingHours Json          // Store working hours as JSON
   entryFees    Float?
   cameraFees   Float?
-  bestTime     Json     // Store best time to visit as JSON
-  petsFriendly Boolean  @default(false)
-  kidsFriendly Boolean  @default(true)
-  status       String   @default("pending") // approved, pending, rejected
+  bestTime     Json          // Store best time to visit as JSON
+  petsFriendly Boolean       @default(false)
+  kidsFriendly Boolean       @default(true)
+  wheelchairAccessible Boolean @default(false)
+  parkingAvailable Boolean   @default(false)
+  wifiAvailable Boolean      @default(false)
+  status       PlaceStatus   @default(PENDING)
+  viewCount    Int           @default(0) // Track how many times place was viewed
   createdBy    String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
   // Relations
-  creator      User         @relation("PlaceCreator", fields: [createdBy], references: [id])
+  creator      User            @relation("PlaceCreator", fields: [createdBy], references: [id])
   memories     Memory[]
   savedPlaces  SavedPlace[]
   placeReviews PlaceReview[]
   routePlans   RoutePlanPlace[]
 
+  @@index([status])
+  @@index([category])
+  @@index([latitude, longitude]) // For geospatial queries
+  @@index([createdBy])
+  @@index([title]) // For search
   @@map("places")
 }
 
+// Memory Model (User posts/experiences about places)
 model Memory {
   id        String   @id @default(cuid())
   userId    String
@@ -70,16 +131,60 @@ model Memory {
   pros      String[] // Array of pros
   cons      String[] // Array of cons
   comment   String?  @db.Text
+  visitDate DateTime? // When the user visited this place
+  isPublic  Boolean  @default(true) // Allow users to make memories private
+  likeCount Int      @default(0) // Cached count for performance
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  place     Place           @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  likes     MemoryLike[]
+  comments  MemoryComment[]
 
+  @@index([userId])
+  @@index([placeId])
+  @@index([createdAt]) // For feed ordering
+  @@index([rating])
   @@map("memories")
 }
 
+// Memory Like Model
+model MemoryLike {
+  id        String   @id @default(cuid())
+  userId    String
+  memoryId  String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  memory Memory @relation(fields: [memoryId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, memoryId])
+  @@index([memoryId])
+  @@index([userId])
+  @@map("memory_likes")
+}
+
+// Memory Comment Model
+model MemoryComment {
+  id        String   @id @default(cuid())
+  userId    String
+  memoryId  String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  memory Memory @relation(fields: [memoryId], references: [id], onDelete: Cascade)
+
+  @@index([memoryId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("memory_comments")
+}
+
+// Saved Place Model (User's saved/favorited places)
 model SavedPlace {
   id        String   @id @default(cuid())
   userId    String
@@ -91,51 +196,68 @@ model SavedPlace {
   place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, placeId])
+  @@index([userId])
+  @@index([placeId])
   @@map("saved_places")
 }
 
+// Place Review Model
 model PlaceReview {
   id        String   @id @default(cuid())
   userId    String
   placeId   String
   rating    Int      // 1-5 stars
   comment   String?  @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   // Relations
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, placeId])
+  @@index([placeId])
+  @@index([userId])
+  @@index([rating])
   @@map("place_reviews")
 }
 
+// Route Plan Model
 model RoutePlan {
-  id        String   @id @default(cuid())
-  userId    String
-  date      DateTime
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  userId      String
+  title       String?  // Optional title for the route
+  date        DateTime
+  notes       String?  @db.Text // User notes about the route
+  isPublic    Boolean  @default(false) // Allow sharing routes
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
-  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   places RoutePlanPlace[]
 
+  @@index([userId])
+  @@index([date])
   @@map("route_plans")
 }
 
+// Route Plan Place Model (Junction table)
 model RoutePlanPlace {
   id                String    @id @default(cuid())
   routePlanId       String
   placeId           String
-  order             Int
+  order             Int       // Order of visit
   estimatedArrival  DateTime
   estimatedDeparture DateTime
+  notes             String?   @db.Text // Notes for this specific place in the route
 
   // Relations
   routePlan RoutePlan @relation(fields: [routePlanId], references: [id], onDelete: Cascade)
   place     Place     @relation(fields: [placeId], references: [id], onDelete: Cascade)
 
+  @@index([routePlanId])
+  @@index([placeId])
   @@map("route_plan_places")
 }
 
