@@ -12,6 +12,10 @@
   --earth-charcoal: #3a3428;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   color: var(--earth-charcoal);
   background: var(--earth-cream);
@@ -41,5 +45,56 @@ body {
 
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
   background: #5d4e37;
+}
+
+/* Smooth page transitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+/* Smooth transitions for all interactive elements */
+a, button {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth link transitions */
+a {
+  transition-property: color, opacity, transform;
+}
+
+/* Prevent layout shift during transitions */
+main {
+  position: relative;
+  min-height: 100%;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Optimize transitions */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
 }
 

@@ -2,9 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 
 export default function FloatingAddButton() {
   const pathname = usePathname();
+  const { isSignedIn, userId } = useAuth();
+
+  // Don't show button if user is not signed in
+  if (!isSignedIn || !userId) {
+    return null;
+  }
 
   // Don't show button on sign-in, sign-up, about, or search pages
   if (pathname?.startsWith("/sign-in") || pathname?.startsWith("/sign-up") || pathname === "/about" || pathname === "/search") {

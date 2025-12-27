@@ -164,3 +164,4 @@ The schema includes optimized indexes for:
 - Consider adding full-text search indexes for title/description searches
 
 
+
