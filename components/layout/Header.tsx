@@ -20,11 +20,24 @@ export default function Header() {
     { href: "/about", label: "About" },
   ];
 
+  const isSearchPage = pathname === "/search";
+
   return (
-    <header className="w-full pt-8 pb-4 bg-transparent">
+    <header 
+      className={`w-full pt-8 pb-4 absolute top-0 left-0 right-0 z-50 ${isSearchPage ? 'bg-transparent backdrop-blur-0' : 'bg-transparent'}`} 
+      style={isSearchPage ? { backgroundColor: 'transparent', background: 'none' } : {}}
+    >
       <div className="container mx-auto flex items-center justify-between px-4">
         {/* Logo */}
-        <Link href="/" className="font-cinzel text-3xl md:text-4xl font-bold text-[#5d4e37] hover:text-[#8b6f47] transition-colors" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+        <Link 
+          href="/" 
+          className={`font-cinzel text-3xl md:text-4xl font-bold transition-colors ${
+            isSearchPage 
+              ? 'text-white hover:text-white/80' 
+              : 'text-[#5d4e37] hover:text-[#8b6f47]'
+          }`}
+          style={{ fontFamily: 'var(--font-cinzel), serif' }}
+        >
           CairoCore
         </Link>
 
@@ -35,7 +48,11 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="font-cinzel text-base md:text-lg font-normal text-[#5d4e37] hover:text-[#8b6f47] hover:underline transition-colors"
+                className={`font-cinzel text-base md:text-lg font-normal transition-colors hover:underline ${
+                  isSearchPage
+                    ? 'text-white hover:text-white/80'
+                    : 'text-[#5d4e37] hover:text-[#8b6f47]'
+                }`}
                 style={{ fontFamily: 'var(--font-cinzel), serif' }}
               >
                 {link.label}
@@ -49,7 +66,11 @@ export default function Header() {
           {/* Search Icon */}
           <Link
             href="/search"
-            className="p-1 transition-colors text-[#5d4e37] hover:text-[#8b6f47]"
+            className={`p-1 transition-colors ${
+              isSearchPage
+                ? 'text-white hover:text-white/80'
+                : 'text-[#5d4e37] hover:text-[#8b6f47]'
+            }`}
             aria-label="Search"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -60,7 +81,11 @@ export default function Header() {
           {/* Profile Icon - Redirects to profile if signed in, sign-in if not */}
           <Link
             href={isSignedIn ? "/profile" : "/sign-in"}
-            className="p-1 transition-colors text-[#5d4e37] hover:text-[#8b6f47]"
+            className={`p-1 transition-colors ${
+              isSearchPage
+                ? 'text-white hover:text-white/80'
+                : 'text-[#5d4e37] hover:text-[#8b6f47]'
+            }`}
             aria-label="Profile"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
