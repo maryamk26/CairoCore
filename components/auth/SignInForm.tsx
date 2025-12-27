@@ -53,7 +53,7 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-0">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
         <label htmlFor="email" className="block text-sm font-cinzel font-medium text-[#5d4e37] mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
@@ -89,7 +89,11 @@ export default function SignInForm() {
 
       <div className="flex items-center justify-between">
         <label className="flex items-center gap-2 text-sm text-[#5d4e37] font-cinzel cursor-pointer" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-          <input type="checkbox" className="w-4 h-4 rounded border-white/50 bg-white/20 text-[#8b6f47] focus:ring-2 focus:ring-white/50" />
+          <input 
+            type="checkbox" 
+            className="w-4 h-4 rounded border-white/50 bg-white/20 focus:ring-2 focus:ring-white/50 cursor-pointer" 
+            style={{ accentColor: '#8b6f47' }}
+          />
           Remember me
         </label>
         <Link href="/forgot-password" className="text-sm text-[#8b6f47] hover:text-[#5d4e37] font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
@@ -125,7 +129,7 @@ export default function SignInForm() {
       </div>
 
       {/* Social Login Buttons */}
-      <div className="space-y-3">
+      <div className="space-y-3 pb-0">
         <button
           type="button"
           onClick={() => handleSocialSignIn("oauth_google")}
@@ -155,12 +159,6 @@ export default function SignInForm() {
         </button>
       </div>
 
-      <div className="text-center text-sm text-[#5d4e37] font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-        Don't have an account?{" "}
-        <Link href="/sign-up" className="text-[#8b6f47] hover:text-[#5d4e37] font-medium font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-          Sign up
-        </Link>
-      </div>
     </div>
   );
 }

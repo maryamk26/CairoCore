@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useSignUp } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 export default function SignUpForm() {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -253,12 +252,6 @@ export default function SignUpForm() {
         </button>
       </div>
 
-      <div className="text-center text-sm text-[#5d4e37] font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-        Already have an account?{" "}
-        <Link href="/sign-in" className="text-[#8b6f47] hover:text-[#5d4e37] font-medium font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-          Sign in
-        </Link>
-      </div>
     </div>
   );
 }
