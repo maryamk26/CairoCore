@@ -9,27 +9,27 @@ export default function Home() {
   const popularPlaces = [
     {
       id: 1,
-      title: "PLACE #1",
-      subtitle: "and get unforgettable",
-      image: "/images/backgrounds/aboutbg.jpg" // Placeholder - you can add specific images
+      title: "Pyramids and Sphinx",
+      subtitle: "Ancient wonders of the world",
+      image: "/images/places/pyramids.jpeg"
     },
     {
       id: 2,
-      title: "PLACE #2",
-      subtitle: "and get unforgettable",
-      image: "/images/backgrounds/searchbg.jpg"
+      title: "Grand Museum",
+      subtitle: "Treasures of ancient Egypt",
+      image: "/images/places/grandm.jpeg"
     },
     {
       id: 3,
-      title: "PLACE #3",
-      subtitle: "and get unforgettable",
-      image: "/images/backgrounds/authbg.jpg"
+      title: "Khan el-Khalili",
+      subtitle: "Historic bazaar and souk",
+      image: "/images/places/khan.jpeg"
     },
     {
       id: 4,
-      title: "PLACE #4",
-      subtitle: "and get unforgettable",
-      image: "/images/backgrounds/aboutbg.jpg"
+      title: "Cairo Tower",
+      subtitle: "Iconic landmark of Cairo",
+      image: "/images/places/cairotower.jpeg"
     }
   ];
 
@@ -100,9 +100,12 @@ export default function Home() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                   <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <h3 className="font-cinzel text-white text-xl font-bold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                    <h3 className="font-cinzel text-white text-xl font-bold mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                       {place.title}
                     </h3>
+                    <p className="font-cinzel text-white/90 text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                      {place.subtitle}
+                    </p>
                   </div>
                 </div>
               </Link>
