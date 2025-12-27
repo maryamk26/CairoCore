@@ -6,8 +6,8 @@ import { usePathname } from "next/navigation";
 export default function FloatingAddButton() {
   const pathname = usePathname();
 
-  // Don't show button on sign-in or sign-up pages
-  if (pathname?.startsWith("/sign-in") || pathname?.startsWith("/sign-up")) {
+  // Don't show button on sign-in, sign-up, or about pages
+  if (pathname?.startsWith("/sign-in") || pathname?.startsWith("/sign-up") || pathname === "/about") {
     return null;
   }
 
