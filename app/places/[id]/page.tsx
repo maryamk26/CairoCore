@@ -3,6 +3,17 @@
 import { useState, use } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
+
+// Dynamically import PlaceMap to avoid SSR issues with Leaflet
+const PlaceMap = dynamic(() => import("@/components/places/PlaceMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[400px] bg-gray-200 flex items-center justify-center rounded-lg">
+      <p className="text-gray-500">Loading map...</p>
+    </div>
+  ),
+});
 
 // Mock data - in production this would come from an API
 const getPlaceData = (id: string) => {
@@ -232,7 +243,7 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
             {/* Image Indicators */}
             {place.images.length > 1 && (
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                {place.images.map((_, index) => (
+                {place.images.map((_: string, index: number) => (
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
@@ -278,6 +289,71 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
               </p>
             </div>
 
+            {/* Location Map */}
+            <div className="bg-[#5d4e37] rounded-lg p-6 md:p-8">
+              <h2 className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-6" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                Location
+              </h2>
+              
+              {/* Detailed Address Information */}
+              <div className="mb-6 space-y-4">
+                <div className="bg-[#8b6f47]/30 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <svg className="w-6 h-6 text-white/80 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <div className="flex-1">
+                      <p className="font-cinzel text-white font-semibold text-lg mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                        Address
+                      </p>
+                      <p className="font-cinzel text-white/90 text-base leading-relaxed" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                        {place.location.address}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Coordinates */}
+                <div className="bg-[#8b6f47]/30 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <svg className="w-6 h-6 text-white/80 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                    </svg>
+                    <div className="flex-1">
+                      <p className="font-cinzel text-white font-semibold text-lg mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                        Coordinates
+                      </p>
+                      <div className="flex flex-col sm:flex-row sm:gap-4 gap-2">
+                        <div>
+                          <span className="font-cinzel text-white/70 text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Latitude: </span>
+                          <span className="font-cinzel text-white/90 font-mono text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                            {place.location.lat.toFixed(6)}°
+                          </span>
+                        </div>
+                        <div>
+                          <span className="font-cinzel text-white/70 text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Longitude: </span>
+                          <span className="font-cinzel text-white/90 font-mono text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                            {place.location.lng.toFixed(6)}°
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <PlaceMap
+                lat={place.location.lat}
+                lng={place.location.lng}
+                title={place.title}
+                address={place.location.address}
+                height="400px"
+                zoom={15}
+              />
+            </div>
+
             {/* Vibe Tags */}
             <div className="bg-[#5d4e37] rounded-lg p-6 md:p-8">
               <h2 className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
@@ -318,12 +394,17 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
               <div className="space-y-4">
                 {/* Location */}
                 <div>
-                  <p className="font-cinzel text-white/70 text-sm mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                  <p className="font-cinzel text-white/70 text-sm mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                     Location
                   </p>
-                  <p className="font-cinzel text-white" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                  <p className="font-cinzel text-white text-sm leading-relaxed" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                     {place.location.address}
                   </p>
+                  <div className="mt-2 pt-2 border-t border-white/10">
+                    <p className="font-cinzel text-white/60 text-xs font-mono" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                      {place.location.lat.toFixed(4)}°, {place.location.lng.toFixed(4)}°
+                    </p>
+                  </div>
                 </div>
 
                 {/* Entry Fees */}
