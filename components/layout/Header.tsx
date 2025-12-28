@@ -1,14 +1,38 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@/lib/hooks/useAuth";
 import UserButton from "@/components/auth/UserButton";
 
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, isLoading, userId, user } = useAuth();
+  
+  // Use userId as the most reliable indicator
+  const authenticated = !isLoading && (isSignedIn || !!userId);
+  
+  // Debug: log auth state (remove in production)
+  useEffect(() => {
+    if (!isLoading) {
+      console.log("\n=== HEADER AUTH STATE ===");
+      console.log("isLoading:", isLoading);
+      console.log("isSignedIn:", isSignedIn);
+      console.log("userId:", userId || "none");
+      console.log("user:", user ? {
+        id: user.id,
+        email: user.email,
+        metadata: user.user_metadata,
+      } : "none");
+      console.log("authenticated (computed):", authenticated);
+      console.log("Timestamp:", new Date().toISOString());
+      console.log("===================\n");
+    } else {
+      console.log("[Header] Supabase not loaded yet...");
+    }
+  }, [isLoading, isSignedIn, userId, user, authenticated]);
 
   const handleAboutClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (pathname === "/") {
@@ -28,7 +52,8 @@ export default function Header() {
 
   const textNavLinks = [
     { href: "/", label: "Home" },
-    ...(isSignedIn ? [{ href: "/planner", label: "Planner" }] : [{ href: "/sign-up", label: "Join Us" }]),
+    // Show Planner when signed in, Join Us when not signed in
+    ...(authenticated ? [{ href: "/planner", label: "Planner" }] : [{ href: "/sign-up", label: "Join Us" }]),
     { href: "/about", label: "About" },
   ];
 
@@ -113,27 +138,28 @@ export default function Header() {
               </svg>
             </Link>
 
-            {/* Profile Icon - Redirects to profile if signed in, sign-in if not */}
-            <Link
-              href={isSignedIn ? "/profile" : "/sign-in"}
-              className={`p-1 transition-colors ${
-                isLightHeader
-                  ? 'text-white hover:text-white/80'
-                  : 'text-[#5d4e37] hover:text-[#8b6f47]'
-              }`}
-              aria-label="Profile"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </Link>
+            {/* Profile Icon - Only shows when NOT signed in, redirects to sign-in */}
+            {!authenticated && (
+              <Link
+                href="/sign-in"
+                className={`p-1 transition-colors ${
+                  isLightHeader
+                    ? 'text-white hover:text-white/80'
+                    : 'text-[#5d4e37] hover:text-[#8b6f47]'
+                }`}
+                aria-label="Sign In"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </Link>
+            )}
 
-            {/* UserButton - Only shows when signed in */}
-            {isSignedIn && <UserButton />}
+            {/* UserButton (Circle with email) - Only shows when signed in */}
+            {authenticated && <UserButton />}
           </div>
         </div>
       </div>
     </header>
   );
 }
-

@@ -1,126 +1,95 @@
 "use client";
 
 import { useState } from "react";
-import { useSignUp } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function SignUpForm() {
-  const { isLoaded, signUp, setActive } = useSignUp();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [pendingVerification, setPendingVerification] = useState(false);
-  const [code, setCode] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLoaded) return;
 
     setIsLoading(true);
     setError("");
 
     try {
-      await signUp.create({
-        emailAddress: email,
+      const supabase = createClient();
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
         password,
-        firstName,
-        lastName,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirectTo)}`,
+        },
       });
 
-      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
-      setPendingVerification(true);
-    } catch (err: any) {
-      setError(err.errors?.[0]?.message || "Something went wrong. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      if (signUpError) {
+        setError(signUpError.message || "Something went wrong. Please try again.");
+        return;
+      }
 
-  const handleSocialSignUp = async (strategy: "oauth_google" | "oauth_apple" | "oauth_github" | "oauth_facebook") => {
-    if (!isLoaded) return;
-    try {
-      await signUp.authenticateWithRedirect({
-        strategy,
-        redirectUrl: "/",
-        redirectUrlComplete: "/",
-      });
-    } catch (err: any) {
-      setError(err.errors?.[0]?.message || "Failed to sign up with social provider");
-    }
-  };
-
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isLoaded) return;
-
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const completeSignUp = await signUp.attemptEmailAddressVerification({
-        code,
-      });
-
-      if (completeSignUp.status === "complete") {
-        await setActive({ session: completeSignUp.createdSessionId });
-        router.push("/");
+      if (data.user) {
+        // Check if email confirmation is required
+        if (data.session) {
+          // User is automatically signed in (email confirmation disabled)
+          window.location.href = redirectTo;
+        } else {
+          // Email confirmation required
+          setError("Please check your email to confirm your account.");
+        }
       } else {
-        setError("Verification failed. Please try again.");
+        setError("Something went wrong. Please try again.");
       }
     } catch (err: any) {
-      setError(err.errors?.[0]?.message || "Invalid verification code");
+      setError(err.message || "Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (pendingVerification) {
-    return (
-      <form onSubmit={handleVerify} className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-cinzel font-bold text-[#5d4e37] mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Verify your email</h2>
-          <p className="text-[#8b6f47] text-sm mb-6 font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-            We sent a verification code to {email}. Please check your inbox.
-          </p>
-        </div>
+  const handleSocialSignUp = async (provider: "google" | "apple" | "github") => {
+    setIsLoading(true);
+    setError("");
+    
+    try {
+      const supabase = createClient();
+      const { error: signUpError } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirectTo)}`,
+        },
+      });
 
-        <div>
-          <label htmlFor="code" className="block text-sm font-cinzel font-medium text-[#5d4e37] mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-            Verification Code
-          </label>
-          <input
-            id="code"
-            type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            required
-            className="w-full px-4 py-3 rounded-full border border-white/50 bg-white/20 backdrop-blur-sm text-[#3a3428] font-cinzel focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/70 transition-all"
-            style={{ fontFamily: 'var(--font-cinzel), serif' }}
-            placeholder="Enter verification code"
-          />
-        </div>
-
-        {error && (
-          <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-            {error}
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={isLoading || !isLoaded}
-          className="w-full py-3 px-4 rounded-lg bg-[#8b6f47]/80 backdrop-blur-sm text-white font-cinzel font-medium hover:bg-[#8b6f47] focus:outline-none focus:ring-2 focus:ring-[#8b6f47] focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        style={{ fontFamily: 'var(--font-cinzel), serif' }}
-        >
-          {isLoading ? "Verifying..." : "Verify Email"}
-        </button>
-      </form>
-    );
-  }
+      if (signUpError) {
+        // Check if provider is not enabled
+        if (signUpError.message.includes("not enabled") || signUpError.message.includes("Unsupported provider")) {
+          setError(`${provider.charAt(0).toUpperCase() + provider.slice(1)} sign-in is not enabled. Please use email/password or contact support.`);
+        } else {
+          setError(signUpError.message || `Failed to sign up with ${provider}`);
+        }
+      }
+    } catch (err: any) {
+      if (err.message?.includes("not enabled") || err.message?.includes("Unsupported provider")) {
+        setError(`${provider.charAt(0).toUpperCase() + provider.slice(1)} sign-in is not enabled. Please use email/password.`);
+      } else {
+        setError(err.message || `Failed to sign up with ${provider}`);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -202,7 +171,7 @@ export default function SignUpForm() {
 
       <button
         type="submit"
-        disabled={isLoading || !isLoaded}
+        disabled={isLoading}
         className="w-full py-3 px-4 rounded-full bg-[#8b6f47]/80 backdrop-blur-sm text-white font-cinzel font-medium hover:bg-[#8b6f47] focus:outline-none focus:ring-2 focus:ring-[#8b6f47] focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         style={{ fontFamily: 'var(--font-cinzel), serif' }}
       >
@@ -210,23 +179,26 @@ export default function SignUpForm() {
       </button>
       </form>
 
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-white/40"></div>
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-transparent text-[#5d4e37] font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-            or
-          </span>
-        </div>
-      </div>
+      {/* OAuth buttons temporarily disabled - enable providers in Supabase dashboard first */}
+      {false && (
+        <>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/40"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-transparent text-[#5d4e37] font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                or
+              </span>
+            </div>
+          </div>
 
-      {/* Social Login Buttons */}
-      <div className="space-y-3">
+          {/* Social Login Buttons */}
+          <div className="space-y-3">
         <button
           type="button"
-          onClick={() => handleSocialSignUp("oauth_google")}
-          disabled={!isLoaded}
+          onClick={() => handleSocialSignUp("google")}
+          disabled={isLoading}
           className="w-full py-3 px-4 rounded-full border-2 border-white/50 bg-white/30 backdrop-blur-sm text-[#5d4e37] font-cinzel font-medium hover:bg-[#5d4e37]/20 hover:border-[#5d4e37]/40 hover:text-[#3a3428] focus:outline-none focus:ring-2 focus:ring-[#8b6f47] focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           style={{ fontFamily: 'var(--font-cinzel), serif' }}
         >
@@ -240,8 +212,8 @@ export default function SignUpForm() {
         </button>
         <button
           type="button"
-          onClick={() => handleSocialSignUp("oauth_apple")}
-          disabled={!isLoaded}
+          onClick={() => handleSocialSignUp("apple")}
+          disabled={isLoading}
           className="w-full py-3 px-4 rounded-full border-2 border-white/50 bg-white/30 backdrop-blur-sm text-[#5d4e37] font-cinzel font-medium hover:bg-[#5d4e37]/20 hover:border-[#5d4e37]/40 hover:text-[#3a3428] focus:outline-none focus:ring-2 focus:ring-[#8b6f47] focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           style={{ fontFamily: 'var(--font-cinzel), serif' }}
         >
@@ -250,9 +222,10 @@ export default function SignUpForm() {
           </svg>
           Continue with Apple
         </button>
-      </div>
+          </div>
+        </>
+      )}
 
     </div>
   );
 }
-

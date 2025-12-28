@@ -5,8 +5,19 @@ import { auth, currentUser } from "@clerk/nextjs/server";
  * Use this in Server Components and API routes
  */
 export async function getCurrentUser() {
-  const user = await currentUser();
-  return user;
+  console.log("[lib/clerk] getCurrentUser() called");
+  try {
+    const user = await currentUser();
+    console.log("[lib/clerk] getCurrentUser() result:", {
+      userId: user?.id || "none",
+      email: user?.emailAddresses?.[0]?.emailAddress || "none",
+      hasUser: !!user,
+    });
+    return user;
+  } catch (error) {
+    console.error("[lib/clerk] getCurrentUser() error:", error);
+    throw error;
+  }
 }
 
 /**
@@ -14,8 +25,15 @@ export async function getCurrentUser() {
  * Use this in Server Components and API routes
  */
 export async function getCurrentUserId() {
-  const { userId } = await auth();
-  return userId;
+  console.log("[lib/clerk] getCurrentUserId() called");
+  try {
+    const { userId } = await auth();
+    console.log("[lib/clerk] getCurrentUserId() result:", userId || "none");
+    return userId;
+  } catch (error) {
+    console.error("[lib/clerk] getCurrentUserId() error:", error);
+    throw error;
+  }
 }
 
 /**
@@ -23,7 +41,15 @@ export async function getCurrentUserId() {
  * Use this in Server Components and API routes
  */
 export async function isAuthenticated() {
-  const { userId } = await auth();
-  return !!userId;
+  console.log("[lib/clerk] isAuthenticated() called");
+  try {
+    const { userId } = await auth();
+    const authenticated = !!userId;
+    console.log("[lib/clerk] isAuthenticated() result:", authenticated, userId || "no userId");
+    return authenticated;
+  } catch (error) {
+    console.error("[lib/clerk] isAuthenticated() error:", error);
+    return false;
+  }
 }
 

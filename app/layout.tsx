@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
 import { Cinzel } from "next/font/google";
 import Header from "@/components/layout/Header";
 import FloatingAddButton from "@/components/layout/FloatingAddButton";
@@ -22,15 +21,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en" className={cinzel.variable}>
-        <body className="flex flex-col min-h-screen bg-gradient-to-br from-[#f5f1e8] via-[#e8ddd4] to-[#d4c4b0]">
-          <Header />
-          <main className="flex-1">{children}</main>
-          <FloatingAddButton />
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" className={cinzel.variable}>
+      <body className="flex flex-col min-h-screen bg-gradient-to-br from-[#f5f1e8] via-[#e8ddd4] to-[#d4c4b0]">
+        <Header />
+        <main className="flex-1">{children}</main>
+        <FloatingAddButton />
+      </body>
+    </html>
   );
 }
-
