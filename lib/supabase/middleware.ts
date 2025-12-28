@@ -32,6 +32,12 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Pass user info to the middleware via headers
+  if (user) {
+    supabaseResponse.headers.set('x-user-id', user.id)
+    supabaseResponse.headers.set('x-user-email', user.email || '')
+  }
+
   return supabaseResponse
 }
 

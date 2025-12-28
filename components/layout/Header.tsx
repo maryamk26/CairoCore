@@ -60,7 +60,8 @@ export default function Header() {
   const isSearchPage = pathname === "/search";
   const isAboutPage = pathname === "/about";
   const isHomePage = pathname === "/";
-  const isLightHeader = isSearchPage || isAboutPage || isHomePage;
+  const isPlannerPage = pathname === "/planner";
+  const isLightHeader = isSearchPage || isAboutPage || isHomePage || isPlannerPage;
 
   return (
     <header 

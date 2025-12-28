@@ -139,3 +139,62 @@ model RoutePlanPlace {
   @@map("route_plan_places")
 }
 
+model Survey {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  questions SurveyQuestion[]
+  responses SurveyResponse[]
+
+  @@map("surveys")
+}
+
+model SurveyQuestion {
+  id          String   @id @default(cuid())
+  surveyId    String
+  question    String   @db.Text
+  type        String   // "single_choice", "multiple_choice", "range", "text"
+  options     Json?    // Array of options for choice questions
+  order       Int
+  isRequired  Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  // Relations
+  survey  Survey              @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  answers SurveyAnswer[]
+
+  @@map("survey_questions")
+}
+
+model SurveyResponse {
+  id          String   @id @default(cuid())
+  surveyId    String
+  userId      String?  // Optional - can be anonymous
+  completedAt DateTime @default(now())
+
+  // Relations
+  survey  Survey         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  answers SurveyAnswer[]
+
+  @@map("survey_responses")
+}
+
+model SurveyAnswer {
+  id         String   @id @default(cuid())
+  responseId String
+  questionId String
+  answer     Json     // Flexible to store any answer type
+  createdAt  DateTime @default(now())
+
+  // Relations
+  response SurveyResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  question SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("survey_answers")
+}
+
