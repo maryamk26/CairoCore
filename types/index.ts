@@ -73,20 +73,51 @@ export interface RoutePlan {
 }
 
 // Survey types
+export interface Survey {
+  id: string;
+  title: string;
+  description?: string;
+  isActive: boolean;
+  questions: SurveyQuestion[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SurveyQuestion {
+  id: string;
+  surveyId: string;
+  question: string;
+  type: "single_choice" | "multiple_choice" | "range" | "text";
+  options?: string[] | { value: string; label: string; icon?: string }[];
+  order: number;
+  isRequired: boolean;
+  createdAt: Date;
+}
+
 export interface SurveyResponse {
-  preferences: {
-    vibe?: string[];
-    budget?: string;
-    timeAvailable?: number;
-    petsFriendly?: boolean;
-    kidsFriendly?: boolean;
-    timeOfDay?: string[];
-    season?: string[];
-  };
-  constraints: {
-    startLocation?: { lat: number; lng: number };
-    date?: Date;
-    numberOfPlaces?: number;
-  };
+  id: string;
+  surveyId: string;
+  userId?: string;
+  answers: SurveyAnswer[];
+  completedAt: Date;
+}
+
+export interface SurveyAnswer {
+  id: string;
+  responseId: string;
+  questionId: string;
+  answer: any; // Flexible to store any answer type
+  createdAt: Date;
+}
+
+// Planner preferences (derived from survey)
+export interface PlannerPreferences {
+  vibes: string[];
+  budget: string;
+  timeAvailable: number; // hours
+  hasPets: boolean;
+  hasKids: boolean;
+  timeOfDay: string[];
+  numberOfPlaces: number;
 }
 
