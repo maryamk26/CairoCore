@@ -1,54 +1,98 @@
 "use client";
 
 import { useState } from "react";
-import { useSignIn } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function SignInForm() {
-  const { isLoaded, signIn, setActive } = useSignIn();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLoaded) return;
+    setIsLoading(true);
+    setError("");
 
+    console.log("\n=== SIGN IN ATTEMPT ===");
+    console.log("Email:", email);
+    console.log("Timestamp:", new Date().toISOString());
+
+    try {
+      console.log("Creating sign-in attempt...");
+      const supabase = createClient();
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        console.error("❌ Sign-in error:", signInError);
+        setError(signInError.message || "Invalid email or password");
+        return;
+      }
+
+      if (data.session) {
+        console.log("✅ Sign-in complete! Session:", data.session.access_token.substring(0, 20) + "...");
+        console.log("Redirecting to:", redirectTo);
+        window.location.href = redirectTo;
+      } else {
+        console.log("⚠️ Sign-in not complete, no session");
+        setError("Something went wrong. Please try again.");
+      }
+    } catch (err: any) {
+      console.error("❌ Sign-in error:", err);
+      setError(err.message || "Invalid email or password");
+    } finally {
+      setIsLoading(false);
+      console.log("===================\n");
+    }
+  };
+
+  const handleSocialSignIn = async (provider: "google" | "apple" | "github") => {
+    console.log("\n=== SOCIAL SIGN IN ATTEMPT ===");
+    console.log("Provider:", provider);
+    console.log("Timestamp:", new Date().toISOString());
+    
     setIsLoading(true);
     setError("");
 
     try {
-      const result = await signIn.create({
-        identifier: email,
-        password,
+      console.log(`Initiating ${provider} authentication...`);
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirectTo)}`,
+        },
       });
 
-      if (result.status === "complete") {
-        await setActive({ session: result.createdSessionId });
-        router.push("/");
+      if (signInError) {
+        console.error("❌ Social sign-in error:", signInError);
+        // Check if provider is not enabled
+        if (signInError.message.includes("not enabled") || signInError.message.includes("Unsupported provider")) {
+          setError(`${provider.charAt(0).toUpperCase() + provider.slice(1)} sign-in is not enabled. Please use email/password or contact support.`);
+        } else {
+          setError(signInError.message || `Failed to sign in with ${provider}`);
+        }
       } else {
-        setError("Something went wrong. Please try again.");
+        console.log("✅ Redirect initiated");
       }
     } catch (err: any) {
-      setError(err.errors?.[0]?.message || "Invalid email or password");
+      console.error("❌ Social sign-in error:", err);
+      if (err.message?.includes("not enabled") || err.message?.includes("Unsupported provider")) {
+        setError(`${provider.charAt(0).toUpperCase() + provider.slice(1)} sign-in is not enabled. Please use email/password.`);
+      } else {
+        setError(err.message || `Failed to sign in with ${provider}`);
+      }
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleSocialSignIn = async (strategy: "oauth_google" | "oauth_apple" | "oauth_github" | "oauth_facebook") => {
-    if (!isLoaded) return;
-    try {
-      await signIn.authenticateWithRedirect({
-        strategy,
-        redirectUrl: "/",
-        redirectUrlComplete: "/",
-      });
-    } catch (err: any) {
-      setError(err.errors?.[0]?.message || "Failed to sign in with social provider");
+      console.log("===================\n");
     }
   };
 
@@ -109,7 +153,7 @@ export default function SignInForm() {
 
       <button
         type="submit"
-        disabled={isLoading || !isLoaded}
+        disabled={isLoading}
         className="w-full py-3 px-4 rounded-full bg-[#8b6f47]/80 backdrop-blur-sm text-white font-cinzel font-medium hover:bg-[#8b6f47] focus:outline-none focus:ring-2 focus:ring-[#8b6f47] focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         style={{ fontFamily: 'var(--font-cinzel), serif' }}
       >
@@ -128,12 +172,11 @@ export default function SignInForm() {
         </div>
       </div>
 
-      {/* Social Login Buttons */}
-      <div className="space-y-3 pb-0">
+      <div className="grid grid-cols-2 gap-4">
         <button
           type="button"
-          onClick={() => handleSocialSignIn("oauth_google")}
-          disabled={!isLoaded}
+          onClick={() => handleSocialSignIn("google")}
+          disabled={isLoading}
           className="w-full py-3 px-4 rounded-full border-2 border-white/50 bg-white/30 backdrop-blur-sm text-[#5d4e37] font-cinzel font-medium hover:bg-[#5d4e37]/20 hover:border-[#5d4e37]/40 hover:text-[#3a3428] focus:outline-none focus:ring-2 focus:ring-[#8b6f47] focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           style={{ fontFamily: 'var(--font-cinzel), serif' }}
         >
@@ -143,23 +186,22 @@ export default function SignInForm() {
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
           </svg>
-          Continue with Google
+          Google
         </button>
+
         <button
           type="button"
-          onClick={() => handleSocialSignIn("oauth_apple")}
-          disabled={!isLoaded}
+          onClick={() => handleSocialSignIn("apple")}
+          disabled={isLoading}
           className="w-full py-3 px-4 rounded-full border-2 border-white/50 bg-white/30 backdrop-blur-sm text-[#5d4e37] font-cinzel font-medium hover:bg-[#5d4e37]/20 hover:border-[#5d4e37]/40 hover:text-[#3a3428] focus:outline-none focus:ring-2 focus:ring-[#8b6f47] focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           style={{ fontFamily: 'var(--font-cinzel), serif' }}
         >
           <svg className="w-5 h-5" fill="#000000" viewBox="0 0 24 24">
-            <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+            <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.09l-.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
           </svg>
-          Continue with Apple
+          Apple
         </button>
       </div>
-
     </div>
   );
 }
-

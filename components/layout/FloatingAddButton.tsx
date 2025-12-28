@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 export default function FloatingAddButton() {
   const pathname = usePathname();
-  const { isSignedIn, userId } = useAuth();
+  const { isSignedIn, isLoading, userId } = useAuth();
 
   // Don't show button if user is not signed in
-  if (!isSignedIn || !userId) {
+  if (isLoading || !isSignedIn || !userId) {
     return null;
   }
 
@@ -40,4 +40,3 @@ export default function FloatingAddButton() {
     </Link>
   );
 }
-
