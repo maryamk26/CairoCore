@@ -10,20 +10,27 @@ interface SavedLocation {
   longitude: number;
 }
 
+interface SearchResult {
+  id: string;
+  place_name: string;
+  center: [number, number]; // [lng, lat]
+  text: string;
+}
+
 interface LocationSelectorProps {
-  onLocationSelect: (location: { lat: number; lng: number; title?: string }) => void;
+  onLocationSelect: (location: { lat: number; lng: number; title?: string; address?: string }) => void;
   currentLocation: { lat: number; lng: number } | null;
 }
 
 export default function LocationSelector({ onLocationSelect, currentLocation }: LocationSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [mode, setMode] = useState<'browser' | 'manual' | 'saved'>('browser');
+  const [mode, setMode] = useState<'browser' | 'search' | 'saved'>('browser');
   const [isLoadingBrowser, setIsLoadingBrowser] = useState(false);
   
-  // Manual entry state
-  const [manualLat, setManualLat] = useState('');
-  const [manualLng, setManualLng] = useState('');
-  const [locationTitle, setLocationTitle] = useState('');
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [shouldSave, setShouldSave] = useState(false);
   
   // Saved locations
@@ -37,6 +44,20 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
     }
   }, [mode]);
 
+  // Debounced search for locations
+  useEffect(() => {
+    if (searchQuery.length < 3) {
+      setSearchResults([]);
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      searchLocations(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
   const fetchSavedLocations = async () => {
     setIsLoadingSaved(true);
     try {
@@ -49,6 +70,44 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
       console.error('Error fetching saved locations:', error);
     } finally {
       setIsLoadingSaved(false);
+    }
+  };
+
+  const searchLocations = async (query: string) => {
+    setIsSearching(true);
+    try {
+      // Using Nominatim (OpenStreetMap's free geocoding service)
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?` +
+        `q=${encodeURIComponent(query)}&` +
+        `countrycodes=eg&` + // Egypt
+        `viewbox=29.5,29.5,32.5,31.5&` + // Bounding box around Cairo
+        `bounded=1&` + // Restrict to bounding box
+        `limit=5&` +
+        `format=json&` +
+        `addressdetails=1`,
+        {
+          headers: {
+            'User-Agent': 'CairoCore/1.0', // Nominatim requires a user agent
+          }
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        // Transform Nominatim results to our format
+        const transformedResults = data.map((item: any) => ({
+          id: item.place_id.toString(),
+          place_name: item.display_name,
+          center: [parseFloat(item.lon), parseFloat(item.lat)], // [lng, lat]
+          text: item.name || item.display_name.split(',')[0],
+        }));
+        setSearchResults(transformedResults);
+      }
+    } catch (error) {
+      console.error('Error searching locations:', error);
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -73,40 +132,29 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
     }
   };
 
-  const handleManualEntry = () => {
-    const lat = parseFloat(manualLat);
-    const lng = parseFloat(manualLng);
-    
-    if (isNaN(lat) || isNaN(lng)) {
-      alert('Please enter valid coordinates');
-      return;
-    }
-    
-    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-      alert('Coordinates out of range. Latitude: -90 to 90, Longitude: -180 to 180');
-      return;
-    }
+  const handleSearchResultSelect = (result: SearchResult) => {
+    const [lng, lat] = result.center;
     
     onLocationSelect({
       lat,
       lng,
-      title: locationTitle || 'Custom Location',
+      title: result.text,
+      address: result.place_name,
     });
     
-    if (shouldSave && locationTitle) {
+    if (shouldSave) {
       // Save to database via API
-      saveLocation(locationTitle, lat, lng);
+      saveLocation(result.text, result.place_name, lat, lng);
     }
     
     // Reset form
-    setManualLat('');
-    setManualLng('');
-    setLocationTitle('');
+    setSearchQuery('');
+    setSearchResults([]);
     setShouldSave(false);
     setIsOpen(false);
   };
 
-  const saveLocation = async (title: string, lat: number, lng: number) => {
+  const saveLocation = async (title: string, address: string, lat: number, lng: number) => {
     try {
       const response = await fetch('/api/user/locations', {
         method: 'POST',
@@ -115,6 +163,7 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
         },
         body: JSON.stringify({
           title,
+          address,
           latitude: lat,
           longitude: lng,
         }),
@@ -197,18 +246,18 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
           }`}
           style={{ fontFamily: 'var(--font-cinzel), serif' }}
         >
-          📍 Current
+          Current
         </button>
         <button
-          onClick={() => setMode('manual')}
+          onClick={() => setMode('search')}
           className={`flex-1 px-3 py-2 rounded font-cinzel text-xs font-semibold transition-colors ${
-            mode === 'manual'
+            mode === 'search'
               ? 'bg-[#d4af37] text-[#3a3428]'
               : 'bg-[#5d4e37] text-white hover:bg-[#6d5e47]'
           }`}
           style={{ fontFamily: 'var(--font-cinzel), serif' }}
         >
-          ✏️ Manual
+          Search
         </button>
         <button
           onClick={() => setMode('saved')}
@@ -219,7 +268,7 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
           }`}
           style={{ fontFamily: 'var(--font-cinzel), serif' }}
         >
-          💾 Saved
+          Saved
         </button>
       </div>
 
@@ -240,52 +289,24 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
         </div>
       )}
 
-      {/* Manual Entry */}
-      {mode === 'manual' && (
+      {/* Search Location */}
+      {mode === 'search' && (
         <div className="space-y-3">
           <div>
             <label className="font-cinzel text-white text-xs mb-1 block" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-              Location Name (optional)
+              Search for a place or address
             </label>
             <input
               type="text"
-              value={locationTitle}
-              onChange={(e) => setLocationTitle(e.target.value)}
-              placeholder="e.g., Home, Work, Hotel"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="e.g., Cairo Tower, Zamalek..."
               className="w-full px-3 py-2 rounded bg-[#5d4e37] text-white placeholder-white/50 font-cinzel text-sm"
               style={{ fontFamily: 'var(--font-cinzel), serif' }}
+              autoFocus
             />
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="font-cinzel text-white text-xs mb-1 block" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                Latitude
-              </label>
-              <input
-                type="number"
-                step="any"
-                value={manualLat}
-                onChange={(e) => setManualLat(e.target.value)}
-                placeholder="30.0444"
-                className="w-full px-3 py-2 rounded bg-[#5d4e37] text-white placeholder-white/50 font-cinzel text-sm"
-                style={{ fontFamily: 'var(--font-cinzel), serif' }}
-              />
-            </div>
-            <div>
-              <label className="font-cinzel text-white text-xs mb-1 block" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                Longitude
-              </label>
-              <input
-                type="number"
-                step="any"
-                value={manualLng}
-                onChange={(e) => setManualLng(e.target.value)}
-                placeholder="31.2357"
-                className="w-full px-3 py-2 rounded bg-[#5d4e37] text-white placeholder-white/50 font-cinzel text-sm"
-                style={{ fontFamily: 'var(--font-cinzel), serif' }}
-              />
-            </div>
-          </div>
+          
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -297,13 +318,42 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
               Save for future use
             </span>
           </label>
-          <button
-            onClick={handleManualEntry}
-            className="w-full px-4 py-3 bg-[#d4af37] text-[#3a3428] rounded font-cinzel font-bold hover:bg-[#e5bf47] transition-colors"
-            style={{ fontFamily: 'var(--font-cinzel), serif' }}
-          >
-            Use This Location
-          </button>
+
+          {/* Search Results */}
+          <div className="max-h-[300px] overflow-y-auto space-y-2">
+            {isSearching && (
+              <p className="font-cinzel text-white/70 text-xs text-center py-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                Searching...
+              </p>
+            )}
+            
+            {!isSearching && searchQuery.length > 0 && searchQuery.length < 3 && (
+              <p className="font-cinzel text-white/70 text-xs text-center py-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                Type at least 3 characters to search
+              </p>
+            )}
+            
+            {!isSearching && searchQuery.length >= 3 && searchResults.length === 0 && (
+              <p className="font-cinzel text-white/70 text-xs text-center py-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                No results found. Try a different search.
+              </p>
+            )}
+            
+            {searchResults.map((result) => (
+              <button
+                key={result.id}
+                onClick={() => handleSearchResultSelect(result)}
+                className="w-full p-3 bg-[#5d4e37] hover:bg-[#6d5e47] rounded text-left transition-colors"
+              >
+                <p className="font-cinzel text-white font-semibold text-sm mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                  {result.text}
+                </p>
+                <p className="font-cinzel text-white/60 text-xs" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                  {result.place_name}
+                </p>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

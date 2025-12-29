@@ -25,6 +25,7 @@ interface UserLocation {
   lat: number;
   lng: number;
   title?: string;
+  address?: string;
 }
 
 export default function RouteBuilder({ places, onBack, onSave }: RouteBuilderProps) {
@@ -235,7 +236,12 @@ export default function RouteBuilder({ places, onBack, onSave }: RouteBuilderPro
               <p className="font-cinzel text-white font-semibold text-sm" style={{ fontFamily: "var(--font-cinzel), serif" }}>
                 {userLocation.title || 'Your Location'}
               </p>
-              <p className="font-cinzel text-white/60 text-xs mt-1" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+              {userLocation.address && (
+                <p className="font-cinzel text-white/70 text-xs mt-1" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                  {userLocation.address}
+                </p>
+              )}
+              <p className="font-cinzel text-white/50 text-xs mt-1" style={{ fontFamily: "var(--font-cinzel), serif" }}>
                 {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
               </p>
             </div>
