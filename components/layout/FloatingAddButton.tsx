@@ -13,8 +13,11 @@ export default function FloatingAddButton() {
     return null;
   }
 
-  // Don't show button on sign-in, sign-up, about, or search pages
-  if (pathname?.startsWith("/sign-in") || pathname?.startsWith("/sign-up") || pathname === "/about" || pathname === "/search") {
+  // Only show button on home page (/) and profile page (/profile)
+  const isHomePage = pathname === "/";
+  const isProfilePage = pathname === "/profile" || pathname?.startsWith("/profile/");
+  
+  if (!isHomePage && !isProfilePage) {
     return null;
   }
 

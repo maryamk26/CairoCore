@@ -21,8 +21,27 @@ export default function PlaceSelection({
   };
 
   return (
-    <div className="min-h-screen bg-[#3a3428] px-4 py-8">
-      <div className="container mx-auto max-w-7xl">
+    <div className="min-h-screen relative">
+      {/* Background with Overlay */}
+      <div className="absolute inset-0 z-0">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: 'url(/images/backgrounds/survey.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundColor: '#5d4e37' // Fallback color
+          }}
+        />
+        {/* Overlay for readability - gradient overlay like survey page */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#5d4e37]/40 via-[#8b6f47]/30 to-[#5d4e37]/40"></div>
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 px-4 pt-32 pb-8">
+        <div className="container mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8">
           <h1 className="font-cinzel text-4xl md:text-5xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
@@ -156,24 +175,7 @@ export default function PlaceSelection({
             );
           })}
         </div>
-
-        {/* Bottom Action */}
-        {selectedPlaces.length >= 1 && (
-          <div className="fixed bottom-0 left-0 right-0 bg-[#5d4e37] border-t-4 border-[#d4af37] p-4 shadow-lg">
-            <div className="container mx-auto max-w-7xl flex items-center justify-between">
-              <span className="font-cinzel text-white font-semibold text-lg" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                {selectedPlaces.length} place{selectedPlaces.length !== 1 ? "s" : ""} selected
-              </span>
-              <button
-                onClick={onContinue}
-                className="px-8 py-3 bg-[#d4af37] text-[#3a3428] rounded-lg font-cinzel font-bold text-lg hover:bg-[#e5bf47] transition-colors shadow-lg"
-                style={{ fontFamily: 'var(--font-cinzel), serif' }}
-              >
-                {selectedPlaces.length === 1 ? "View Location →" : "Build My Route →"}
-              </button>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

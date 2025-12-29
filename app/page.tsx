@@ -134,15 +134,29 @@ export default function Home() {
 
         {/* Content */}
         <div className="relative z-10 container mx-auto px-4 py-16">
-          <div className="max-w-3xl">
-            {/* Main Headline - Large and catchy */}
-            <h2 className="font-cinzel text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-              YOUR CAIRO, UNLOCKED
+          <div className="max-w-2xl">
+            {/* Pre-headline - Medium size */}
+            <p className="text-white text-xl md:text-4xl font-cinzel mb-3" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              IT'S TIME TO
+            </p>
+            
+            {/* Main Headline - Large but not overwhelming */}
+            <h2 className="font-cinzel text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              VISIT CAIRO
             </h2>
             
-            {/* Description - Gen Z style */}
-            <p className="text-white text-lg md:text-2xl leading-relaxed font-cinzel max-w-2xl" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-              CairoCore is your go-to for discovering, sharing, and vibing with Cairo's best spots. From ancient wonders to hidden gems, we help you plan the perfect day, share your adventures, and connect with fellow explorers. No gatekeeping, just pure Cairo energy.
+            {/* CTA Button */}
+            <button
+              onClick={() => setShowModal(true)}
+              className="inline-block px-8 py-3 border-2 border-white/80 text-white font-cinzel font-medium rounded-full hover:bg-white/10 hover:border-white transition-all backdrop-blur-sm mb-6"
+              style={{ fontFamily: 'var(--font-cinzel), serif' }}
+            >
+              Explore More
+            </button>
+
+            {/* Description - Body text size */}
+            <p className="font-cinzel text-white/80 text-sm md:text-xl leading-relaxed max-w-xl" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              Crave new adventures, mystical experiences and stunning places? You need to visit Cairo. We make sure that you'll get an experience you'll never forget.
             </p>
           </div>
         </div>
