@@ -27,6 +27,7 @@ model User {
   placeReviews PlaceReview[]
   routePlans   RoutePlan[]
   createdPlaces Place[] @relation("PlaceCreator")
+  savedLocations SavedLocation[]
 
   @@map("users")
 }
@@ -196,5 +197,21 @@ model SurveyAnswer {
   question SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@map("survey_answers")
+}
+
+model SavedLocation {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String   // e.g., "Home", "Work", "Hotel"
+  address   String?  // Optional address text
+  latitude  Float
+  longitude Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("saved_locations")
 }
 
