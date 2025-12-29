@@ -15,6 +15,10 @@ const RouteMap = dynamic(() => import("@/components/places/RouteMap"), {
   ),
 });
 
+const NavigationMode = dynamic(() => import("./NavigationMode"), {
+  ssr: false,
+});
+
 interface RouteBuilderProps {
   places: PlaceRecommendation[];
   onBack: () => void;
@@ -33,6 +37,7 @@ export default function RouteBuilder({ places, onBack, onSave }: RouteBuilderPro
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [isNavigationMode, setIsNavigationMode] = useState(false);
 
   // Request user's location on component mount
   useEffect(() => {
@@ -165,6 +170,25 @@ export default function RouteBuilder({ places, onBack, onSave }: RouteBuilderPro
       );
     }
   };
+
+  const handleYallaClick = () => {
+    if (!userLocation) {
+      alert('Please set your starting location first!');
+      return;
+    }
+    setIsNavigationMode(true);
+  };
+
+  // Show navigation mode if activated
+  if (isNavigationMode && userLocation) {
+    return (
+      <NavigationMode
+        startLocation={userLocation}
+        places={orderedPlaces}
+        onExit={() => setIsNavigationMode(false)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen relative">
@@ -405,6 +429,17 @@ export default function RouteBuilder({ places, onBack, onSave }: RouteBuilderPro
 
             {/* Action Buttons */}
             <div className="space-y-3">
+              {/* Yalla Button - Start Navigation */}
+              {userLocation && orderedPlaces.length >= 1 && (
+                <button
+                  onClick={handleYallaClick}
+                  className="w-full px-6 py-4 bg-gradient-to-r from-[#d4af37] to-[#e5bf47] text-[#3a3428] rounded-lg font-cinzel font-bold hover:from-[#e5bf47] hover:to-[#f5cf57] transition-all transform hover:scale-105 shadow-lg text-lg"
+                  style={{ fontFamily: 'var(--font-cinzel), serif' }}
+                >
+                  🚀 Yalla! Let's Go
+                </button>
+              )}
+              
               <button
                 onClick={handleSave}
                 disabled={orderedPlaces.length < 1}
