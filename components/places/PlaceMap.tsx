@@ -5,7 +5,6 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Fix for default marker icons in Next.js
 const iconRetinaUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png";
 const iconUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png";
 const shadowUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png";
@@ -32,29 +31,25 @@ interface PlaceMapProps {
   zoom?: number;
 }
 
-// Component to handle map view updates
 function MapViewUpdater({ lat, lng, zoom }: { lat: number; lng: number; zoom?: number }) {
   const map = useMap();
-  
   useEffect(() => {
     map.setView([lat, lng], zoom || map.getZoom());
   }, [lat, lng, zoom, map]);
-
   return null;
 }
 
-export default function PlaceMap({ 
-  lat, 
-  lng, 
-  title, 
-  address, 
+export default function PlaceMap({
+  lat,
+  lng,
+  title,
+  address,
   height = "400px",
-  zoom = 15 
+  zoom = 15,
 }: PlaceMapProps) {
-  // Ensure we're in the browser
   if (typeof window === "undefined") {
     return (
-      <div 
+      <div
         className="w-full bg-gray-200 flex items-center justify-center rounded-lg"
         style={{ height }}
       >
@@ -68,8 +63,8 @@ export default function PlaceMap({
       <MapContainer
         center={[lat, lng]}
         zoom={zoom}
-        scrollWheelZoom={true}
-        style={{ height: "100%", width: "100%", zIndex: 0 }}
+        scrollWheelZoom
+        style={{ height: "100%", width: "100%" }}
         className="rounded-lg"
       >
         <TileLayer
@@ -87,9 +82,3 @@ export default function PlaceMap({
     </div>
   );
 }
-
-
-
-
-
-

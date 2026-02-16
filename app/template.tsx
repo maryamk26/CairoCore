@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
-export default function Template({ children }: { children: React.ReactNode }) {
+interface TemplateProps {
+  children: React.ReactNode;
+}
+
+export default function Template({ children }: TemplateProps) {
   const pathname = usePathname();
   const [displayChildren, setDisplayChildren] = useState(children);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -11,14 +15,17 @@ export default function Template({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Start fade out
     setIsTransitioning(true);
-    
+
     // After fade out, update content and fade in
     const timer = setTimeout(() => {
       setDisplayChildren(children);
-      // Small delay before fade in for smoother transition
-      setTimeout(() => {
+
+      // Small delay before fade in
+      const fadeInTimer = setTimeout(() => {
         setIsTransitioning(false);
       }, 50);
+
+      return () => clearTimeout(fadeInTimer);
     }, 250);
 
     return () => clearTimeout(timer);
@@ -27,9 +34,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
   return (
     <div
       className={`min-h-full transition-all duration-300 ease-in-out ${
-        isTransitioning
-          ? "opacity-0 translate-y-3"
-          : "opacity-100 translate-y-0"
+        isTransitioning ? "opacity-0 translate-y-3" : "opacity-100 translate-y-0"
       }`}
       style={{
         willChange: isTransitioning ? "opacity, transform" : "auto",
@@ -39,4 +44,3 @@ export default function Template({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
-

@@ -10,6 +10,12 @@ export function useAuth() {
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
+    if (!supabase) {
+      // Supabase is not configured; treat as unauthenticated but not loading.
+      setIsLoading(false);
+      return;
+    }
+
     // Get initial session
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);

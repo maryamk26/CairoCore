@@ -2,92 +2,90 @@ export default function TestClerkConfig() {
   const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   const hasSecretKey = !!process.env.CLERK_SECRET_KEY;
 
+  const envVariables = [
+    {
+      label: "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+      value: publishableKey,
+      renderValue: publishableKey ? (
+        <div>
+          <div className="text-green-600 mb-2">✅ Set</div>
+          <div className="font-mono text-xs bg-gray-100 p-2 rounded break-all">
+            {publishableKey}
+          </div>
+          <div className="mt-2 text-sm">
+            <span className="font-semibold">Type: </span>
+            {publishableKey.startsWith("pk_test_") ? (
+              <span className="text-blue-600">Test Key</span>
+            ) : publishableKey.startsWith("pk_live_") ? (
+              <span className="text-green-600">Live Key</span>
+            ) : (
+              <span className="text-red-600">Unknown Key Type</span>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="text-red-600">❌ Not Set</div>
+      ),
+    },
+    {
+      label: "CLERK_SECRET_KEY",
+      value: hasSecretKey,
+      renderValue: hasSecretKey ? (
+        <div className="text-green-600">✅ Set (hidden for security)</div>
+      ) : (
+        <div className="text-red-600">❌ Not Set</div>
+      ),
+    },
+    {
+      label: "NEXT_PUBLIC_CLERK_SIGN_IN_URL",
+      value: process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL,
+      renderValue: <div className="font-mono text-sm">{process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL || "Not Set"}</div>,
+    },
+    {
+      label: "NEXT_PUBLIC_CLERK_SIGN_UP_URL",
+      value: process.env.NEXT_PUBLIC_CLERK_SIGN_UP_URL,
+      renderValue: <div className="font-mono text-sm">{process.env.NEXT_PUBLIC_CLERK_SIGN_UP_URL || "Not Set"}</div>,
+    },
+    {
+      label: "NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL",
+      value: process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL,
+      renderValue: <div className="font-mono text-sm">{process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL || "Not Set"}</div>,
+    },
+    {
+      label: "NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL",
+      value: process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL,
+      renderValue: <div className="font-mono text-sm">{process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL || "Not Set"}</div>,
+    },
+  ];
+
+  const isConfigComplete = publishableKey && hasSecretKey;
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">Clerk Configuration Test</h1>
 
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Environment Variables</h2>
-          
+        {/* Environment Variables */}
+        <Card title="Environment Variables">
           <div className="space-y-4">
-            <div>
-              <div className="font-bold mb-2">NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:</div>
-              {publishableKey ? (
-                <div>
-                  <div className="text-green-600 mb-2">✅ Set</div>
-                  <div className="font-mono text-xs bg-gray-100 p-2 rounded break-all">
-                    {publishableKey}
-                  </div>
-                  <div className="mt-2 text-sm">
-                    <span className="font-semibold">Type: </span>
-                    {publishableKey.startsWith("pk_test_") ? (
-                      <span className="text-blue-600">Test Key</span>
-                    ) : publishableKey.startsWith("pk_live_") ? (
-                      <span className="text-green-600">Live Key</span>
-                    ) : (
-                      <span className="text-red-600">Unknown Key Type</span>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-red-600">❌ Not Set</div>
-              )}
-            </div>
-
-            <div>
-              <div className="font-bold mb-2">CLERK_SECRET_KEY:</div>
-              {hasSecretKey ? (
-                <div className="text-green-600">✅ Set (hidden for security)</div>
-              ) : (
-                <div className="text-red-600">❌ Not Set</div>
-              )}
-            </div>
-
-            <div>
-              <div className="font-bold mb-2">NEXT_PUBLIC_CLERK_SIGN_IN_URL:</div>
-              <div className="font-mono text-sm">
-                {process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL || "Not Set"}
+            {envVariables.map((env) => (
+              <div key={env.label}>
+                <div className="font-bold mb-2">{env.label}:</div>
+                {env.renderValue}
               </div>
-            </div>
-
-            <div>
-              <div className="font-bold mb-2">NEXT_PUBLIC_CLERK_SIGN_UP_URL:</div>
-              <div className="font-mono text-sm">
-                {process.env.NEXT_PUBLIC_CLERK_SIGN_UP_URL || "Not Set"}
-              </div>
-            </div>
-
-            <div>
-              <div className="font-bold mb-2">NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL:</div>
-              <div className="font-mono text-sm">
-                {process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL || "Not Set"}
-              </div>
-            </div>
-
-            <div>
-              <div className="font-bold mb-2">NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL:</div>
-              <div className="font-mono text-sm">
-                {process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL || "Not Set"}
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
+        </Card>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Configuration Status</h2>
-          
-          {publishableKey && hasSecretKey ? (
-            <div className="text-green-600 text-lg">
-              ✅ Clerk is properly configured!
-            </div>
+        {/* Configuration Status */}
+        <Card title="Configuration Status">
+          {isConfigComplete ? (
+            <div className="text-green-600 text-lg">✅ Clerk is properly configured!</div>
           ) : (
             <div>
-              <div className="text-red-600 text-lg mb-4">
-                ❌ Clerk configuration is incomplete
-              </div>
+              <div className="text-red-600 text-lg mb-4">❌ Clerk configuration is incomplete</div>
               <div className="text-sm space-y-2">
-                <p>Please ensure you have a `.env.local` file with:</p>
+                <p>Please ensure you have a <code>.env.local</code> file with:</p>
                 <pre className="bg-gray-100 p-4 rounded text-xs">
 {`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
 CLERK_SECRET_KEY="sk_test_..."
@@ -102,8 +100,9 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL="/"`}
               </div>
             </div>
           )}
-        </div>
+        </Card>
 
+        {/* Navigation */}
         <div className="mt-6 space-x-4">
           <a
             href="/debug-auth"
@@ -123,6 +122,15 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL="/"`}
   );
 }
 
+// Reusable Card component for consistent styling
+function Card({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <h2 className="text-xl font-semibold mb-4">{title}</h2>
+      {children}
+    </div>
+  );
+}
 
 
 

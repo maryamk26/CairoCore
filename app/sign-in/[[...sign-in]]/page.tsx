@@ -13,14 +13,26 @@ export default function SignInPage() {
       }}
     >
       {/* Logo/Brand - Top Left */}
-      <div className="absolute top-6 left-6 md:top-8 md:left-8">
-        <Link href="/" className="inline-block">
-          <h1 className="text-4xl md:text-5xl font-cinzel font-bold text-[#5d4e37] tracking-tight" style={{ fontFamily: 'var(--font-cinzel), serif' }}>CairoCore</h1>
-        </Link>
-      </div>
+      <Logo />
 
+      {/* Authentication Container */}
       <AuthContainer />
     </div>
   );
 }
 
+// Modular Logo component
+function Logo() {
+  return (
+    <div className="absolute top-6 left-6 md:top-8 md:left-8">
+      <Link href="/" className="inline-block">
+        <h1
+          className="text-4xl md:text-5xl font-cinzel font-bold text-[#5d4e37] tracking-tight"
+          style={{ fontFamily: 'var(--font-cinzel), serif' }}
+        >
+          CairoCore
+        </h1>
+      </Link>
+    </div>
+  );
+}

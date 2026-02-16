@@ -1,10 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { PlaceRecommendation } from "@/utils/planner/recommendation";
 import { calculateDistance } from "@/utils/algorithms/distance";
+import { optimizeRouteByDistance, validateRoute } from "@/utils/planner/routeOptimization";
+import { SurveyAnswers } from "@/types/planner";
 import LocationSelector from "./LocationSelector";
+import {
+  ensureNotificationPermission,
+  showTimeWarning,
+  showWorkingHoursWarning,
+  showRouteReady,
+  getNotificationPermission
+} from "@/utils/notifications";
+import RouteSummaryCard from "./RouteSummaryCard";
+import RoutePlaceCard from "./RoutePlaceCard";
+import WarningsModal from "./WarningsModal";
 
 const RouteMap = dynamic(() => import("@/components/places/RouteMap"), {
   ssr: false,
@@ -15,13 +27,13 @@ const RouteMap = dynamic(() => import("@/components/places/RouteMap"), {
   ),
 });
 
-const NavigationMode = dynamic(() => import("./NavigationMode"), {
-  ssr: false,
-});
+const NavigationMode = dynamic(() => import("./NavigationMode"), { ssr: false });
 
 interface RouteBuilderProps {
   places: PlaceRecommendation[];
+  userPreferences: SurveyAnswers | null;
   onBack: () => void;
+  onPlaceRemoved: (placeId: string) => void;
   onSave?: () => void;
 }
 
@@ -32,37 +44,49 @@ interface UserLocation {
   address?: string;
 }
 
-export default function RouteBuilder({ places, onBack, onSave }: RouteBuilderProps) {
+interface TripStats {
+  totalDistance: number;
+  totalTime: number;
+  travelTime: number;
+}
+
+const AVG_SPEED_KMH = 25;
+const MINUTES_PER_HOUR = 60;
+const VISIT_TIME_MINUTES = 90;
+const DISTANCE_ROUNDING = 10;
+
+export default function RouteBuilder({
+  places,
+  userPreferences,
+  onBack,
+  onPlaceRemoved,
+  onSave
+}: RouteBuilderProps) {
   const [orderedPlaces, setOrderedPlaces] = useState(places);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [isNavigationMode, setIsNavigationMode] = useState(false);
+  const [routeWarnings, setRouteWarnings] = useState<string[]>([]);
+  const [showWarningsModal, setShowWarningsModal] = useState(false);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
 
-  // Request user's location on component mount
   useEffect(() => {
-    if ('geolocation' in navigator) {
-      setIsLoadingLocation(true);
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-          setLocationPermission('granted');
-          setIsLoadingLocation(false);
-        },
-        (error) => {
-          console.log('Location permission denied or error:', error);
-          setLocationPermission('denied');
-          setIsLoadingLocation(false);
-        }
-      );
-    }
+    setNotificationPermission(getNotificationPermission());
   }, []);
 
-  // Calculate total distance and travel time
-  const calculateTripStats = () => {
+  useEffect(() => {
+    if (userLocation && places.length > 0) {
+      const optimized = optimizeRouteByDistance(userLocation.lat, userLocation.lng, places);
+      setOrderedPlaces(optimized);
+      
+      if (getNotificationPermission() === 'granted') {
+        showRouteReady(optimized.length);
+      }
+    }
+  }, [userLocation, places]);
+
+  const calculateTripStats = useCallback((): TripStats => {
     if (!userLocation || orderedPlaces.length === 0) {
       return { totalDistance: 0, totalTime: 0, travelTime: 0 };
     }
@@ -70,397 +94,309 @@ export default function RouteBuilder({ places, onBack, onSave }: RouteBuilderPro
     let totalDistance = 0;
     let previousLocation = userLocation;
 
-    // Calculate distance from user location to first place, then between places
     orderedPlaces.forEach((place) => {
-      const distance = calculateDistance(
-        previousLocation.lat,
-        previousLocation.lng,
-        place.latitude,
-        place.longitude
+      totalDistance += calculateDistance(
+        previousLocation,
+        { lat: place.latitude, lng: place.longitude }
       );
-      totalDistance += distance;
       previousLocation = { lat: place.latitude, lng: place.longitude };
     });
 
-    // Average speed in Cairo: 25 km/h (accounting for traffic)
-    const travelTimeHours = totalDistance / 25;
-    const travelTimeMinutes = Math.round(travelTimeHours * 60);
-    
-    // Time spent at each location (1.5 hours average)
-    const visitTimeMinutes = orderedPlaces.length * 90;
-    
-    // Total time in minutes
-    const totalTimeMinutes = travelTimeMinutes + visitTimeMinutes;
+    const travelTimeMinutes = Math.round((totalDistance / AVG_SPEED_KMH) * MINUTES_PER_HOUR);
+    const visitTimeMinutes = orderedPlaces.length * VISIT_TIME_MINUTES;
 
     return {
-      totalDistance: Math.round(totalDistance * 10) / 10, // Round to 1 decimal
+      totalDistance: Math.round(totalDistance * DISTANCE_ROUNDING) / DISTANCE_ROUNDING,
       travelTime: travelTimeMinutes,
-      totalTime: totalTimeMinutes,
+      totalTime: travelTimeMinutes + visitTimeMinutes,
     };
-  };
+  }, [userLocation, orderedPlaces]);
 
-  const tripStats = calculateTripStats();
+  const tripStats = useMemo(() => calculateTripStats(), [calculateTripStats]);
 
-  const movePlace = (index: number, direction: "up" | "down") => {
-    const newPlaces = [...orderedPlaces];
-    const newIndex = direction === "up" ? index - 1 : index + 1;
-
-    if (newIndex >= 0 && newIndex < newPlaces.length) {
-      [newPlaces[index], newPlaces[newIndex]] = [newPlaces[newIndex], newPlaces[index]];
-      setOrderedPlaces(newPlaces);
-    }
-  };
-
-  const removePlace = (index: number) => {
-    const newPlaces = orderedPlaces.filter((_, i) => i !== index);
-    setOrderedPlaces(newPlaces);
-  };
-
-  const handleSave = () => {
-    // TODO: Implement save to database
-    if (onSave) {
-      onSave();
-    }
-    alert("Route saved! (This would save to database in production)");
-  };
-
-  // Convert to format expected by RouteMap, including user's location as starting point
-  const mapPlaces = userLocation
-    ? [
-        {
-          id: 'user-location',
-          title: userLocation.title || 'Your Location',
-          lat: userLocation.lat,
-          lng: userLocation.lng,
-          address: 'Starting Point',
-        },
-        ...orderedPlaces.map((place) => ({
-          id: place.id,
-          title: place.title,
-          lat: place.latitude,
-          lng: place.longitude,
-          address: place.address,
-        })),
-      ]
-    : orderedPlaces.map((place) => ({
-        id: place.id,
-        title: place.title,
-        lat: place.latitude,
-        lng: place.longitude,
-        address: place.address,
-      }));
-
-  const requestLocation = () => {
-    if ('geolocation' in navigator) {
-      setIsLoadingLocation(true);
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-          setLocationPermission('granted');
-          setIsLoadingLocation(false);
-        },
-        (error) => {
-          alert('Please enable location access in your browser settings to see the route from your current location.');
-          setLocationPermission('denied');
-          setIsLoadingLocation(false);
-        }
-      );
-    }
-  };
-
-  const handleYallaClick = () => {
-    if (!userLocation) {
-      alert('Please set your starting location first!');
+  useEffect(() => {
+    if (!userLocation || orderedPlaces.length === 0) {
+      setRouteWarnings([]);
       return;
     }
-    setIsNavigationMode(true);
-  };
 
-  // Show navigation mode if activated
+    const validation = validateRoute(
+      { lat: userLocation.lat, lng: userLocation.lng },
+      orderedPlaces,
+      'driving'
+    );
+    
+    const allWarnings: string[] = [...validation.warnings];
+    const stats = calculateTripStats();
+
+    const timeAvailableValue = userPreferences?.timeAvailable;
+    if (timeAvailableValue != null) {
+      const timeAvailableHours = typeof timeAvailableValue === 'number' 
+        ? timeAvailableValue 
+        : typeof timeAvailableValue === 'string' 
+        ? parseFloat(timeAvailableValue) 
+        : 0;
+      
+      if (!isNaN(timeAvailableHours) && timeAvailableHours > 0) {
+        const userTimeMinutes = timeAvailableHours * MINUTES_PER_HOUR;
+        
+        if (stats.totalTime > userTimeMinutes) {
+          const excessHours = Math.round((stats.totalTime - userTimeMinutes) / MINUTES_PER_HOUR * DISTANCE_ROUNDING) / DISTANCE_ROUNDING;
+          const actualHours = Math.round(stats.totalTime / MINUTES_PER_HOUR * DISTANCE_ROUNDING) / DISTANCE_ROUNDING;
+          const hours = Math.floor(stats.totalTime / MINUTES_PER_HOUR);
+          const minutes = stats.totalTime % MINUTES_PER_HOUR;
+          
+          const warningMessage = `This trip will take approximately ${hours}h ${minutes}m, which is ${excessHours}h more than your requested ${timeAvailableHours}h. Consider removing some places or adjusting your schedule.`;
+          allWarnings.unshift(warningMessage);
+
+          if (getNotificationPermission() === 'granted') {
+            showTimeWarning(timeAvailableHours, actualHours, excessHours);
+          }
+        }
+      }
+    }
+
+    if (getNotificationPermission() === 'granted' && validation.warnings.length > 0) {
+      const firstWarning = validation.warnings[0];
+      const match = firstWarning.match(/^(.*?):/);
+      if (match) {
+        showWorkingHoursWarning(match[1], firstWarning);
+      }
+    }
+
+    setRouteWarnings(allWarnings);
+  }, [userLocation, orderedPlaces, userPreferences, calculateTripStats]);
+
+  const mapPlaces = useMemo(() => {
+    const placeMarkers = orderedPlaces.map(p => ({
+      id: p.id,
+      title: p.title,
+      lat: p.latitude,
+      lng: p.longitude,
+      address: p.address
+    }));
+
+    if (!userLocation) {
+      return placeMarkers;
+    }
+
+    return [
+      {
+        id: 'user-location',
+        title: userLocation.title || 'Your Location',
+        lat: userLocation.lat,
+        lng: userLocation.lng,
+        address: 'Starting Point'
+      },
+      ...placeMarkers
+    ];
+  }, [userLocation, orderedPlaces]);
+
+  const requestLocation = useCallback(() => {
+    if (!('geolocation' in navigator)) {
+      return;
+    }
+
+    setIsLoadingLocation(true);
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        });
+        setLocationPermission('granted');
+        setIsLoadingLocation(false);
+      },
+      () => {
+        alert('Enable location access to plan your route.');
+        setLocationPermission('denied');
+        setIsLoadingLocation(false);
+      }
+    );
+  }, []);
+
+  const movePlace = useCallback((index: number, direction: "up" | "down") => {
+    const newPlaces = [...orderedPlaces];
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    
+    if (newIndex < 0 || newIndex >= newPlaces.length) {
+      return;
+    }
+    
+    [newPlaces[index], newPlaces[newIndex]] = [newPlaces[newIndex], newPlaces[index]];
+    setOrderedPlaces(newPlaces);
+  }, [orderedPlaces]);
+
+  const removePlace = useCallback((index: number) => {
+    const placeToRemove = orderedPlaces[index];
+    setOrderedPlaces(orderedPlaces.filter((_, i) => i !== index));
+    onPlaceRemoved(placeToRemove.id);
+  }, [orderedPlaces, onPlaceRemoved]);
+
+  const handleSave = useCallback(() => {
+    onSave?.();
+    alert("Route saved! (Production: save to database)");
+  }, [onSave]);
+
+  const handleYallaClick = useCallback(async () => {
+    if (!userLocation) {
+      alert('Set your starting location first!');
+      return;
+    }
+
+    if (notificationPermission !== 'granted') {
+      const granted = await ensureNotificationPermission();
+      setNotificationPermission(granted ? 'granted' : 'denied');
+    }
+
+    if (routeWarnings.length > 0) {
+      setShowWarningsModal(true);
+    } else {
+      setIsNavigationMode(true);
+    }
+  }, [userLocation, notificationPermission, routeWarnings]);
+
+  const proceedWithNavigation = useCallback(() => {
+    setShowWarningsModal(false);
+    setIsNavigationMode(true);
+  }, []);
+
+  const handleExitNavigation = useCallback(() => {
+    setIsNavigationMode(false);
+  }, []);
+
   if (isNavigationMode && userLocation) {
     return (
       <NavigationMode
         startLocation={userLocation}
         places={orderedPlaces}
-        onExit={() => setIsNavigationMode(false)}
+        onExit={handleExitNavigation}
       />
     );
   }
 
   return (
     <div className="min-h-screen relative">
-      {/* Background with Overlay */}
       <div className="absolute inset-0 z-0">
-        {/* Background Image */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: 'url(/images/backgrounds/survey.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            backgroundColor: '#5d4e37' // Fallback color
+            backgroundColor: '#5d4e37'
           }}
         />
-        {/* Overlay for readability */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#5d4e37]/40 via-[#8b6f47]/30 to-[#5d4e37]/40"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#5d4e37]/40 via-[#8b6f47]/30 to-[#5d4e37]/40" />
       </div>
 
-      {/* Main Content */}
       <div className="relative z-10">
         <div className="container mx-auto px-4 pt-32 pb-8">
-        {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={onBack}
-            className="mb-4 flex items-center gap-2 text-white/70 hover:text-white transition-colors font-cinzel"
-            style={{ fontFamily: 'var(--font-cinzel), serif' }}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Selection
-          </button>
-          <h1 className="font-cinzel text-4xl md:text-5xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-            {orderedPlaces.length === 1 ? "Your Selected Location" : "Your Optimized Route"}
-          </h1>
-          <p className="font-cinzel text-white/80 text-lg" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-            {orderedPlaces.length === 1 
-              ? "View your selected location on the map and add more places if you'd like."
-              : "Review and adjust your trip route. Drag to reorder stops."}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content - Map */}
-          <div className="lg:col-span-2">
-            <div className="bg-[#5d4e37] rounded-lg p-6">
-              {orderedPlaces.length >= 1 ? (
-                <RouteMap places={mapPlaces} height="600px" />
-              ) : null}
-            </div>
+          <div className="mb-8">
+            <button
+              onClick={onBack}
+              className="mb-4 flex items-center gap-2 text-white/70 hover:text-white font-cinzel"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+              Back to Selection
+            </button>
+            <h1 className="font-cinzel text-4xl md:text-5xl font-bold text-white mb-4">
+              {orderedPlaces.length === 1 ? "Your Selected Location" : "Your Optimized Route"}
+            </h1>
+            <p className="font-cinzel text-white/80 text-lg">
+              {orderedPlaces.length === 1
+                ? "View your selected location on the map and add more places if you'd like."
+                : "Review and adjust your trip route. Drag to reorder stops."}
+            </p>
           </div>
 
-      {/* Sidebar - Route Details */}
-      <div className="space-y-6">
-        {/* Location Selector */}
-        <div className="bg-[#5d4e37] rounded-lg p-6">
-          <h3 className="font-cinzel text-xl font-bold text-white mb-4" style={{ fontFamily: "var(--font-cinzel), serif" }}>
-            Starting Point
-          </h3>
-          <LocationSelector
-            onLocationSelect={setUserLocation}
-            currentLocation={userLocation}
-          />
-          {userLocation && (
-            <div className="mt-3 p-3 bg-[#8b6f47] rounded">
-              <p className="font-cinzel text-white font-semibold text-sm" style={{ fontFamily: "var(--font-cinzel), serif" }}>
-                {userLocation.title || 'Your Location'}
-              </p>
-              {userLocation.address && (
-                <p className="font-cinzel text-white/70 text-xs mt-1" style={{ fontFamily: "var(--font-cinzel), serif" }}>
-                  {userLocation.address}
-                </p>
-              )}
-              <p className="font-cinzel text-white/50 text-xs mt-1" style={{ fontFamily: "var(--font-cinzel), serif" }}>
-                {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
-              </p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <div className="bg-[#5d4e37] rounded-lg p-6">
+                {orderedPlaces.length >= 1 && (
+                  <RouteMap places={mapPlaces} height="600px" />
+                )}
+              </div>
             </div>
-          )}
-        </div>
 
-        {/* Route Summary */}
-        <div className="bg-[#5d4e37] rounded-lg p-6">
-              <h3 className="font-cinzel text-xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                Route Summary
-              </h3>
-              
-              {/* Location Permission Status */}
-              {!userLocation && !isLoadingLocation && (
-                <div className="mb-4 p-3 bg-[#d4af37]/20 border border-[#d4af37] rounded-lg">
-                  <p className="font-cinzel text-white text-sm mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                    📍 Enable location for accurate route planning
-                  </p>
+            <div className="space-y-6">
+              <LocationSelector
+                currentLocation={userLocation}
+                onLocationSelect={setUserLocation}
+              />
+
+              <RouteSummaryCard
+                userLocation={userLocation}
+                isLoadingLocation={isLoadingLocation}
+                tripStats={tripStats}
+                orderedPlaces={orderedPlaces}
+                requestLocation={requestLocation}
+                handleSave={handleSave}
+                handleYallaClick={handleYallaClick}
+              />
+
+              <div className="bg-[#5d4e37] rounded-lg p-6">
+                <h3 className="font-cinzel text-xl font-bold text-white mb-4">
+                  Your Route
+                </h3>
+                <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                  {orderedPlaces.map((place, index) => (
+                    <RoutePlaceCard
+                      key={place.id}
+                      place={place}
+                      index={index}
+                      movePlace={movePlace}
+                      removePlace={removePlace}
+                      totalPlaces={orderedPlaces.length}
+                    />
+                  ))}
+                </div>
+
+                {userLocation && orderedPlaces.length >= 1 && (
                   <button
-                    onClick={requestLocation}
-                    className="w-full px-4 py-2 bg-[#d4af37] text-[#3a3428] rounded font-cinzel font-semibold hover:bg-[#e5bf47] transition-colors text-sm"
-                    style={{ fontFamily: 'var(--font-cinzel), serif' }}
+                    onClick={handleYallaClick}
+                    className="w-full mt-4 px-6 py-4 bg-gradient-to-r from-[#d4af37] to-[#e5bf47] text-[#3a3428] rounded-lg font-cinzel font-bold hover:from-[#e5bf47] hover:to-[#f5cf57] transition-all shadow-lg text-lg"
                   >
-                    Share My Location
+                    Yalla! Let's Go
                   </button>
-                </div>
-              )}
-              
-              {isLoadingLocation && (
-                <div className="mb-4 p-3 bg-[#8b6f47] rounded-lg text-center">
-                  <p className="font-cinzel text-white text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                    Getting your location...
-                  </p>
-                </div>
-              )}
-
-              <div className="space-y-3">
-                {userLocation && tripStats.totalDistance > 0 && (
-                  <>
-                    <div className="flex justify-between">
-                      <span className="font-cinzel text-white/70" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Total Distance</span>
-                      <span className="font-cinzel text-white font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                        {tripStats.totalDistance} km
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-cinzel text-white/70" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Travel Time</span>
-                      <span className="font-cinzel text-white font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                        ~{Math.round(tripStats.travelTime / 60)}h {tripStats.travelTime % 60}m
-                      </span>
-                    </div>
-                    <div className="h-px bg-white/20 my-2"></div>
-                  </>
                 )}
-                <div className="flex justify-between">
-                  <span className="font-cinzel text-white/70" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Total Stops</span>
-                  <span className="font-cinzel text-white font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                    {orderedPlaces.length}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-cinzel text-white/70" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Visit Time</span>
-                  <span className="font-cinzel text-white font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                    ~{Math.round((orderedPlaces.length * 90) / 60)}h {(orderedPlaces.length * 90) % 60}m
-                  </span>
-                </div>
-                {userLocation && tripStats.totalTime > 0 && (
-                  <div className="flex justify-between pt-2 border-t-2 border-[#d4af37]">
-                    <span className="font-cinzel text-[#d4af37] font-bold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Total Duration</span>
-                    <span className="font-cinzel text-[#d4af37] font-bold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                      ~{Math.floor(tripStats.totalTime / 60)}h {tripStats.totalTime % 60}m
-                    </span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="font-cinzel text-white/70" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Total Cost</span>
-                  <span className="font-cinzel text-white font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                    {orderedPlaces.reduce((sum, place) => sum + (place.entryFees || 0), 0)} EGP
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Your Route */}
-            <div className="bg-[#5d4e37] rounded-lg p-6">
-              <h3 className="font-cinzel text-xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                Your Route
-              </h3>
-              <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                {orderedPlaces.map((place, index) => (
-                  <div
-                    key={place.id}
-                    className="bg-[#8b6f47] rounded-lg p-4"
-                  >
-                    <div className="flex items-start gap-3">
-                      {/* Number Badge */}
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#d4af37] flex items-center justify-center text-[#3a3428] font-bold">
-                        {index + 1}
-                      </div>
-
-                      {/* Place Info */}
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-cinzel text-white font-semibold text-sm mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                          {place.title}
-                        </h4>
-                        <p className="font-cinzel text-white/60 text-xs mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                          {place.address}
-                        </p>
-                        <div className="flex items-center gap-2 text-white/70 text-xs">
-                          {place.entryFees !== null && place.entryFees > 0 ? (
-                            <span className="font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                              {place.entryFees} EGP
-                            </span>
-                          ) : (
-                            <span className="font-cinzel text-[#d4af37]" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                              Free
-                            </span>
-                          )}
-                          {place.kidsFriendly && <span title="Kid-friendly">👶</span>}
-                          {place.petsFriendly && <span title="Pet-friendly">🐕</span>}
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex flex-col gap-1">
-                        <button
-                          onClick={() => movePlace(index, "up")}
-                          disabled={index === 0}
-                          className="p-1 text-white/70 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
-                          aria-label="Move up"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => movePlace(index, "down")}
-                          disabled={index === orderedPlaces.length - 1}
-                          className="p-1 text-white/70 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
-                          aria-label="Move down"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => removePlace(index)}
-                          className="p-1 text-red-400 hover:text-red-300"
-                          aria-label="Remove"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="space-y-3">
-              {/* Yalla Button - Start Navigation */}
-              {userLocation && orderedPlaces.length >= 1 && (
                 <button
-                  onClick={handleYallaClick}
-                  className="w-full px-6 py-4 bg-gradient-to-r from-[#d4af37] to-[#e5bf47] text-[#3a3428] rounded-lg font-cinzel font-bold hover:from-[#e5bf47] hover:to-[#f5cf57] transition-all transform hover:scale-105 shadow-lg text-lg"
-                  style={{ fontFamily: 'var(--font-cinzel), serif' }}
+                  onClick={handleSave}
+                  disabled={orderedPlaces.length < 1}
+                  className="w-full mt-2 px-6 py-3 bg-[#d4af37] text-[#3a3428] rounded-lg font-cinzel font-bold hover:bg-[#e5bf47] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  🚀 Yalla! Let's Go
+                  {orderedPlaces.length === 1 ? "Save Location" : "Save Route"}
                 </button>
-              )}
-              
-              <button
-                onClick={handleSave}
-                disabled={orderedPlaces.length < 1}
-                className="w-full px-6 py-3 bg-[#d4af37] text-[#3a3428] rounded-lg font-cinzel font-bold hover:bg-[#e5bf47] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ fontFamily: 'var(--font-cinzel), serif' }}
-              >
-                {orderedPlaces.length === 1 ? "Save Location" : "Save Route"}
-              </button>
-              <button
-                onClick={onBack}
-                className="w-full px-6 py-3 bg-[#8b6f47] text-white rounded-lg font-cinzel font-semibold hover:bg-[#9d7f57] transition-colors"
-                style={{ fontFamily: 'var(--font-cinzel), serif' }}
-              >
-                Add More Places
-              </button>
+                <button
+                  onClick={onBack}
+                  className="w-full mt-2 px-6 py-3 bg-[#8b6f47] text-white rounded-lg font-cinzel font-semibold hover:bg-[#9d7f57] transition-colors"
+                >
+                  Add More Places
+                </button>
+              </div>
             </div>
           </div>
-        </div>
         </div>
       </div>
+
+      {showWarningsModal && (
+        <WarningsModal
+          warnings={routeWarnings}
+          onClose={() => setShowWarningsModal(false)}
+          onProceed={proceedWithNavigation}
+        />
+      )}
     </div>
   );
 }
-

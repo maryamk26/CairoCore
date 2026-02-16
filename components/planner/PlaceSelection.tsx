@@ -6,6 +6,7 @@ import Image from "next/image";
 interface PlaceSelectionProps {
   recommendations: PlaceRecommendation[];
   selectedPlaces: PlaceRecommendation[];
+  removedPlaceIds: string[];
   onTogglePlace: (place: PlaceRecommendation) => void;
   onContinue: () => void;
 }
@@ -13,10 +14,15 @@ interface PlaceSelectionProps {
 export default function PlaceSelection({
   recommendations,
   selectedPlaces,
+  removedPlaceIds,
   onTogglePlace,
   onContinue,
 }: PlaceSelectionProps) {
   const isSelected = (placeId: string) => {
+    // Don't show as selected if it was removed from the route
+    if (removedPlaceIds.includes(placeId)) {
+      return false;
+    }
     return selectedPlaces.some((p) => p.id === placeId);
   };
 

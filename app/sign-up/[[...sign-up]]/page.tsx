@@ -3,19 +3,28 @@ import Link from "next/link";
 
 export default function SignUpPage() {
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center px-4  user 
-      }}
-    >
-      {/* Logo/Brand - Top Left */}
-      <div className="absolute top-6 left-6 md:top-8 md:left-8">
-        <Link href="/" className="inline-block">
-          <h1 className="text-4xl md:text-5xl font-cinzel font-bold text-[#5d4e37] tracking-tight" style={{ fontFamily: 'var(--font-cinzel), serif' }}>CairoCore</h1>
-        </Link>
-      </div>
+    <div className="min-h-screen flex items-center justify-center px-4 relative">
+      {/* Logo/Brand */}
+      <Logo />
 
+      {/* Authentication Container */}
       <AuthContainer initialMode="sign-up" />
     </div>
   );
 }
 
+// Modular Logo component
+function Logo() {
+  return (
+    <div className="absolute top-6 left-6 md:top-8 md:left-8">
+      <Link href="/" className="inline-block">
+        <h1
+          className="text-4xl md:text-5xl font-cinzel font-bold text-[#5d4e37] tracking-tight"
+          style={{ fontFamily: 'var(--font-cinzel), serif' }}
+        >
+          CairoCore
+        </h1>
+      </Link>
+    </div>
+  );
+}

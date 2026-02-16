@@ -6,6 +6,11 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/hooks/useAuth";
 
+const userMenuClass = "absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-200";
+const userNameClass = "text-sm font-medium text-gray-900 font-cinzel";
+const userEmailClass = "text-xs text-gray-500 truncate font-cinzel";
+const menuItemClass = "block px-4 py-2 text-sm font-cinzel hover:bg-gray-100";
+
 export default function UserButton() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -14,16 +19,11 @@ export default function UserButton() {
   const supabase = createClient();
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) setIsOpen(false);
     };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleSignOut = async () => {
@@ -32,12 +32,9 @@ export default function UserButton() {
     setIsOpen(false);
   };
 
-  const userInitials = user?.user_metadata?.first_name?.[0]?.toUpperCase() || 
-                       user?.email?.[0]?.toUpperCase() || 
-                       "U";
-  const userName = user?.user_metadata?.first_name || 
-                   user?.email?.split("@")[0] || 
-                   "User";
+  const userInitials = user?.user_metadata?.first_name?.[0]?.toUpperCase() ||
+                       user?.email?.[0]?.toUpperCase() || "U";
+  const userName = user?.user_metadata?.first_name || user?.email?.split("@")[0] || "User";
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -50,30 +47,13 @@ export default function UserButton() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-200">
+        <div className={userMenuClass}>
           <div className="px-4 py-2 border-b border-gray-200">
-            <p className="text-sm font-medium text-gray-900 font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-              {userName}
-            </p>
-            <p className="text-xs text-gray-500 truncate font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-              {user?.email}
-            </p>
+            <p className={userNameClass}>{userName}</p>
+            <p className={userEmailClass}>{user?.email}</p>
           </div>
-          <Link
-            href="/profile"
-            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 font-cinzel"
-            style={{ fontFamily: 'var(--font-cinzel), serif' }}
-            onClick={() => setIsOpen(false)}
-          >
-            Profile
-          </Link>
-          <button
-            onClick={handleSignOut}
-            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 font-cinzel"
-            style={{ fontFamily: 'var(--font-cinzel), serif' }}
-          >
-            Sign Out
-          </button>
+          <Link href="/profile" className={menuItemClass} onClick={() => setIsOpen(false)}>Profile</Link>
+          <button onClick={handleSignOut} className={menuItemClass + " text-red-600"}>Sign Out</button>
         </div>
       )}
     </div>

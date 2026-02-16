@@ -1,4 +1,4 @@
-import { SurveyAnswers } from "@/components/planner/SurveyComponent";
+import { SurveyAnswers } from "@/types/planner";
 
 export interface PlaceRecommendation {
   id: string;
@@ -167,4 +167,7 @@ export function estimateTripDuration(
   const travelTime = (numberOfPlaces - 1) * 0.5;
   return baseTime + travelTime;
 }
+
+
+
 
