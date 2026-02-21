@@ -1,21 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks/useAuth";
 
 export default function Footer() {
-  const { isSignedIn, isLoading, userId, user } = useAuth();
-  
-  // Use userId as the most reliable indicator
+  const { isSignedIn, isLoading, userId } = useAuth();
   const authenticated = !isLoading && (isSignedIn || !!userId);
-  
-  // Debug: log auth state (remove in production)
-  useEffect(() => {
-    if (!isLoading) {
-      console.log("Footer auth state:", { isSignedIn, userId, user: !!user });
-    }
-  }, [isLoading, isSignedIn, userId, user]);
 
   return (
     <footer className="fixed bottom-0 left-0 right-0 bg-white/40 border-t border-white/30 z-50 backdrop-blur-md">

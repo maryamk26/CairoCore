@@ -1,58 +1,28 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/hooks/useAuth";
 import UserButton from "@/components/auth/UserButton";
 
 export default function Header() {
   const pathname = usePathname();
-  const router = useRouter();
-  const { isSignedIn, isLoading, userId, user } = useAuth();
-  
-  // Use userId as the most reliable indicator
+  const { isSignedIn, isLoading, userId } = useAuth();
   const authenticated = !isLoading && (isSignedIn || !!userId);
-  
-  // Debug: log auth state (remove in production)
-  useEffect(() => {
-    if (!isLoading) {
-      console.log("\n=== HEADER AUTH STATE ===");
-      console.log("isLoading:", isLoading);
-      console.log("isSignedIn:", isSignedIn);
-      console.log("userId:", userId || "none");
-      console.log("user:", user ? {
-        id: user.id,
-        email: user.email,
-        metadata: user.user_metadata,
-      } : "none");
-      console.log("authenticated (computed):", authenticated);
-      console.log("Timestamp:", new Date().toISOString());
-      console.log("===================\n");
-    } else {
-      console.log("[Header] Supabase not loaded yet...");
-    }
-  }, [isLoading, isSignedIn, userId, user, authenticated]);
 
   const handleAboutClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (pathname === "/") {
       e.preventDefault();
-      const aboutSection = document.getElementById("about");
-      if (aboutSection) {
-        aboutSection.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+      document.getElementById("about")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-    // If not on home page, let the default Link behavior handle navigation
   };
 
-  // Don't show header on sign-in or sign-up pages
   if (pathname?.startsWith("/sign-in") || pathname?.startsWith("/sign-up")) {
     return null;
   }
 
   const textNavLinks = [
     { href: "/", label: "Home" },
-    // Show Planner when signed in, Join Us when not signed in
     ...(authenticated ? [{ href: "/planner", label: "Planner" }] : [{ href: "/sign-up", label: "Join Us" }]),
     { href: "/about", label: "About" },
   ];
@@ -69,7 +39,6 @@ export default function Header() {
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
-          {/* Logo */}
           <Link 
             href="/" 
             className={`font-cinzel text-3xl md:text-4xl font-bold transition-colors ${
@@ -82,10 +51,8 @@ export default function Header() {
             CairoCore
           </Link>
 
-          {/* Navigation Links - Text */}
           <nav className="flex items-center gap-8">
             {textNavLinks.map((link) => {
-              // Special handling for About link on home page
               if (link.href === "/about") {
                 return (
                   <Link
@@ -121,9 +88,7 @@ export default function Header() {
             })}
           </nav>
 
-          {/* User Actions - Icons */}
           <div className="flex items-center gap-4">
-            {/* Search Icon */}
             <Link
               href="/search"
               className={`p-1 transition-colors ${
@@ -138,7 +103,6 @@ export default function Header() {
               </svg>
             </Link>
 
-            {/* Profile Icon - Only shows when NOT signed in, redirects to sign-in */}
             {!authenticated && (
               <Link
                 href="/sign-in"
@@ -155,7 +119,6 @@ export default function Header() {
               </Link>
             )}
 
-            {/* UserButton (Circle with email) - Only shows when signed in */}
             {authenticated && <UserButton />}
           </div>
         </div>
