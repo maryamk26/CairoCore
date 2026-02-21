@@ -26,7 +26,6 @@
   },
   "homepage": "https://github.com/maryamk26/CairoCore#readme",
   "dependencies": {
-    "@clerk/nextjs": "^6.36.5",
     "@prisma/client": "^6.0.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.89.0",

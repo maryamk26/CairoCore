@@ -19,7 +19,7 @@ CairoCore is a platform for tourists, bloggers, photographers, and anyone who wa
 - **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Authentication**: Clerk
+- **Authentication**: Supabase Auth
 - **Database**: (To be configured - Prisma recommended)
 
 ## Project Structure
@@ -73,13 +73,9 @@ npm install
 
 3. Create a `.env.local` file in the root directory:
 ```env
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="your-clerk-publishable-key"
-CLERK_SECRET_KEY="your-clerk-secret-key"
-NEXT_PUBLIC_CLERK_SIGN_IN_URL="/sign-in"
-NEXT_PUBLIC_CLERK_SIGN_UP_URL="/sign-up"
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL="/"
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL="/"
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
 
 # Database
 DATABASE_URL="your-database-url"
@@ -87,12 +83,6 @@ DATABASE_URL="your-database-url"
 # Google Maps API
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="your-google-maps-api-key"
 ```
-
-**To get your Clerk keys:**
-1. Sign up at [clerk.com](https://clerk.com)
-2. Create a new application
-3. Copy your Publishable Key and Secret Key from the dashboard
-4. Add them to your `.env.local` file
 
 4. Run the development server:
 ```bash
@@ -110,7 +100,7 @@ npm run dev
 
 ## Roadmap
 
-- [x] Authentication system (Clerk)
+- [x] Authentication system (Supabase)
 - [ ] Database setup (Prisma)
 - [ ] User profiles
 - [ ] Place management
