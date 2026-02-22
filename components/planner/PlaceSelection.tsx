@@ -1,13 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import { PlaceRecommendation } from "@/utils/planner/recommendation";
 import Image from "next/image";
+
+const INITIAL_VISIBLE = 6;
+const SHOW_MORE_STEP = 6;
+
+const BUDGET_MAX_PER_PLACE: Record<string, number> = {
+  low: 50,
+  medium: 200,
+  high: Infinity,
+};
 
 interface PlaceSelectionProps {
   recommendations: PlaceRecommendation[];
   selectedPlaces: PlaceRecommendation[];
   onTogglePlace: (place: PlaceRecommendation) => void;
   onContinue: () => void;
+  onBackToSurvey: () => void;
+  budget?: string;
 }
 
 export default function PlaceSelection({
@@ -15,44 +27,71 @@ export default function PlaceSelection({
   selectedPlaces,
   onTogglePlace,
   onContinue,
+  onBackToSurvey,
+  budget,
 }: PlaceSelectionProps) {
-  const isSelected = (placeId: string) => {
-    return selectedPlaces.some((p) => p.id === placeId);
-  };
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
+  const visible = recommendations.slice(0, visibleCount);
+  const hasMore = visibleCount < recommendations.length;
+  const isSelected = (placeId: string) =>
+    selectedPlaces.some((p) => p.id === placeId);
+
+  const budgetMaxPerPlace = budget ? BUDGET_MAX_PER_PLACE[budget] : Infinity;
+  const placesOverBudget = selectedPlaces.filter(
+    (p) => (p.entryFees ?? 0) > budgetMaxPerPlace
+  );
+  const overBudget = placesOverBudget.length > 0;
 
   return (
     <div className="min-h-screen relative">
-      {/* Background with Overlay */}
       <div className="absolute inset-0 z-0">
-        {/* Background Image */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: 'url(/images/backgrounds/survey.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            backgroundColor: '#5d4e37' // Fallback color
+            backgroundColor: '#5d4e37',
           }}
         />
-        {/* Overlay for readability - gradient overlay like survey page */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#5d4e37]/40 via-[#8b6f47]/30 to-[#5d4e37]/40"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#5d4e37]/40 via-[#8b6f47]/30 to-[#5d4e37]/40" />
       </div>
 
-      {/* Main Content */}
       <div className="relative z-10 px-4 pt-32 pb-8">
         <div className="container mx-auto max-w-7xl">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="font-cinzel text-4xl md:text-5xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-            Your Personalized Recommendations
-          </h1>
-          <p className="font-cinzel text-white/80 text-lg" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-            Based on your preferences, we've selected the best places for you. Choose the ones you'd like to visit!
-          </p>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="font-cinzel text-4xl md:text-5xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              Your Personalized Recommendations
+            </h1>
+            <p className="font-cinzel text-white/80 text-lg" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              Based on your preferences, we've selected the best places for you. Choose the ones you'd like to visit!
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onBackToSurvey}
+            className="shrink-0 px-5 py-2.5 rounded-lg border-2 border-white/60 text-white font-cinzel font-semibold hover:bg-white/10 transition-colors"
+            style={{ fontFamily: 'var(--font-cinzel), serif' }}
+          >
+            Edit my answers
+          </button>
         </div>
 
-        {/* Selected Count */}
+        {overBudget && (
+          <div className="mb-6 rounded-lg border-2 border-amber-400 bg-amber-500/20 p-4 flex items-center gap-3">
+            <span className="text-amber-200 shrink-0" aria-hidden>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </span>
+            <p className="font-cinzel text-amber-100 text-sm sm:text-base" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              {placesOverBudget.length} place{placesOverBudget.length !== 1 ? "s" : ""} exceed your per-place budget (max {budget === "low" ? "50" : budget === "medium" ? "200" : "—"} EGP per place): {placesOverBudget.map((p) => p.title).join(", ")}.
+            </p>
+          </div>
+        )}
+
         {selectedPlaces.length > 0 && (
           <div className="bg-[#d4af37] text-[#3a3428] rounded-lg p-4 mb-6 flex items-center justify-between">
             <span className="font-cinzel font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
@@ -69,9 +108,8 @@ export default function PlaceSelection({
           </div>
         )}
 
-        {/* Recommendations Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {recommendations.map((place) => {
+          {visible.map((place) => {
             const selected = isSelected(place.id);
             return (
               <div
@@ -81,7 +119,6 @@ export default function PlaceSelection({
                 }`}
                 onClick={() => onTogglePlace(place)}
               >
-                {/* Image */}
                 <div className="relative h-48 bg-gray-800">
                   {place.images && place.images.length > 0 ? (
                     <Image
@@ -98,12 +135,10 @@ export default function PlaceSelection({
                     </div>
                   )}
                   
-                  {/* Match Score Badge */}
                   <div className="absolute top-3 right-3 bg-[#d4af37] text-[#3a3428] px-3 py-1 rounded-full font-cinzel font-bold text-sm">
                     {Math.round(place.matchScore)}% Match
                   </div>
 
-                  {/* Selected Indicator */}
                   {selected && (
                     <div className="absolute top-3 left-3 bg-[#d4af37] text-[#3a3428] w-8 h-8 rounded-full flex items-center justify-center">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,7 +148,6 @@ export default function PlaceSelection({
                   )}
                 </div>
 
-                {/* Content */}
                 <div className="p-5">
                   <h3 className="font-cinzel text-xl font-bold text-white mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                     {place.title}
@@ -123,7 +157,6 @@ export default function PlaceSelection({
                     {place.description}
                   </p>
 
-                  {/* Match Reasons */}
                   {place.matchReasons && place.matchReasons.length > 0 && (
                     <div className="mb-3 space-y-1">
                       {place.matchReasons.slice(0, 2).map((reason, index) => (
@@ -139,7 +172,6 @@ export default function PlaceSelection({
                     </div>
                   )}
 
-                  {/* Vibe Tags */}
                   <div className="flex flex-wrap gap-2 mb-3">
                     {place.vibe.slice(0, 3).map((vibe) => (
                       <span
@@ -152,7 +184,6 @@ export default function PlaceSelection({
                     ))}
                   </div>
 
-                  {/* Price & Icons */}
                   <div className="flex items-center justify-between text-white/70 text-sm">
                     <div className="flex items-center gap-2">
                       {place.entryFees !== null && place.entryFees > 0 ? (
@@ -175,6 +206,19 @@ export default function PlaceSelection({
             );
           })}
         </div>
+
+        {hasMore && (
+          <div className="mt-8 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setVisibleCount((c) => c + SHOW_MORE_STEP)}
+              className="px-8 py-3 rounded-lg border-2 border-[#d4af37] text-[#d4af37] font-cinzel font-semibold hover:bg-[#d4af37]/10 transition-colors"
+              style={{ fontFamily: "var(--font-cinzel), serif" }}
+            >
+              Show more
+            </button>
+          </div>
+        )}
         </div>
       </div>
     </div>

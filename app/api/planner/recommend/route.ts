@@ -195,8 +195,8 @@ export async function POST(request: NextRequest) {
       usingMockData = true;
     }
 
-    // Get recommendations based on preferences
-    const recommendations = getTopRecommendations(places, preferences);
+    // Get recommendations: always at least 24 so selection page can show 6 + Show more (6 at a time)
+    const recommendations = getTopRecommendations(places, preferences, 24);
 
     return NextResponse.json({
       success: true,

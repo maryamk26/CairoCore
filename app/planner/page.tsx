@@ -22,7 +22,6 @@ export default function PlannerPage() {
     setError(null);
 
     try {
-      // Call API to get recommendations
       const response = await fetch("/api/planner/recommend", {
         method: "POST",
         headers: {
@@ -38,8 +37,7 @@ export default function PlannerPage() {
       const data = await response.json();
       setRecommendations(data.recommendations);
       setStage("selection");
-    } catch (err) {
-      console.error("Error getting recommendations:", err);
+    } catch {
       setError("Failed to get recommendations. Please try again.");
     } finally {
       setIsLoading(false);
@@ -72,7 +70,6 @@ export default function PlannerPage() {
     setError(null);
   };
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#3a3428] flex items-center justify-center">
@@ -86,7 +83,6 @@ export default function PlannerPage() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="min-h-screen bg-[#3a3428] flex items-center justify-center px-4">
@@ -114,10 +110,9 @@ export default function PlannerPage() {
     );
   }
 
-  // Render based on stage
   switch (stage) {
     case "survey":
-      return <AccordionSurvey onComplete={handleSurveyComplete} />;
+      return <AccordionSurvey onComplete={handleSurveyComplete} initialAnswers={preferences ?? undefined} />;
 
     case "selection":
       return (
@@ -126,6 +121,8 @@ export default function PlannerPage() {
           selectedPlaces={selectedPlaces}
           onTogglePlace={handleTogglePlace}
           onContinue={handleContinueToRoute}
+          onBackToSurvey={() => setStage("survey")}
+          budget={preferences?.budget as string | undefined}
         />
       );
 
@@ -135,6 +132,8 @@ export default function PlannerPage() {
           places={selectedPlaces}
           onBack={handleBackToSelection}
           onSave={handleStartOver}
+          minutesPerPlace={preferences?.timePerPlace as number | undefined}
+          timeOfDay={preferences?.timeOfDay as string[] | undefined}
         />
       );
 

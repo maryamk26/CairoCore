@@ -118,6 +118,6 @@ export interface PlannerPreferences {
   hasPets: boolean;
   hasKids: boolean;
   timeOfDay: string[];
-  numberOfPlaces: number;
+  numberOfPlaces?: number;
 }
 

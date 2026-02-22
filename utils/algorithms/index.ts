@@ -16,8 +16,6 @@ export {
 export {
   nearestNeighborRoute,
   optimizeRouteFromLocation,
-  twoOptOptimization,
-  hybridRouteOptimization,
   type PlaceWithLocation,
   type OptimizedRoute,
 } from "./routeOptimization";

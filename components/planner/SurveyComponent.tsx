@@ -45,22 +45,22 @@ const SURVEY_QUESTIONS: Question[] = [
   },
   {
     id: "budget",
-    question: "What's your budget level?",
+    question: "What's your budget per place?",
     type: "single_choice",
     options: [
-      { value: "low", label: "Budget-friendly (Free - 100 EGP)", icon: "💰" },
-      { value: "medium", label: "Moderate (100 - 500 EGP)", icon: "💳" },
-      { value: "high", label: "Premium (500+ EGP)", icon: "💎" },
+      { value: "low", label: "Free – 50 EGP per place", icon: "💰" },
+      { value: "medium", label: "50 – 200 EGP per place", icon: "💳" },
+      { value: "high", label: "200+ EGP per place", icon: "💎" },
     ],
   },
   {
-    id: "time",
-    question: "How much time do you have?",
+    id: "timePerPlace",
+    question: "How much time do you want to spend at each place (approx)?",
     type: "range",
-    min: 0,
-    max: 12,
-    step: 1,
-    unit: "hours",
+    min: 15,
+    max: 180,
+    step: 15,
+    unit: "min",
   },
   {
     id: "companions",
@@ -85,15 +85,6 @@ const SURVEY_QUESTIONS: Question[] = [
       { value: "evening", label: "Evening (6pm - 10pm)", icon: "🌆" },
       { value: "night", label: "Night (10pm+)", icon: "🌙" },
     ],
-  },
-  {
-    id: "numberOfPlaces",
-    question: "How many places would you like to visit?",
-    type: "range",
-    min: 0,
-    max: 10,
-    step: 1,
-    unit: "places",
   },
 ];
 

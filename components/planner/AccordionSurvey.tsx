@@ -25,6 +25,7 @@ export interface SurveyAnswers {
 
 interface AccordionSurveyProps {
   onComplete: (answers: SurveyAnswers) => void;
+  initialAnswers?: SurveyAnswers;
 }
 
 const SURVEY_QUESTIONS: Question[] = [
@@ -45,22 +46,22 @@ const SURVEY_QUESTIONS: Question[] = [
   },
   {
     id: "budget",
-    question: "What's your budget level?",
+    question: "What's your budget per place?",
     type: "single_choice",
     options: [
-      { value: "low", label: "Budget-friendly (Free - 100 EGP)" },
-      { value: "medium", label: "Moderate (100 - 500 EGP)" },
-      { value: "high", label: "Premium (500+ EGP)" },
+      { value: "low", label: "Free – 50 EGP per place" },
+      { value: "medium", label: "50 – 200 EGP per place" },
+      { value: "high", label: "200+ EGP per place" },
     ],
   },
   {
-    id: "time",
-    question: "How much time do you have?",
+    id: "timePerPlace",
+    question: "How much time do you want to spend at each place (approx)?",
     type: "range",
-    min: 0,
-    max: 12,
-    step: 1,
-    unit: "hours",
+    min: 15,
+    max: 180,
+    step: 15,
+    unit: "min",
   },
   {
     id: "companions",
@@ -86,24 +87,14 @@ const SURVEY_QUESTIONS: Question[] = [
       { value: "night", label: "Night (10pm+)" },
     ],
   },
-  {
-    id: "numberOfPlaces",
-    question: "How many places would you like to visit?",
-    type: "range",
-    min: 0,
-    max: 10,
-    step: 1,
-    unit: "places",
-  },
 ];
 
-export default function AccordionSurvey({ onComplete }: AccordionSurveyProps) {
+export default function AccordionSurvey({ onComplete, initialAnswers }: AccordionSurveyProps) {
   const [openQuestion, setOpenQuestion] = useState<string | null>(SURVEY_QUESTIONS[0].id);
-  const [answers, setAnswers] = useState<SurveyAnswers>({});
+  const [answers, setAnswers] = useState<SurveyAnswers>(initialAnswers ?? {});
 
   const handleSingleChoice = (questionId: string, value: string) => {
     setAnswers({ ...answers, [questionId]: value });
-    // Auto-open next unanswered question
     const currentIndex = SURVEY_QUESTIONS.findIndex(q => q.id === questionId);
     if (currentIndex < SURVEY_QUESTIONS.length - 1) {
       const nextQuestion = SURVEY_QUESTIONS[currentIndex + 1];
@@ -147,27 +138,22 @@ export default function AccordionSurvey({ onComplete }: AccordionSurveyProps) {
 
   return (
     <div className="min-h-screen relative">
-      {/* Background with Overlay */}
       <div className="absolute inset-0 z-0">
-        {/* Background Image */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: 'url(/images/backgrounds/survey.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            backgroundColor: '#5d4e37' // Fallback color
+            backgroundColor: '#5d4e37',
           }}
         />
-        {/* Overlay for readability - gradient overlay like search page */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#5d4e37]/40 via-[#8b6f47]/30 to-[#5d4e37]/40"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#5d4e37]/40 via-[#8b6f47]/30 to-[#5d4e37]/40" />
       </div>
 
-      {/* Main Content */}
       <div className="relative z-10 px-4 pt-32 pb-12">
         <div className="container mx-auto max-w-4xl">
-          {/* Header */}
           <div className="text-center mb-12">
             <h1 className="font-cinzel text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
               Plan Your Perfect Trip
@@ -177,7 +163,6 @@ export default function AccordionSurvey({ onComplete }: AccordionSurveyProps) {
             </p>
           </div>
 
-        {/* Progress Indicator */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-3">
               <span className="font-cinzel text-white text-base font-bold drop-shadow-md" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
@@ -195,7 +180,6 @@ export default function AccordionSurvey({ onComplete }: AccordionSurveyProps) {
             </div>
           </div>
 
-        {/* Accordion Questions */}
         <div className="space-y-4 mb-8">
           {SURVEY_QUESTIONS.map((question, index) => {
             const isOpen = openQuestion === question.id;
@@ -213,7 +197,6 @@ export default function AccordionSurvey({ onComplete }: AccordionSurveyProps) {
                     : "border-[#5d4e37]"
                 }`}
               >
-                {/* Question Header */}
                 <button
                   onClick={() => toggleQuestion(question.id)}
                   className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-white/5 transition-colors rounded-lg"
@@ -237,10 +220,8 @@ export default function AccordionSurvey({ onComplete }: AccordionSurveyProps) {
                   </div>
                 </button>
 
-                {/* Question Content */}
                 {isOpen && (
                   <div className="px-6 pb-6 pt-2">
-                    {/* Single Choice */}
                     {question.type === "single_choice" && question.options && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {question.options.map((option) => (
@@ -261,7 +242,6 @@ export default function AccordionSurvey({ onComplete }: AccordionSurveyProps) {
                       </div>
                     )}
 
-                    {/* Multiple Choice */}
                     {question.type === "multiple_choice" && question.options && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {question.options.map((option) => {
@@ -298,7 +278,6 @@ export default function AccordionSurvey({ onComplete }: AccordionSurveyProps) {
                       </div>
                     )}
 
-                    {/* Range */}
                     {question.type === "range" && (
                       <div className="space-y-6">
                         <div className="text-center">
@@ -340,7 +319,6 @@ export default function AccordionSurvey({ onComplete }: AccordionSurveyProps) {
           })}
         </div>
 
-        {/* Submit Button */}
         <div className="text-center">
           <button
             onClick={handleSubmit}

@@ -39,27 +39,29 @@ export function calculatePlaceMatch(
     }
   }
 
-  // Budget matching (20 points max)
+  // Budget per place matching (20 points max): low ≤50, medium 50–200, high 200+
   const budget = preferences.budget as string;
   const entryFee = place.entryFees || 0;
-  
-  if (budget === "low" && entryFee <= 100) {
+
+  if (budget === "low" && entryFee <= 50) {
     score += 20;
     if (entryFee === 0) {
-      reasons.push("Free entry - perfect for your budget!");
+      reasons.push("Free entry - fits your per-place budget");
     } else {
-      reasons.push("Budget-friendly pricing");
+      reasons.push("Within your per-place budget");
     }
-  } else if (budget === "medium" && entryFee > 100 && entryFee <= 500) {
+  } else if (budget === "medium" && entryFee > 50 && entryFee <= 200) {
     score += 20;
-    reasons.push("Moderately priced");
-  } else if (budget === "high" && entryFee > 500) {
+    reasons.push("Within your per-place budget");
+  } else if (budget === "high" && entryFee > 200) {
     score += 20;
-    reasons.push("Premium experience");
-  } else if (budget === "high" && entryFee < 500) {
-    score += 15; // Still acceptable
-  } else if (budget === "low" && entryFee > 100) {
-    score += 5; // Not ideal
+    reasons.push("Premium per-place range");
+  } else if (budget === "high" && entryFee <= 200) {
+    score += 15;
+  } else if (budget === "low" && entryFee > 50) {
+    score += 5;
+  } else if (budget === "medium" && (entryFee <= 50 || entryFee > 200)) {
+    score += 5;
   }
 
   // Companion matching (20 points max)
@@ -119,12 +121,14 @@ export function calculatePlaceMatch(
   return { score, reasons };
 }
 
+const MIN_RECOMMENDATIONS_TO_SHOW = 24;
+
 export function getTopRecommendations(
   places: any[],
   preferences: SurveyAnswers,
   limit?: number
 ): PlaceRecommendation[] {
-  const numberOfPlaces = (preferences.numberOfPlaces as number) || limit || 5;
+  const returnCount = limit ?? MIN_RECOMMENDATIONS_TO_SHOW;
 
   // Calculate match scores for all places
   const scoredPlaces = places.map((place) => {
@@ -139,7 +143,7 @@ export function getTopRecommendations(
   // Sort by match score (descending) and return top N
   return scoredPlaces
     .sort((a, b) => b.matchScore - a.matchScore)
-    .slice(0, numberOfPlaces)
+    .slice(0, returnCount)
     .map((place) => ({
       id: place.id,
       title: place.title,
@@ -157,14 +161,3 @@ export function getTopRecommendations(
       matchReasons: place.matchReasons,
     }));
 }
-
-export function estimateTripDuration(
-  numberOfPlaces: number,
-  timePerPlace: number = 1.5 // hours
-): number {
-  // Base time per place + travel time between places (estimate 30 min per transition)
-  const baseTime = numberOfPlaces * timePerPlace;
-  const travelTime = (numberOfPlaces - 1) * 0.5;
-  return baseTime + travelTime;
-}
-
