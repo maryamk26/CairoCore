@@ -4,7 +4,6 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
-// Dynamically import RouteMap to avoid SSR issues with Leaflet
 const RouteMap = dynamic(() => import("@/components/places/RouteMap"), {
   ssr: false,
   loading: () => (
@@ -14,7 +13,6 @@ const RouteMap = dynamic(() => import("@/components/places/RouteMap"), {
   ),
 });
 
-// Mock places data - in production this would come from an API
 const mockPlaces = [
   {
     id: "1",
@@ -94,7 +92,6 @@ export default function PlannerPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content - Map */}
           <div className="lg:col-span-2">
             <div className="bg-[#5d4e37] rounded-lg p-6">
               {selectedPlaces.length >= 2 ? (
@@ -113,9 +110,7 @@ export default function PlannerPage() {
             </div>
           </div>
 
-          {/* Sidebar - Place Selection */}
           <div className="space-y-6">
-            {/* Selected Places */}
             {selectedPlaces.length > 0 && (
               <div className="bg-[#5d4e37] rounded-lg p-6">
                 <div className="flex justify-between items-center mb-4">
@@ -183,7 +178,6 @@ export default function PlannerPage() {
               </div>
             )}
 
-            {/* Available Places */}
             <div className="bg-[#5d4e37] rounded-lg p-6">
               <h3 className="font-cinzel text-xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                 Available Places

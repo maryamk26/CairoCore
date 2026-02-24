@@ -17,13 +17,13 @@ export default function Header() {
     }
   };
 
-  if (pathname?.startsWith("/sign-in") || pathname?.startsWith("/sign-up")) {
+  if (pathname?.startsWith("/sign-in") || pathname?.startsWith("/sign-up") || pathname?.startsWith("/auth")) {
     return null;
   }
 
   const textNavLinks = [
     { href: "/", label: "Home" },
-    ...(authenticated ? [{ href: "/planner", label: "Planner" }] : [{ href: "/sign-up", label: "Join Us" }]),
+    ...(authenticated ? [{ href: "/planner", label: "Planner" }] : [{ href: "/auth?mode=sign-up", label: "Join Us" }]),
     { href: "/about", label: "About" },
   ];
 
@@ -105,7 +105,7 @@ export default function Header() {
 
             {!authenticated && (
               <Link
-                href="/sign-in"
+                href="/auth"
                 className={`p-1 transition-colors ${
                   isLightHeader
                     ? 'text-white hover:text-white/80'

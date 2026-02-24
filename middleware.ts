@@ -5,6 +5,7 @@ const publicRoutes = [
   '/',
   '/sign-in',
   '/sign-up',
+  '/auth',
   '/about',
   '/search',
   '/places',
@@ -31,7 +32,7 @@ export async function middleware(request: NextRequest) {
   if (!isPublic) {
     const userId = response.headers.get('x-user-id')
     if (!userId) {
-      const redirectUrl = new URL('/sign-in', request.url)
+      const redirectUrl = new URL('/auth', request.url)
       redirectUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(redirectUrl)
     }
