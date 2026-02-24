@@ -9,7 +9,6 @@ export default function AuthSwitch({ isSignIn, onSwitch }: AuthSwitchProps) {
   return (
     <div className="flex justify-center">
       <div className="relative inline-flex bg-white/80 backdrop-blur-sm rounded-full p-1 border border-white/30 shadow-md">
-        {/* Animated Background Slider */}
         <div
           className="absolute top-1 bottom-1 rounded-full bg-[#5d4e37] transition-transform duration-300 ease-in-out"
           style={{ 

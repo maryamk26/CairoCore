@@ -8,16 +8,11 @@ export default function FloatingAddButton() {
   const pathname = usePathname();
   const { isSignedIn, isLoading, userId } = useAuth();
 
-  // Don't show button if user is not signed in
   if (isLoading || !isSignedIn || !userId) {
     return null;
   }
 
-  // Only show button on home page (/) and profile page (/profile)
-  const isHomePage = pathname === "/";
-  const isProfilePage = pathname === "/profile" || pathname?.startsWith("/profile/");
-  
-  if (!isHomePage && !isProfilePage) {
+  if (pathname?.startsWith("/sign-in") || pathname?.startsWith("/sign-up") || pathname?.startsWith("/auth") || pathname === "/about" || pathname === "/search") {
     return null;
   }
 
