@@ -35,7 +35,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section with Background Image */}
       <section 
         className="relative min-h-screen flex items-center"
         style={{
@@ -45,35 +44,24 @@ export default function Home() {
           backgroundRepeat: 'no-repeat',
         }}
       >
-        {/* Dark Overlay */}
         <div className="absolute inset-0 bg-black/60 z-0"></div>
-
-        {/* Content */}
         <div className="relative z-10 container mx-auto px-4 py-24">
           <div className="max-w-2xl">
-            {/* Pre-headline - Medium size */}
             <p className="text-white text-xl md:text-4xl font-cinzel mb-3" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
               IT'S TIME TO
             </p>
-            
-            {/* Main Headline - Large but not overwhelming */}
             <h1 className="font-cinzel text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
               VISIT CAIRO
             </h1>
-            
-            {/* Description - Body text size */}
             <p className="text-white text-sm md:text-xl leading-relaxed mb-8 font-cinzel max-w-xl" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
               Crave new adventures, mystical experiences and stunning places? You need to visit Cairo. We make sure that you'll get an experience you'll never forget.
             </p>
           </div>
         </div>
-        {/* Gradient fade at bottom for blending */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent via-[#3a3428]/50 to-[#3a3428] pointer-events-none"></div>
       </section>
 
-      {/* Popular Places Section */}
-      <section className="bg-[#3a3428] py-16 md:py-24 relative">
-        {/* Gradient fade at top for blending */}
+      <section id="places" className="bg-[#3a3428] py-16 md:py-24 relative scroll-mt-20">
         <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#3a3428] via-[#3a3428]/50 to-transparent pointer-events-none"></div>
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -112,11 +100,9 @@ export default function Home() {
             ))}
           </div>
         </div>
-        {/* Gradient fade at bottom for blending */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent via-[#3a3428]/50 to-[#3a3428] pointer-events-none"></div>
       </section>
 
-      {/* About Us Section with Background */}
       <section 
         id="about"
         className="relative min-h-[600px] flex items-center scroll-mt-20"
@@ -127,25 +113,16 @@ export default function Home() {
           backgroundRepeat: 'no-repeat',
         }}
       >
-        {/* Dark Overlay */}
         <div className="absolute inset-0 bg-black/70 z-0"></div>
-        {/* Gradient fade at top for blending */}
         <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#3a3428] via-[#3a3428]/50 to-transparent z-10 pointer-events-none"></div>
-
-        {/* Content */}
         <div className="relative z-10 container mx-auto px-4 py-16">
           <div className="max-w-2xl">
-            {/* Pre-headline - Medium size */}
             <p className="text-white text-xl md:text-4xl font-cinzel mb-3" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-              IT'S TIME TO
+              Know more about
             </p>
-            
-            {/* Main Headline - Large but not overwhelming */}
             <h2 className="font-cinzel text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-              VISIT CAIRO
+              CairoCore
             </h2>
-            
-            {/* CTA Button */}
             <button
               onClick={() => setShowModal(true)}
               className="inline-block px-8 py-3 border-2 border-white/80 text-white font-cinzel font-medium rounded-full hover:bg-white/10 hover:border-white transition-all backdrop-blur-sm mb-6"
@@ -153,16 +130,17 @@ export default function Home() {
             >
               Explore More
             </button>
-
-            {/* Description - Body text size */}
             <p className="font-cinzel text-white/80 text-sm md:text-xl leading-relaxed max-w-xl" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-              Crave new adventures, mystical experiences and stunning places? You need to visit Cairo. We make sure that you'll get an experience you'll never forget.
+              Cairo hits different — we help you feel it.
+              <br />
+              Your smart guide to exploring Cairo your way: hidden gems, iconic spots, food, vibes, and routes built just for you.
+              <br />
+              Less confusion. More adventure. Zero boring plans.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Modal Widget */}
       <div 
         className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
           showModal ? 'bg-black/50 backdrop-blur-sm' : 'bg-black/0 backdrop-blur-0 pointer-events-none'
@@ -175,7 +153,6 @@ export default function Home() {
           }`}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Close Button */}
           <button
             onClick={() => setShowModal(false)}
             className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
@@ -185,8 +162,6 @@ export default function Home() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-
-          {/* Modal Content */}
           <div className="mt-4">
             <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-white mb-6" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
               What We Do

@@ -17,14 +17,21 @@ export default function Header() {
     }
   };
 
+  const handlePlacesClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      document.getElementById("places")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   if (pathname?.startsWith("/sign-in") || pathname?.startsWith("/sign-up") || pathname?.startsWith("/auth")) {
     return null;
   }
 
   const textNavLinks = [
     { href: "/", label: "Home" },
-    ...(authenticated ? [{ href: "/planner", label: "Planner" }] : [{ href: "/auth?mode=sign-up", label: "Join Us" }]),
-    { href: "/about", label: "About" },
+    ...(authenticated ? [{ href: "/planner", label: "Planner" }] : [{ href: "/#places", label: "Places" }]),
+    { href: "/about", label: "About Us" },
   ];
 
   const isSearchPage = pathname === "/search";
@@ -60,6 +67,23 @@ export default function Header() {
                     key={link.href}
                     href={link.href}
                     onClick={handleAboutClick}
+                    className={`font-cinzel text-base md:text-lg font-normal transition-colors hover:underline ${
+                      isLightHeader
+                        ? 'text-white hover:text-white/80'
+                        : 'text-[#5d4e37] hover:text-[#8b6f47]'
+                    }`}
+                    style={{ fontFamily: 'var(--font-cinzel), serif' }}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              }
+              if (link.href === "/#places") {
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={handlePlacesClick}
                     className={`font-cinzel text-base md:text-lg font-normal transition-colors hover:underline ${
                       isLightHeader
                         ? 'text-white hover:text-white/80'

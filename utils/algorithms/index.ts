@@ -1,9 +1,3 @@
-/**
- * Algorithms module
- * Central export point for all algorithm utilities
- */
-
-// Distance algorithms
 export {
   calculateDistance,
   calculateTravelTime,
@@ -12,22 +6,9 @@ export {
   type Coordinates,
 } from "./distance";
 
-// Route optimization algorithms
 export {
   nearestNeighborRoute,
   optimizeRouteFromLocation,
   type PlaceWithLocation,
   type OptimizedRoute,
 } from "./routeOptimization";
-
-// Place recommendation algorithms
-export {
-  recommendPlaces,
-  filterPlacesByConstraints,
-  getRecommendedPlaces,
-  type PlaceScore,
-} from "./placeRecommendation";
-
-
-
-
