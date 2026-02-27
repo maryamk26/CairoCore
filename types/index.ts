@@ -22,9 +22,9 @@ export interface Place {
     lng: number;
     address: string;
   };
-  vibe: string[]; // e.g., ["historical", "romantic", "photography"]
+  vibe: string[];
   workingHours: {
-    [key: string]: { open: string; close: string } | null; // day of week
+    [key: string]: { open: string; close: string } | null;
   };
   entryFees: number | null;
   cameraFees: number | null;
@@ -37,7 +37,7 @@ export interface Place {
   averageRating: number;
   totalReviews: number;
   status: "approved" | "pending" | "rejected";
-  createdBy: string; // userId
+  createdBy: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -60,9 +60,9 @@ export interface Memory {
 export interface RoutePlan {
   id: string;
   userId: string;
-  places: string[]; // placeIds
+  places: string[];
   date: Date;
-  estimatedDuration: number; // in minutes
+  estimatedDuration: number;
   route: {
     placeId: string;
     order: number;
@@ -106,15 +106,15 @@ export interface SurveyAnswer {
   id: string;
   responseId: string;
   questionId: string;
-  answer: any; // Flexible to store any answer type
+  answer: any;
   createdAt: Date;
 }
 
-// Planner preferences (derived from survey)
+// Planner preferences
 export interface PlannerPreferences {
   vibes: string[];
   budget: string;
-  timeAvailable: number; // hours
+  timeAvailable: number;
   hasPets: boolean;
   hasKids: boolean;
   timeOfDay: string[];

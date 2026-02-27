@@ -9,18 +9,11 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
-    // Start fade out
     setIsTransitioning(true);
-    
-    // After fade out, update content and fade in
     const timer = setTimeout(() => {
       setDisplayChildren(children);
-      // Small delay before fade in for smoother transition
-      setTimeout(() => {
-        setIsTransitioning(false);
-      }, 50);
+      setTimeout(() => setIsTransitioning(false), 50);
     }, 250);
-
     return () => clearTimeout(timer);
   }, [pathname, children]);
 

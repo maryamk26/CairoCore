@@ -1,8 +1,3 @@
-/**
- * Route optimization algorithms
- * Implements algorithms for optimizing the order of places in a route
- */
-
 import { Coordinates, calculateDistance, findNearestPoint } from "./distance";
 
 export interface PlaceWithLocation {
@@ -14,16 +9,9 @@ export interface PlaceWithLocation {
 export interface OptimizedRoute {
   order: number[];
   totalDistance: number;
-  estimatedTime: number; // in minutes
+  estimatedTime: number;
 }
 
-/**
- * Nearest Neighbor Algorithm for route optimization
- * A greedy heuristic for approximating the Traveling Salesman Problem
- * @param places Array of places with locations
- * @param startIndex Optional starting point index (default: 0)
- * @returns Optimized route with order and total distance
- */
 export function nearestNeighborRoute(
   places: PlaceWithLocation[],
   startIndex: number = 0
@@ -43,7 +31,6 @@ export function nearestNeighborRoute(
   let currentIndex = startIndex;
   let totalDistance = 0;
 
-  // Build route by always going to the nearest unvisited place
   while (visited.size < places.length) {
     let nearestIndex = -1;
     let minDistance = Infinity;
@@ -69,27 +56,19 @@ export function nearestNeighborRoute(
     }
   }
 
-  // Calculate estimated travel time (assuming 30 km/h average speed)
   const estimatedTime = Math.round((totalDistance / 30) * 60);
 
   return {
     order,
-    totalDistance: Math.round(totalDistance * 100) / 100, // Round to 2 decimal places
+    totalDistance: Math.round(totalDistance * 100) / 100,
     estimatedTime,
   };
 }
 
-/**
- * Optimize route starting from a specific location (not necessarily a place in the list)
- * @param places Array of places with locations
- * @param startLocation Starting location
- * @returns Optimized route
- */
 export function optimizeRouteFromLocation(
   places: PlaceWithLocation[],
   startLocation: Coordinates
 ): OptimizedRoute {
-  // Find the nearest place to start from
   const placesCoordinates: Coordinates[] = places.map((p) => ({
     lat: p.lat,
     lng: p.lng,

@@ -13,7 +13,7 @@ export interface PlaceRecommendation {
   cameraFees: number | null;
   petsFriendly: boolean;
   kidsFriendly: boolean;
-  matchScore: number; // 0-100
+  matchScore: number;
   matchReasons: string[];
 }
 
@@ -25,7 +25,6 @@ export function calculatePlaceMatch(
   const reasons: string[] = [];
   const maxScore = 100;
 
-  // Vibe matching (40 points max)
   const preferredVibes = preferences.vibe as string[];
   if (preferredVibes && preferredVibes.length > 0) {
     const matchingVibes = place.vibe.filter((v: string) =>
@@ -39,7 +38,6 @@ export function calculatePlaceMatch(
     }
   }
 
-  // Budget per place matching (20 points max): low ≤50, medium 50–200, high 200+
   const budget = preferences.budget as string;
   const entryFee = place.entryFees || 0;
 
@@ -64,7 +62,6 @@ export function calculatePlaceMatch(
     score += 5;
   }
 
-  // Companion matching (20 points max)
   const companions = (preferences.companions as string[]) || [];
   let companionScore = 0;
   
@@ -87,8 +84,6 @@ export function calculatePlaceMatch(
   }
 
   if (companions.includes("elderly")) {
-    // Check if place has easy access (this would need to be in the database)
-    // For now, we'll give moderate score
     companionScore += 5;
   }
 
@@ -101,21 +96,16 @@ export function calculatePlaceMatch(
 
   score += Math.max(0, Math.min(20, companionScore));
 
-  // Time of day matching (10 points max)
   const timeOfDay = (preferences.timeOfDay as string[]) || [];
   if (timeOfDay.length > 0) {
-    // This would need working hours check
-    // For now, give partial points
     score += 5;
   }
 
-  // Photography spots bonus (10 points)
   if (preferredVibes?.includes("photography") && place.vibe.includes("photography")) {
     score += 10;
     reasons.push("Great for photography!");
   }
 
-  // Normalize score to 0-100
   score = Math.min(maxScore, Math.max(0, score));
 
   return { score, reasons };
@@ -130,7 +120,6 @@ export function getTopRecommendations(
 ): PlaceRecommendation[] {
   const returnCount = limit ?? MIN_RECOMMENDATIONS_TO_SHOW;
 
-  // Calculate match scores for all places
   const scoredPlaces = places.map((place) => {
     const { score, reasons } = calculatePlaceMatch(place, preferences);
     return {
@@ -140,7 +129,6 @@ export function getTopRecommendations(
     };
   });
 
-  // Sort by match score (descending) and return top N
   return scoredPlaces
     .sort((a, b) => b.matchScore - a.matchScore)
     .slice(0, returnCount)

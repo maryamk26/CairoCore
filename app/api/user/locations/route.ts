@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
-// GET - Fetch all saved locations for the authenticated user
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -15,7 +14,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Find user in database
     const dbUser = await prisma.user.findUnique({
       where: { email: user.email! },
       include: {
@@ -45,7 +43,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Create a new saved location
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -68,7 +65,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate coordinates
     if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
       return NextResponse.json(
         { error: "Invalid coordinates" },
@@ -76,7 +72,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user in database
     const dbUser = await prisma.user.findUnique({
       where: { email: user.email! }
     });
@@ -88,7 +83,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create saved location
     const savedLocation = await prisma.savedLocation.create({
       data: {
         userId: dbUser.id,
@@ -112,7 +106,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE - Delete a saved location
 export async function DELETE(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -135,7 +128,6 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Find user in database
     const dbUser = await prisma.user.findUnique({
       where: { email: user.email! }
     });
@@ -147,7 +139,6 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Verify the location belongs to the user
     const location = await prisma.savedLocation.findUnique({
       where: { id: locationId }
     });
@@ -159,7 +150,6 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Delete the location
     await prisma.savedLocation.delete({
       where: { id: locationId }
     });

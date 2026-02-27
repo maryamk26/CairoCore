@@ -13,7 +13,7 @@ interface SavedLocation {
 interface SearchResult {
   id: string;
   place_name: string;
-  center: [number, number]; // [lng, lat]
+  center: [number, number]; // lng, lat
   text: string;
 }
 
@@ -26,25 +26,19 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<'browser' | 'search' | 'saved'>('browser');
   const [isLoadingBrowser, setIsLoadingBrowser] = useState(false);
-  
-  // Search state
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [shouldSave, setShouldSave] = useState(false);
-  
-  // Saved locations
   const [savedLocations, setSavedLocations] = useState<SavedLocation[]>([]);
   const [isLoadingSaved, setIsLoadingSaved] = useState(false);
 
-  // Fetch saved locations when component mounts or when saved tab is opened
   useEffect(() => {
     if (mode === 'saved' && savedLocations.length === 0) {
       fetchSavedLocations();
     }
   }, [mode]);
 
-  // Debounced search for locations
   useEffect(() => {
     if (searchQuery.length < 3) {
       setSearchResults([]);
@@ -76,31 +70,27 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
   const searchLocations = async (query: string) => {
     setIsSearching(true);
     try {
-      // Using Nominatim (OpenStreetMap's free geocoding service)
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?` +
-        `q=${encodeURIComponent(query)}&` +
-        `countrycodes=eg&` + // Egypt
-        `viewbox=29.5,29.5,32.5,31.5&` + // Bounding box around Cairo
-        `bounded=1&` + // Restrict to bounding box
-        `limit=5&` +
-        `format=json&` +
-        `addressdetails=1`,
+          `q=${encodeURIComponent(query)}&` +
+          `countrycodes=eg&` +
+          `viewbox=29.5,29.5,32.5,31.5&` +
+          `bounded=1&` +
+          `limit=5&` +
+          `format=json&` +
+          `addressdetails=1`,
         {
-          headers: {
-            'User-Agent': 'CairoCore/1.0', // Nominatim requires a user agent
-          }
+          headers: { "User-Agent": "CairoCore/1.0" },
         }
       );
 
       if (response.ok) {
         const data = await response.json();
-        // Transform Nominatim results to our format
-        const transformedResults = data.map((item: any) => ({
+        const transformedResults = data.map((item: { place_id: number; lon: string; lat: string; display_name: string; name?: string }) => ({
           id: item.place_id.toString(),
           place_name: item.display_name,
-          center: [parseFloat(item.lon), parseFloat(item.lat)], // [lng, lat]
-          text: item.name || item.display_name.split(',')[0],
+          center: [parseFloat(item.lon), parseFloat(item.lat)],
+          text: item.name || item.display_name.split(",")[0],
         }));
         setSearchResults(transformedResults);
       }
@@ -143,12 +133,9 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
     });
     
     if (shouldSave) {
-      // Save to database via API
       saveLocation(result.text, result.place_name, lat, lng);
     }
-    
-    // Reset form
-    setSearchQuery('');
+    setSearchQuery("");
     setSearchResults([]);
     setShouldSave(false);
     setIsOpen(false);
@@ -171,7 +158,6 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
 
       if (response.ok) {
         const data = await response.json();
-        // Add to local state
         setSavedLocations([data.location, ...savedLocations]);
       } else {
         console.error('Failed to save location');
@@ -188,8 +174,7 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
       });
 
       if (response.ok) {
-        // Remove from local state
-        setSavedLocations(savedLocations.filter(loc => loc.id !== locationId));
+        setSavedLocations(savedLocations.filter((loc) => loc.id !== locationId));
       } else {
         console.error('Failed to delete location');
       }
@@ -235,7 +220,6 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
         </button>
       </div>
 
-      {/* Mode Selector */}
       <div className="flex gap-2">
         <button
           onClick={() => setMode('browser')}
@@ -272,8 +256,7 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
         </button>
       </div>
 
-      {/* Browser Location */}
-      {mode === 'browser' && (
+      {mode === "browser" && (
         <div className="space-y-2">
           <p className="font-cinzel text-white/80 text-xs" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
             Use your device's current location
@@ -289,8 +272,7 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
         </div>
       )}
 
-      {/* Search Location */}
-      {mode === 'search' && (
+      {mode === "search" && (
         <div className="space-y-3">
           <div>
             <label className="font-cinzel text-white text-xs mb-1 block" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
@@ -319,7 +301,6 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
             </span>
           </label>
 
-          {/* Search Results */}
           <div className="max-h-[300px] overflow-y-auto space-y-2">
             {isSearching && (
               <p className="font-cinzel text-white/70 text-xs text-center py-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
@@ -357,8 +338,7 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
         </div>
       )}
 
-      {/* Saved Locations */}
-      {mode === 'saved' && (
+      {mode === "saved" && (
         <div className="space-y-2">
           {isLoadingSaved ? (
             <p className="font-cinzel text-white/70 text-xs text-center py-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>

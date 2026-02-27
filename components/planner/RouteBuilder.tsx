@@ -62,7 +62,7 @@ async function fetchOsrmRoute(
 ): Promise<{ distanceKm: number; durationMinutes: number; profileUsed: string } | null> {
   if (places.length === 0) return null;
   const waypoints = [start, ...places.map((p) => ({ lat: p.latitude, lng: p.longitude }))];
-  const coordinates = waypoints.map((p) => `${p.lng},${p.lat}`).join(";");
+  const coordinates = waypoints.map((p) => `${p.lng},${p.lat}`).join(";"); // OSRM: lng,lat
 
   const profileForRequest = transportMode === "walk" ? "foot" : "car";
   const url = `https://router.project-osrm.org/route/v1/${profileForRequest}/${coordinates}?overview=simplified`;
@@ -99,12 +99,16 @@ async function fetchOsrmRoute(
   }
 }
 
+type RouteStopWhen = "beginning" | "middle" | "end";
+
 interface RouteBuilderProps {
   places: PlaceRecommendation[];
   onBack: () => void;
   onSave?: () => void;
   minutesPerPlace?: number;
   timeOfDay?: string[];
+  routeStop?: PlaceRecommendation | null;
+  routeStopWhen?: RouteStopWhen;
 }
 
 interface UserLocation {
@@ -114,7 +118,31 @@ interface UserLocation {
   address?: string;
 }
 
-export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: minutesPerPlaceProp, timeOfDay }: RouteBuilderProps) {
+function insertStopIntoRoute(
+  mainPlaces: PlaceRecommendation[],
+  stop: PlaceRecommendation,
+  when: RouteStopWhen
+): PlaceRecommendation[] {
+  if (mainPlaces.length === 0) return [stop];
+  const n = mainPlaces.length;
+  const insertIndex =
+    when === "beginning" ? 0 : when === "middle" ? Math.floor(n / 2) : n;
+  return [
+    ...mainPlaces.slice(0, insertIndex),
+    stop,
+    ...mainPlaces.slice(insertIndex),
+  ];
+}
+
+export default function RouteBuilder({
+  places,
+  onBack,
+  onSave,
+  minutesPerPlace: minutesPerPlaceProp,
+  timeOfDay,
+  routeStop = null,
+  routeStopWhen = "middle",
+}: RouteBuilderProps) {
   const [orderedPlaces, setOrderedPlaces] = useState(places);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [transportMode, setTransportMode] = useState<string>("");
@@ -132,6 +160,21 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
   } | null>(null);
   const [loadingRoute, setLoadingRoute] = useState(false);
   const lastStartRef = useRef<{ lat: number; lng: number } | null>(null);
+
+  const placesWithStop = useMemo(() => {
+    if (!routeStop) return orderedPlaces;
+    return insertStopIntoRoute(orderedPlaces, routeStop, routeStopWhen);
+  }, [orderedPlaces, routeStop, routeStopWhen]);
+
+  const stopDisplayIndex = useMemo(() => {
+    if (!routeStop) return -1;
+    const n = orderedPlaces.length;
+    return routeStopWhen === "beginning"
+      ? 0
+      : routeStopWhen === "middle"
+        ? Math.floor(n / 2)
+        : n;
+  }, [orderedPlaces.length, routeStop, routeStopWhen]);
 
   useEffect(() => {
     setOrderedPlaces(places);
@@ -180,7 +223,7 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
   }, []);
 
   useEffect(() => {
-    if (!userLocation || !transportMode || orderedPlaces.length === 0) {
+    if (!userLocation || !transportMode || placesWithStop.length === 0) {
       setLiveRoute(null);
       return;
     }
@@ -188,7 +231,7 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
     const modeRequested = transportMode;
     setLoadingRoute(true);
     setLiveRoute(null);
-    fetchOsrmRoute(userLocation, orderedPlaces, transportMode)
+    fetchOsrmRoute(userLocation, placesWithStop, transportMode)
       .then((result) => {
         if (!cancelled && result) {
           setLiveRoute({
@@ -204,17 +247,17 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
     return () => {
       cancelled = true;
     };
-  }, [userLocation, transportMode, orderedPlaces]);
+  }, [userLocation, transportMode, placesWithStop]);
 
   const calculateTripStats = () => {
-    if (!userLocation || orderedPlaces.length === 0 || !transportMode) {
+    if (!userLocation || placesWithStop.length === 0 || !transportMode) {
       return { totalDistance: 0, totalTime: 0, travelTime: 0 };
     }
 
     let totalDistance = 0;
     let previousLocation = userLocation;
 
-    orderedPlaces.forEach((place) => {
+    placesWithStop.forEach((place) => {
       const distance = calculateDistance(
         { lat: previousLocation.lat, lng: previousLocation.lng },
         { lat: place.latitude, lng: place.longitude }
@@ -228,7 +271,7 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
     const speed = SPEED_KMH[transportMode] ?? 60;
     const travelTimeHours = roadDistanceKm / speed;
     const travelTimeMinutes = Math.round(travelTimeHours * 60);
-    const visitTimeMinutes = orderedPlaces.length * minutesPerPlace;
+    const visitTimeMinutes = placesWithStop.length * minutesPerPlace;
     const totalTimeMinutes = travelTimeMinutes + visitTimeMinutes;
 
     const safe = (n: number) => (Number.isFinite(n) ? n : 0);
@@ -241,9 +284,9 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
 
   const fallbackStats = useMemo(
     () => calculateTripStats(),
-    [userLocation, orderedPlaces, transportMode, minutesPerPlace]
+    [userLocation, placesWithStop, transportMode, minutesPerPlace]
   );
-  const visitTimeMinutes = orderedPlaces.length * minutesPerPlace;
+  const visitTimeMinutes = placesWithStop.length * minutesPerPlace;
   const tripStats = useMemo(() => {
     if (liveRoute && liveRoute.forMode === transportMode) {
       const totalTime = liveRoute.durationMinutes + visitTimeMinutes;
@@ -255,24 +298,37 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
     }
     return fallbackStats;
   }, [liveRoute, transportMode, fallbackStats, visitTimeMinutes]);
-  const canCalculateWholeTrip = !!(userLocation && transportMode && orderedPlaces.length > 0);
+  const canCalculateWholeTrip = !!(userLocation && transportMode && placesWithStop.length > 0);
   const wholeTripMinutes = canCalculateWholeTrip ? tripStats.totalTime : 0;
   const fromLiveMap = !!(liveRoute && liveRoute.forMode === transportMode);
   const preferredWindow = getPreferredWindow(timeOfDay);
   const tripExceedsPreferredTime = preferredWindow != null && wholeTripMinutes > preferredWindow.minutes;
 
-  const movePlace = (index: number, direction: "up" | "down") => {
-    const newPlaces = [...orderedPlaces];
-    const newIndex = direction === "up" ? index - 1 : index + 1;
-
-    if (newIndex >= 0 && newIndex < newPlaces.length) {
-      [newPlaces[index], newPlaces[newIndex]] = [newPlaces[newIndex], newPlaces[index]];
-      setOrderedPlaces(newPlaces);
-    }
+  const displayIndexToMainIndex = (displayIndex: number): number | null => {
+    if (!routeStop || stopDisplayIndex < 0) return displayIndex;
+    if (displayIndex === stopDisplayIndex) return null;
+    if (routeStopWhen === "beginning") return displayIndex - 1;
+    if (routeStopWhen === "end") return displayIndex;
+    return displayIndex < stopDisplayIndex ? displayIndex : displayIndex - 1;
   };
 
-  const removePlace = (index: number) => {
-    const newPlaces = orderedPlaces.filter((_, i) => i !== index);
+  const movePlace = (displayIndex: number, direction: "up" | "down") => {
+    const mainIndex = displayIndexToMainIndex(displayIndex);
+    if (mainIndex === null) return;
+    const newPlaces = [...orderedPlaces];
+    const newDisplayIndex = direction === "up" ? displayIndex - 1 : displayIndex + 1;
+    if (newDisplayIndex === stopDisplayIndex) return;
+    const newMainIndex = displayIndexToMainIndex(newDisplayIndex);
+    if (newMainIndex === null || newMainIndex < 0 || newMainIndex >= newPlaces.length) return;
+    if (mainIndex < 0 || mainIndex >= newPlaces.length) return;
+    [newPlaces[mainIndex], newPlaces[newMainIndex]] = [newPlaces[newMainIndex], newPlaces[mainIndex]];
+    setOrderedPlaces(newPlaces);
+  };
+
+  const removePlace = (displayIndex: number) => {
+    const mainIndex = displayIndexToMainIndex(displayIndex);
+    if (mainIndex === null) return;
+    const newPlaces = orderedPlaces.filter((_, i) => i !== mainIndex);
     setOrderedPlaces(newPlaces);
   };
 
@@ -292,7 +348,7 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
           lng: userLocation.lng,
           address: 'Starting Point',
         },
-        ...orderedPlaces.map((place) => ({
+        ...placesWithStop.map((place) => ({
           id: place.id,
           title: place.title,
           lat: place.latitude,
@@ -300,7 +356,7 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
           address: place.address,
         })),
       ]
-    : orderedPlaces.map((place) => ({
+    : placesWithStop.map((place) => ({
         id: place.id,
         title: place.title,
         lat: place.latitude,
@@ -341,7 +397,7 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
     return (
       <NavigationMode
         startLocation={userLocation}
-        places={orderedPlaces}
+        places={placesWithStop}
         onExit={() => setIsNavigationMode(false)}
       />
     );
@@ -377,10 +433,10 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
             Back to Selection
           </button>
           <h1 className="font-cinzel text-4xl md:text-5xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-            {orderedPlaces.length === 1 ? "Your Selected Location" : "Your Optimized Route"}
+            {placesWithStop.length === 1 ? "Your Selected Location" : "Your Optimized Route"}
           </h1>
           <p className="font-cinzel text-white/80 text-lg" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-            {orderedPlaces.length === 1 
+            {placesWithStop.length === 1 
               ? "View your selected location on the map and add more places if you'd like."
               : "Review and adjust your trip route. Drag to reorder stops."}
           </p>
@@ -389,7 +445,7 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <div className="bg-[#5d4e37] rounded-lg p-6">
-              {orderedPlaces.length >= 1 ? (
+              {placesWithStop.length >= 1 ? (
                 <RouteMap places={mapPlaces} height="600px" />
               ) : null}
             </div>
@@ -533,7 +589,7 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
                 <div className="flex justify-between">
                   <span className="font-cinzel text-white/70" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Time at places</span>
                   <span className="font-cinzel text-white font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                    ~{Math.floor((orderedPlaces.length * minutesPerPlace) / 60)}h {(orderedPlaces.length * minutesPerPlace) % 60}m
+                    ~{Math.floor((placesWithStop.length * minutesPerPlace) / 60)}h {(placesWithStop.length * minutesPerPlace) % 60}m
                   </span>
                 </div>
                     <div className="h-px bg-white/20 my-2"></div>
@@ -542,10 +598,10 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
                 <div className="flex justify-between">
                   <span className="font-cinzel text-white/70" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Total Stops</span>
                   <span className="font-cinzel text-white font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                    {orderedPlaces.length}
+                    {placesWithStop.length}
                   </span>
                 </div>
-                {orderedPlaces.length > 0 && (
+                {placesWithStop.length > 0 && (
                   <div className="flex flex-col gap-0.5">
                     <div className="flex justify-between items-center">
                       <span className="font-cinzel text-white/70" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
@@ -571,7 +627,7 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
                 <div className="flex justify-between">
                   <span className="font-cinzel text-white/70" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Total Cost</span>
                   <span className="font-cinzel text-white font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                    {orderedPlaces.reduce((sum, place) => sum + (place.entryFees || 0), 0)} EGP
+                    {placesWithStop.reduce((sum, place) => sum + (place.entryFees || 0), 0)} EGP
                   </span>
                 </div>
               </div>
@@ -582,10 +638,12 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
                 Your Route
               </h3>
               <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                {orderedPlaces.map((place, index) => (
+                {placesWithStop.map((place, index) => {
+                  const isStop = !!routeStop && place.id === routeStop.id;
+                  return (
                   <div
                     key={place.id}
-                    className="bg-[#8b6f47] rounded-lg p-4"
+                    className={`rounded-lg p-4 ${isStop ? "bg-[#8b6f47] ring-2 ring-[#d4af37]" : "bg-[#8b6f47]"}`}
                   >
                     <div className="flex items-start gap-3">
                       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#d4af37] flex items-center justify-center text-[#3a3428] font-bold">
@@ -593,6 +651,11 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
                       </div>
 
                       <div className="flex-1 min-w-0">
+                        {isStop && (
+                          <span className="font-cinzel text-[#d4af37] text-xs font-semibold block mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                            Stop — {routeStopWhen === "beginning" ? "Start" : routeStopWhen === "middle" ? "Mid-route" : "End"}
+                          </span>
+                        )}
                         <h4 className="font-cinzel text-white font-semibold text-sm mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                           {place.title}
                         </h4>
@@ -614,6 +677,7 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
                         </div>
                       </div>
 
+                      {!isStop && (
                       <div className="flex flex-col gap-1">
                         <button
                           onClick={() => movePlace(index, "up")}
@@ -627,7 +691,7 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
                         </button>
                         <button
                           onClick={() => movePlace(index, "down")}
-                          disabled={index === orderedPlaces.length - 1}
+                          disabled={index === placesWithStop.length - 1}
                           className="p-1 text-white/70 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
                           aria-label="Move down"
                         >
@@ -645,14 +709,16 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
                           </svg>
                         </button>
                       </div>
+                      )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
             <div className="space-y-3">
-              {userLocation && orderedPlaces.length >= 1 && (
+              {userLocation && placesWithStop.length >= 1 && (
                 <button
                   onClick={handleYallaClick}
                   className="w-full px-6 py-4 bg-gradient-to-r from-[#d4af37] to-[#e5bf47] text-[#3a3428] rounded-lg font-cinzel font-bold hover:from-[#e5bf47] hover:to-[#f5cf57] transition-all transform hover:scale-105 shadow-lg text-lg"
@@ -664,11 +730,11 @@ export default function RouteBuilder({ places, onBack, onSave, minutesPerPlace: 
               
               <button
                 onClick={handleSave}
-                disabled={orderedPlaces.length < 1}
+                disabled={placesWithStop.length < 1}
                 className="w-full px-6 py-3 bg-[#d4af37] text-[#3a3428] rounded-lg font-cinzel font-bold hover:bg-[#e5bf47] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ fontFamily: 'var(--font-cinzel), serif' }}
               >
-                {orderedPlaces.length === 1 ? "Save Location" : "Save Route"}
+                {placesWithStop.length === 1 ? "Save Location" : "Save Route"}
               </button>
               <button
                 onClick={onBack}

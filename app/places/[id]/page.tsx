@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 
-// Dynamically import PlaceMap to avoid SSR issues with Leaflet
 const PlaceMap = dynamic(() => import("@/components/places/PlaceMap"), {
   ssr: false,
   loading: () => (
@@ -15,7 +14,7 @@ const PlaceMap = dynamic(() => import("@/components/places/PlaceMap"), {
   ),
 });
 
-// Mock data - in production this would come from an API
+// mock data until API
 const getPlaceData = (id: string) => {
   const places: Record<string, any> = {
     "1": {
@@ -205,7 +204,6 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
 
   return (
     <div className="min-h-screen bg-[#3a3428]">
-      {/* Image Carousel Section */}
       <section className="relative h-[60vh] md:h-[70vh] overflow-hidden">
         {place.images.length > 0 && (
           <>
@@ -215,8 +213,7 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/60"></div>
-            
-            {/* Navigation Arrows */}
+
             {place.images.length > 1 && (
               <>
                 <button
@@ -240,7 +237,6 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
               </>
             )}
 
-            {/* Image Indicators */}
             {place.images.length > 1 && (
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
                 {place.images.map((_: string, index: number) => (
@@ -256,7 +252,6 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
               </div>
             )}
 
-            {/* Title Overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
               <h1 className="font-cinzel text-4xl md:text-6xl font-bold text-white mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                 {place.title}
@@ -274,12 +269,9 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
         )}
       </section>
 
-      {/* Content Section */}
       <section className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Description */}
             <div className="bg-[#5d4e37] rounded-lg p-6 md:p-8">
               <h2 className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                 About
@@ -289,13 +281,11 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
               </p>
             </div>
 
-            {/* Location Map */}
             <div className="bg-[#5d4e37] rounded-lg p-6 md:p-8">
               <h2 className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-6" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                 Location
               </h2>
-              
-              {/* Detailed Address Information */}
+
               <div className="mb-6 space-y-4">
                 <div className="bg-[#8b6f47]/30 rounded-lg p-4">
                   <div className="flex items-start gap-3">
@@ -314,7 +304,6 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
                   </div>
                 </div>
 
-                {/* Coordinates */}
                 <div className="bg-[#8b6f47]/30 rounded-lg p-4">
                   <div className="flex items-start gap-3">
                     <svg className="w-6 h-6 text-white/80 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -354,7 +343,6 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
               />
             </div>
 
-            {/* Vibe Tags */}
             <div className="bg-[#5d4e37] rounded-lg p-6 md:p-8">
               <h2 className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                 Vibe
@@ -372,7 +360,6 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
               </div>
             </div>
 
-            {/* Reviews Section - Placeholder */}
             <div className="bg-[#5d4e37] rounded-lg p-6 md:p-8">
               <h2 className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-6" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                 Reviews & Memories
@@ -383,16 +370,13 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
             </div>
           </div>
 
-          {/* Sidebar */}
           <div className="space-y-6">
-            {/* Quick Info Card */}
             <div className="bg-[#5d4e37] rounded-lg p-6 sticky top-4">
               <h3 className="font-cinzel text-xl font-bold text-white mb-6" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                 Quick Info
               </h3>
               
               <div className="space-y-4">
-                {/* Location */}
                 <div>
                   <p className="font-cinzel text-white/70 text-sm mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                     Location
@@ -407,7 +391,6 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
                   </div>
                 </div>
 
-                {/* Entry Fees */}
                 {place.entryFees && (
                   <div>
                     <p className="font-cinzel text-white/70 text-sm mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
@@ -419,7 +402,6 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
                   </div>
                 )}
 
-                {/* Camera Fees */}
                 {place.cameraFees && (
                   <div>
                     <p className="font-cinzel text-white/70 text-sm mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
@@ -431,7 +413,6 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
                   </div>
                 )}
 
-                {/* Pet & Kids Friendly */}
                 <div className="flex gap-4">
                   {place.petsFriendly && (
                     <div>
@@ -457,7 +438,6 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
               </div>
             </div>
 
-            {/* Working Hours */}
             <div className="bg-[#5d4e37] rounded-lg p-6">
               <h3 className="font-cinzel text-xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                 Working Hours
@@ -482,7 +462,6 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
               </div>
             </div>
 
-            {/* Best Time to Visit */}
             <div className="bg-[#5d4e37] rounded-lg p-6">
               <h3 className="font-cinzel text-xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                 Best Time to Visit

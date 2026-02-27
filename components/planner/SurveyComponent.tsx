@@ -137,7 +137,6 @@ export default function SurveyComponent({ onComplete }: SurveyComponentProps) {
   return (
     <div className="min-h-screen bg-[#3a3428] flex items-center justify-center px-4 py-8">
       <div className="max-w-3xl w-full">
-        {/* Progress bar */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-2">
             <span className="font-cinzel text-white/70 text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
@@ -155,13 +154,11 @@ export default function SurveyComponent({ onComplete }: SurveyComponentProps) {
           </div>
         </div>
 
-        {/* Question Card */}
         <div className="bg-[#5d4e37] rounded-lg p-8 shadow-2xl">
           <h2 className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-8" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
             {question.question}
           </h2>
 
-          {/* Single Choice */}
           {question.type === "single_choice" && question.options && (
             <div className="space-y-3">
               {question.options.map((option) => (
@@ -185,7 +182,6 @@ export default function SurveyComponent({ onComplete }: SurveyComponentProps) {
             </div>
           )}
 
-          {/* Multiple Choice */}
           {question.type === "multiple_choice" && question.options && (
             <div className="space-y-3">
               {question.options.map((option) => {
@@ -223,7 +219,6 @@ export default function SurveyComponent({ onComplete }: SurveyComponentProps) {
             </div>
           )}
 
-          {/* Range */}
           {question.type === "range" && (
             <div className="space-y-6">
               <div className="text-center">
@@ -259,7 +254,6 @@ export default function SurveyComponent({ onComplete }: SurveyComponentProps) {
             </div>
           )}
 
-          {/* Navigation Buttons */}
           <div className="flex gap-4 mt-8">
             <button
               onClick={handleBack}

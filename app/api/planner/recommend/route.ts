@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTopRecommendations } from "@/utils/planner/recommendation";
 
-// Mock data for testing when database is not available
+// mock
 const MOCK_PLACES = [
   {
     id: "1",
@@ -161,7 +161,6 @@ export async function POST(request: NextRequest) {
     let places;
     let usingMockData = false;
 
-    // Try to fetch from database first
     try {
       places = await prisma.place.findMany({
         where: {
@@ -182,20 +181,16 @@ export async function POST(request: NextRequest) {
           kidsFriendly: true,
         },
       });
-      
-      // If no places in database, use mock data
+
       if (places.length === 0) {
-        console.log("No places in database, using mock data");
         places = MOCK_PLACES;
         usingMockData = true;
       }
-    } catch (dbError) {
-      console.log("Database error, using mock data:", dbError);
+    } catch {
       places = MOCK_PLACES;
       usingMockData = true;
     }
 
-    // Get recommendations: always at least 24 so selection page can show 6 + Show more (6 at a time)
     const recommendations = getTopRecommendations(places, preferences, 24);
 
     return NextResponse.json({
@@ -203,7 +198,7 @@ export async function POST(request: NextRequest) {
       recommendations,
       totalPlaces: places.length,
       matchedPlaces: recommendations.length,
-      usingMockData, // Let frontend know we're using mock data
+      usingMockData,
     });
   } catch (error) {
     console.error("Error getting recommendations:", error);

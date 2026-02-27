@@ -87,18 +87,55 @@ const SURVEY_QUESTIONS: Question[] = [
       { value: "night", label: "Night (10pm+)" },
     ],
   },
+  {
+    id: "routeStopType",
+    question: "Would you like to stop by one of the following in the route?",
+    type: "single_choice",
+    options: [
+      { value: "coffee_shop", label: "Coffee shop" },
+      { value: "restaurant", label: "Restaurant" },
+      { value: "none", label: "None" },
+    ],
+  },
+  {
+    id: "routeStopWhen",
+    question: "When would you like to stop?",
+    type: "single_choice",
+    options: [
+      { value: "beginning", label: "In the beginning of the route" },
+      { value: "middle", label: "In the middle of the route" },
+      { value: "end", label: "In the end of the route" },
+      { value: "doesnt_matter", label: "Doesn't matter" },
+    ],
+  },
 ];
+
+const showRouteStopWhen = (answers: SurveyAnswers) => {
+  const stopType = answers.routeStopType as string | undefined;
+  return stopType === "coffee_shop" || stopType === "restaurant";
+};
 
 export default function AccordionSurvey({ onComplete, initialAnswers }: AccordionSurveyProps) {
   const [openQuestion, setOpenQuestion] = useState<string | null>(SURVEY_QUESTIONS[0].id);
   const [answers, setAnswers] = useState<SurveyAnswers>(initialAnswers ?? {});
 
+  const visibleQuestions = SURVEY_QUESTIONS.filter(
+    (q) => q.id !== "routeStopWhen" || showRouteStopWhen(answers)
+  );
+
   const handleSingleChoice = (questionId: string, value: string) => {
-    setAnswers({ ...answers, [questionId]: value });
-    const currentIndex = SURVEY_QUESTIONS.findIndex(q => q.id === questionId);
+    let nextAnswers = { ...answers, [questionId]: value };
+    if (questionId === "routeStopType" && value === "none") {
+      delete nextAnswers.routeStopWhen;
+    }
+    setAnswers(nextAnswers);
+    const currentIndex = SURVEY_QUESTIONS.findIndex((q) => q.id === questionId);
     if (currentIndex < SURVEY_QUESTIONS.length - 1) {
       const nextQuestion = SURVEY_QUESTIONS[currentIndex + 1];
-      if (!answers[nextQuestion.id]) {
+      if (nextQuestion.id === "routeStopWhen" && !showRouteStopWhen(nextAnswers)) {
+        const afterNext = SURVEY_QUESTIONS[currentIndex + 2];
+        if (afterNext && !nextAnswers[afterNext.id]) setOpenQuestion(afterNext.id);
+      } else if (!nextAnswers[nextQuestion.id]) {
         setOpenQuestion(nextQuestion.id);
       }
     }
@@ -128,7 +165,7 @@ export default function AccordionSurvey({ onComplete, initialAnswers }: Accordio
     return answer !== undefined && answer !== null;
   };
 
-  const allAnswered = SURVEY_QUESTIONS.every(q => isAnswered(q.id));
+  const allAnswered = visibleQuestions.every((q) => isAnswered(q.id));
 
   const handleSubmit = () => {
     if (allAnswered) {
@@ -166,22 +203,22 @@ export default function AccordionSurvey({ onComplete, initialAnswers }: Accordio
           <div className="mb-8">
             <div className="flex justify-between items-center mb-3">
               <span className="font-cinzel text-white text-base font-bold drop-shadow-md" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                {Object.keys(answers).filter(id => isAnswered(id)).length} of {SURVEY_QUESTIONS.length} answered
+                {visibleQuestions.filter((q) => isAnswered(q.id)).length} of {visibleQuestions.length} answered
               </span>
               <span className="font-cinzel text-white text-base font-bold drop-shadow-md" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                {Math.round((Object.keys(answers).filter(id => isAnswered(id)).length / SURVEY_QUESTIONS.length) * 100)}%
+                {Math.round((visibleQuestions.filter((q) => isAnswered(q.id)).length / visibleQuestions.length) * 100)}%
               </span>
             </div>
             <div className="w-full bg-[#5d4e37]/80 rounded-full h-3 shadow-lg">
               <div
                 className="bg-[#d4af37] h-3 rounded-full transition-all duration-500 shadow-md"
-                style={{ width: `${(Object.keys(answers).filter(id => isAnswered(id)).length / SURVEY_QUESTIONS.length) * 100}%` }}
+                style={{ width: `${(visibleQuestions.filter((q) => isAnswered(q.id)).length / visibleQuestions.length) * 100}%` }}
               />
             </div>
           </div>
 
         <div className="space-y-4 mb-8">
-          {SURVEY_QUESTIONS.map((question, index) => {
+          {visibleQuestions.map((question, index) => {
             const isOpen = openQuestion === question.id;
             const answered = isAnswered(question.id);
             const currentAnswer = answers[question.id];
@@ -326,7 +363,7 @@ export default function AccordionSurvey({ onComplete, initialAnswers }: Accordio
             className="px-12 py-4 bg-[#d4af37] text-[#3a3428] rounded-lg font-cinzel font-bold text-lg hover:bg-[#e5bf47] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
             style={{ fontFamily: 'var(--font-cinzel), serif' }}
           >
-            {allAnswered ? "Get My Recommendations →" : `Answer ${SURVEY_QUESTIONS.length - Object.keys(answers).filter(id => isAnswered(id)).length} More Questions`}
+            {allAnswered ? "Get My Recommendations →" : `Answer ${visibleQuestions.length - visibleQuestions.filter((q) => isAnswered(q.id)).length} More Questions`}
           </button>
         </div>
         </div>

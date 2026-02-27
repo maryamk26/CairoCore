@@ -4,17 +4,25 @@ import { useState } from "react";
 import AccordionSurvey, { SurveyAnswers } from "@/components/planner/AccordionSurvey";
 import PlaceSelection from "@/components/planner/PlaceSelection";
 import RouteBuilder from "@/components/planner/RouteBuilder";
+import StopSelection from "@/components/planner/StopSelection";
 import { PlaceRecommendation } from "@/utils/planner/recommendation";
 
-type Stage = "survey" | "selection" | "route";
+type Stage = "survey" | "selection" | "stop" | "route";
+// flow: survey → selection → [stop] → route
 
 export default function PlannerPage() {
   const [stage, setStage] = useState<Stage>("survey");
   const [preferences, setPreferences] = useState<SurveyAnswers | null>(null);
   const [recommendations, setRecommendations] = useState<PlaceRecommendation[]>([]);
   const [selectedPlaces, setSelectedPlaces] = useState<PlaceRecommendation[]>([]);
+  const [stopRecommendations, setStopRecommendations] = useState<PlaceRecommendation[]>([]);
+  const [selectedStop, setSelectedStop] = useState<PlaceRecommendation | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const routeStopType = preferences?.routeStopType as string | undefined;
+  const needsStopStep = routeStopType === "coffee_shop" || routeStopType === "restaurant";
+  const stopPageTitle = routeStopType === "coffee_shop" ? "Coffee shops" : "Restaurants";
 
   const handleSurveyComplete = async (answers: SurveyAnswers) => {
     setPreferences(answers);
@@ -52,14 +60,40 @@ export default function PlannerPage() {
     }
   };
 
-  const handleContinueToRoute = () => {
-    if (selectedPlaces.length >= 1) {
+  const handleContinueToRoute = async () => {
+    if (selectedPlaces.length < 1) return;
+    if (needsStopStep) {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(
+          `/api/planner/stops?type=${encodeURIComponent(routeStopType)}`
+        );
+        if (!res.ok) throw new Error("Failed to load stops");
+        const data = await res.json();
+        setStopRecommendations(data.recommendations ?? []);
+        setSelectedStop(null);
+        setStage("stop");
+      } catch {
+        setError("Failed to load stop options. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
       setStage("route");
     }
   };
 
-  const handleBackToSelection = () => {
-    setStage("selection");
+  const handleContinueFromStop = () => {
+    if (selectedStop) setStage("route");
+  };
+
+  const handleBackFromRoute = () => {
+    if (needsStopStep && selectedStop) {
+      setStage("stop");
+    } else {
+      setStage("selection");
+    }
   };
 
   const handleStartOver = () => {
@@ -67,6 +101,8 @@ export default function PlannerPage() {
     setPreferences(null);
     setRecommendations([]);
     setSelectedPlaces([]);
+    setStopRecommendations([]);
+    setSelectedStop(null);
     setError(null);
   };
 
@@ -126,16 +162,40 @@ export default function PlannerPage() {
         />
       );
 
-    case "route":
+    case "stop":
+      return (
+        <StopSelection
+          title={stopPageTitle}
+          recommendations={stopRecommendations}
+          selectedStop={selectedStop}
+          onSelectStop={setSelectedStop}
+          onContinue={handleContinueFromStop}
+          onBack={() => setStage("selection")}
+        />
+      );
+
+    case "route": {
+      const routeStopWhen = preferences?.routeStopWhen as "beginning" | "middle" | "end" | "doesnt_matter" | undefined;
+      const treatStopAsPlace = routeStopWhen === "doesnt_matter" && selectedStop;
+      const placesForRoute = treatStopAsPlace
+        ? [...selectedPlaces, selectedStop]
+        : selectedPlaces;
+      const fixedPositionWhen =
+        routeStopWhen === "beginning" || routeStopWhen === "middle" || routeStopWhen === "end"
+          ? routeStopWhen
+          : "middle";
       return (
         <RouteBuilder
-          places={selectedPlaces}
-          onBack={handleBackToSelection}
+          places={placesForRoute}
+          onBack={handleBackFromRoute}
           onSave={handleStartOver}
           minutesPerPlace={preferences?.timePerPlace as number | undefined}
           timeOfDay={preferences?.timeOfDay as string[] | undefined}
+          routeStop={treatStopAsPlace ? null : selectedStop}
+          routeStopWhen={treatStopAsPlace ? undefined : fixedPositionWhen}
         />
       );
+    }
 
     default:
       return null;

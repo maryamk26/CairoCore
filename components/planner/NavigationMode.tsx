@@ -44,20 +44,16 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
   const [isNavigating, setIsNavigating] = useState(false);
   const watchIdRef = useRef<number | null>(null);
 
-  // Fetch route with turn-by-turn directions
   const fetchNavigationRoute = async (mode: TransportMode) => {
     setIsLoadingRoute(true);
     try {
-      // Build all waypoints: start + all places
       const allPoints = [
         startLocation,
         ...places.map(p => ({ lat: p.latitude, lng: p.longitude }))
       ];
 
-      const coordinates = allPoints.map(p => `${p.lng},${p.lat}`).join(';');
-      
-      // Use appropriate OSRM profile based on transport mode
-      const profile = mode === 'driving' ? 'car' : mode === 'cycling' ? 'bike' : 'foot';
+      const coordinates = allPoints.map((p) => `${p.lng},${p.lat}`).join(";"); // OSRM: lng,lat
+      const profile = mode === "driving" ? "car" : mode === "cycling" ? "bike" : "foot";
       const url = `https://router.project-osrm.org/route/v1/${profile}/${coordinates}?` +
         `overview=full&geometries=geojson&steps=true&annotations=true`;
 
@@ -68,8 +64,6 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
         
         if (data.code === "Ok" && data.routes && data.routes.length > 0) {
           const route = data.routes[0];
-          
-          // Extract all steps from all legs
           const allSteps: NavigationStep[] = [];
           route.legs.forEach((leg: any) => {
             leg.steps.forEach((step: any) => {
@@ -98,8 +92,7 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
     }
   };
 
-  // Convert maneuver type to readable instruction
-  const getInstructionFromManeuver = (maneuver: any): string => {
+  const getInstructionFromManeuver = (maneuver: { type: string; modifier?: string } & Record<string, unknown>): string => {
     const type = maneuver.type;
     const modifier = maneuver.modifier;
     
@@ -118,7 +111,6 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
     return instructions[type] || `${type} ${modifier || ''}`.trim();
   };
 
-  // Start tracking user's real-time location
   const startLocationTracking = () => {
     if ('geolocation' in navigator) {
       watchIdRef.current = navigator.geolocation.watchPosition(
@@ -128,8 +120,7 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
             position.coords.longitude
           ];
           setUserLocation(newLocation);
-          
-          // Check if we're close to the next step
+
           if (steps[currentStep]) {
             const [stepLat, stepLng] = steps[currentStep].location;
             const distance = calculateDistance(
@@ -138,8 +129,6 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
               stepLat,
               stepLng
             );
-            
-            // If within 20 meters, move to next step
             if (distance < 0.02) {
               if (currentStep < steps.length - 1) {
                 setCurrentStep(currentStep + 1);
@@ -159,7 +148,6 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
     }
   };
 
-  // Stop location tracking
   useEffect(() => {
     return () => {
       if (watchIdRef.current !== null) {
@@ -168,7 +156,6 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
     };
   }, []);
 
-  // Calculate distance between two points (in km)
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -198,7 +185,6 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
     return `${minutes}m`;
   };
 
-  // Mode selection screen
   if (!transportMode) {
     return (
       <div className="fixed inset-0 bg-[#3a3428] z-50 flex items-center justify-center">
@@ -222,7 +208,6 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
           </p>
 
           <div className="grid grid-cols-2 gap-4">
-            {/* Driving */}
             <button
               onClick={() => {
                 setTransportMode('driving');
@@ -239,7 +224,6 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
               </p>
             </button>
 
-            {/* Walking */}
             <button
               onClick={() => {
                 setTransportMode('walking');
@@ -256,7 +240,6 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
               </p>
             </button>
 
-            {/* Cycling */}
             <button
               onClick={() => {
                 setTransportMode('cycling');
@@ -273,11 +256,10 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
               </p>
             </button>
 
-            {/* Motorcycle */}
             <button
               onClick={() => {
-                setTransportMode('driving'); // Use driving profile for motorcycle
-                fetchNavigationRoute('driving');
+                setTransportMode("driving");
+                fetchNavigationRoute("driving");
               }}
               className="bg-[#5d4e37] hover:bg-[#6d5e47] p-8 rounded-lg transition-colors group"
             >
@@ -295,7 +277,6 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
     );
   }
 
-  // Loading screen
   if (isLoadingRoute) {
     return (
       <div className="fixed inset-0 bg-[#3a3428] z-50 flex items-center justify-center">
@@ -309,7 +290,6 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
     );
   }
 
-  // Navigation screen
   if (isNavigating && steps.length > 0) {
     const currentStepData = steps[currentStep];
     const remainingDistance = steps.slice(currentStep).reduce((sum, step) => sum + step.distance, 0);
@@ -317,15 +297,12 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
 
     return (
       <div className="fixed inset-0 bg-gray-900 z-50">
-        {/* Map */}
         <NavigationMap
           userLocation={userLocation}
           steps={steps}
           currentStep={currentStep}
           places={places}
         />
-
-        {/* Top instruction panel */}
         <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/90 to-transparent p-4 z-10">
           <div className="container mx-auto">
             <div className="flex items-start justify-between mb-4">
@@ -375,8 +352,6 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
             </div>
           </div>
         </div>
-
-        {/* Bottom steps list */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 z-10 max-h-48 overflow-y-auto">
           <div className="container mx-auto space-y-2">
             {steps.slice(currentStep + 1, currentStep + 4).map((step, index) => (

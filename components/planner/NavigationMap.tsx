@@ -6,7 +6,6 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { PlaceRecommendation } from "@/utils/planner/recommendation";
 
-// Custom icon for user's current location
 const userLocationIcon = L.divIcon({
   className: "custom-user-marker",
   html: `<div style="
@@ -21,7 +20,6 @@ const userLocationIcon = L.divIcon({
   iconAnchor: [10, 10],
 });
 
-// Custom icon for destination markers
 const destinationIcon = (color: string = "#ef4444") => L.divIcon({
   className: "custom-destination-marker",
   html: `<div style="
@@ -60,7 +58,6 @@ interface NavigationMapProps {
   places: PlaceRecommendation[];
 }
 
-// Component to update map view to follow user
 function MapFollower({ userLocation }: { userLocation: [number, number] }) {
   const map = useMap();
   
@@ -80,15 +77,11 @@ export default function NavigationMap({ userLocation, steps, currentStep, places
     );
   }
 
-  // Convert steps to route polyline
-  const routeCoordinates: [number, number][] = steps.map(step => 
-    [step.location[1], step.location[0]] // Convert from [lng, lat] to [lat, lng]
-  );
-
-  // Completed route (from start to current position)
+  const routeCoordinates: [number, number][] = steps.map((step) => [
+    step.location[1],
+    step.location[0],
+  ]);
   const completedRoute = routeCoordinates.slice(0, currentStep + 1);
-  
-  // Remaining route (from current position to end)
   const remainingRoute = routeCoordinates.slice(currentStep);
 
   return (
@@ -104,8 +97,6 @@ export default function NavigationMap({ userLocation, steps, currentStep, places
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        
-        {/* Completed route - gray */}
         {completedRoute.length > 1 && (
           <Polyline
             positions={completedRoute}
@@ -114,8 +105,6 @@ export default function NavigationMap({ userLocation, steps, currentStep, places
             opacity={0.6}
           />
         )}
-        
-        {/* Remaining route - blue */}
         {remainingRoute.length > 1 && (
           <Polyline
             positions={remainingRoute}
@@ -124,11 +113,7 @@ export default function NavigationMap({ userLocation, steps, currentStep, places
             opacity={0.9}
           />
         )}
-        
-        {/* User's current location */}
         <Marker position={userLocation} icon={userLocationIcon} />
-        
-        {/* Accuracy circle around user */}
         <Circle
           center={userLocation}
           radius={20}
@@ -139,17 +124,13 @@ export default function NavigationMap({ userLocation, steps, currentStep, places
             weight: 1,
           }}
         />
-        
-        {/* Destination markers */}
-        {places.map((place, index) => (
+        {places.map((place) => (
           <Marker
             key={place.id}
             position={[place.latitude, place.longitude]}
             icon={destinationIcon("#ef4444")}
           />
         ))}
-        
-        {/* Map follower to keep user centered */}
         <MapFollower userLocation={userLocation} />
       </MapContainer>
     </div>

@@ -5,7 +5,6 @@ import Link from "next/link";
 
 type SearchType = "places" | "people";
 
-// Mock data for search suggestions - replace with actual API calls
 const mockPlaces = [
   {
     id: "1",
@@ -80,12 +79,10 @@ export default function SearchPage() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
-  // Get current suggestions based on search type
   const getCurrentSuggestions = () => {
     return searchType === "places" ? mockPlaces : mockPeople;
   };
 
-  // Filter suggestions based on search query and type
   useEffect(() => {
     const currentSuggestions = getCurrentSuggestions();
     if (searchQuery.trim() === "") {
@@ -100,7 +97,6 @@ export default function SearchPage() {
     }
   }, [searchQuery, searchType]);
 
-  // Handle click outside to close suggestions
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -127,7 +123,6 @@ export default function SearchPage() {
   const handleSuggestionClick = (suggestion: typeof mockPlaces[0] | typeof mockPeople[0]) => {
     setSearchQuery(suggestion.title);
     setShowSuggestions(false);
-    // TODO: Navigate to place/user page or perform search
   };
 
   const handleSearchTypeChange = (type: SearchType) => {
@@ -139,37 +134,30 @@ export default function SearchPage() {
 
   return (
     <div className="relative min-h-screen flex flex-col overflow-hidden">
-      {/* Background with Overlay */}
       <div className="absolute inset-0 z-0">
-        {/* Background Image */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: "url('/images/backgrounds/searchbg.jpg')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            backgroundColor: '#5d4e37' // Fallback color
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            backgroundColor: "#5d4e37",
           }}
         />
-        {/* Overlay for readability - lighter overlay to show the image */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#5d4e37]/40 via-[#8b6f47]/30 to-[#5d4e37]/40"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#5d4e37]/40 via-[#8b6f47]/30 to-[#5d4e37]/40" />
       </div>
 
-      {/* Main Content */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pt-24 pb-16 md:pt-32 md:pb-24">
         <div className="w-full max-w-3xl">
-          {/* Inspirational Quote */}
           <div className="text-center mb-8 px-4">
             <p className="font-cinzel text-white text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold leading-relaxed" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
               Find Places & Connect with People
             </p>
           </div>
 
-          {/* Search Type Selector */}
           <div className="flex justify-center mb-6">
             <div className="relative inline-flex bg-white/80 backdrop-blur-sm rounded-full p-1 border border-white/30 shadow-md">
-              {/* Animated Background Slider */}
               <div
                 className="absolute top-1 bottom-1 rounded-full bg-[#5d4e37] transition-transform duration-300 ease-in-out"
                 style={{ 
@@ -203,7 +191,6 @@ export default function SearchPage() {
             </div>
           </div>
 
-          {/* Search Bar */}
           <div className="relative">
             <div className="relative bg-white/95 backdrop-blur-sm rounded-full shadow-xl border border-white/30 overflow-hidden">
               <div className="flex items-center px-6 py-4 md:py-5">
@@ -239,7 +226,6 @@ export default function SearchPage() {
               </div>
             </div>
 
-            {/* Search Suggestions Dropdown */}
             {filteredSuggestions.length > 0 && (
               <div
                 ref={suggestionsRef}
@@ -261,8 +247,7 @@ export default function SearchPage() {
                       onClick={() => handleSuggestionClick(suggestion)}
                       className="w-full flex items-start gap-4 px-6 py-4 hover:bg-[#e8ddd4]/50 transition-colors text-left border-b border-[#d4c4b0]/30 last:border-b-0"
                     >
-                    {/* Icon - Location Pin for Places, User Icon for People */}
-                    <div className="flex-shrink-0 mt-1">
+                      <div className="flex-shrink-0 mt-1">
                       {suggestion.type === "place" ? (
                         <svg
                           className="w-5 h-5 text-[#8b6f47]"
@@ -313,7 +298,6 @@ export default function SearchPage() {
               </div>
             )}
 
-            {/* No Results Message */}
             {searchQuery.trim() !== "" && filteredSuggestions.length === 0 && (
               <div
                 ref={suggestionsRef}
@@ -328,7 +312,6 @@ export default function SearchPage() {
             )}
           </div>
 
-          {/* Popular Searches - Always rendered to maintain consistent layout */}
           <div className={`mt-8 text-center transition-opacity duration-300 ${
             (showSuggestions || searchType === "people") ? 'opacity-0 invisible pointer-events-none' : 'opacity-100 visible pointer-events-auto'
           }`}>

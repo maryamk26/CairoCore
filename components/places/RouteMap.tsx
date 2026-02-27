@@ -5,7 +5,6 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Fix for default marker icons in Next.js
 const iconRetinaUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png";
 const iconUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png";
 const shadowUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png";
@@ -21,7 +20,26 @@ const DefaultIcon = L.icon({
   shadowSize: [41, 41],
 });
 
-// Custom icon creator for numbered markers
+function createLocationDotIcon() {
+  return L.divIcon({
+    className: "custom-location-dot-marker",
+    html: `<div style="
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    ">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="28" height="28" fill="#22c55e" style="display:block;">
+        <path d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/>
+      </svg>
+    </div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 36],
+  });
+}
+
 function createNumberedIcon(number: number, color: string = "#3388ff") {
   return L.divIcon({
     className: "custom-numbered-marker",
@@ -59,13 +77,12 @@ interface RouteMapProps {
   height?: string;
 }
 
-// Component to fit map bounds to show all markers
 function MapBoundsUpdater({ places }: { places: Place[] }) {
   const map = useMap();
   
   useEffect(() => {
     if (places.length > 0) {
-      const bounds = L.latLngBounds(places.map(place => [place.lat, place.lng] as [number, number]));
+      const bounds = L.latLngBounds(places.map((place) => [place.lat, place.lng] as [number, number]));
       map.fitBounds(bounds, { padding: [50, 50] });
     }
   }, [places, map]);
@@ -73,13 +90,11 @@ function MapBoundsUpdater({ places }: { places: Place[] }) {
   return null;
 }
 
-// Fetch route from OSRM API (free Open Source Routing Machine)
 async function fetchRoute(places: Place[]): Promise<L.LatLng[][] | null> {
   if (places.length < 2) return null;
 
   try {
-    // Build coordinates string for OSRM API (longitude,latitude format)
-    const coordinates = places.map(place => `${place.lng},${place.lat}`).join(";");
+    const coordinates = places.map((place) => `${place.lng},${place.lat}`).join(";"); // OSRM: lng,lat
     const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson`;
     
     const response = await fetch(url);
@@ -90,7 +105,6 @@ async function fetchRoute(places: Place[]): Promise<L.LatLng[][] | null> {
     const data = await response.json();
     
     if (data.code === "Ok" && data.routes && data.routes.length > 0) {
-      // Convert GeoJSON coordinates [lng, lat] to Leaflet LatLng format [lat, lng]
       const geometry = data.routes[0].geometry.coordinates;
       const routePoints = geometry.map(([lng, lat]: [number, number]) => 
         [lat, lng] as [number, number]
@@ -99,8 +113,7 @@ async function fetchRoute(places: Place[]): Promise<L.LatLng[][] | null> {
     }
     
     return null;
-  } catch (error) {
-    console.error("Error fetching route:", error);
+  } catch {
     return null;
   }
 }
@@ -143,9 +156,8 @@ export default function RouteMap({ places, height = "500px" }: RouteMapProps) {
     );
   }
 
-  // Calculate center point
-  const centerLat = places.reduce((sum, place) => sum + place.lat, 0) / places.length;
-  const centerLng = places.reduce((sum, place) => sum + place.lng, 0) / places.length;
+  const centerLat = places.reduce((s, p) => s + p.lat, 0) / places.length;
+  const centerLng = places.reduce((s, p) => s + p.lng, 0) / places.length;
 
   return (
     <div className="w-full rounded-lg overflow-hidden relative" style={{ height }}>
@@ -165,8 +177,6 @@ export default function RouteMap({ places, height = "500px" }: RouteMapProps) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        
-        {/* Route polyline */}
         {routeCoordinates && routeCoordinates.map((route, index) => (
           <Polyline
             key={index}
@@ -176,20 +186,24 @@ export default function RouteMap({ places, height = "500px" }: RouteMapProps) {
             opacity={0.7}
           />
         ))}
-        
-        {/* Markers */}
         {places.map((place, index) => {
-          const isFirst = index === 0;
-          const isLast = index === places.length - 1;
-          // Green for start, red for end, blue for intermediate
-          const color = isFirst ? "#22c55e" : isLast ? "#ef4444" : "#3b82f6";
-          const icon = createNumberedIcon(index + 1, color);
-          
+          const isStart = index === 0;
+          const isLastRouteStop = index === places.length - 1;
+          const routeNumber = index;
+          const color = isStart ? "#22c55e" : isLastRouteStop ? "#ef4444" : "#3b82f6";
+          const icon = isStart
+            ? createLocationDotIcon()
+            : createNumberedIcon(routeNumber, color);
+
           return (
             <Marker key={place.id} position={[place.lat, place.lng]} icon={icon}>
               <Popup>
                 <div className="font-semibold text-sm mb-1">
-                  {index + 1}. {place.title}
+                  {isStart ? (
+                    <>Starting point — {place.title}</>
+                  ) : (
+                    <>{routeNumber}. {place.title}</>
+                  )}
                 </div>
                 {place.address && (
                   <div className="text-xs text-gray-600">{place.address}</div>
