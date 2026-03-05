@@ -4,6 +4,7 @@ import { useState, use } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import { getCategoryIcon } from "@/components/icons/categoryIcons";
 
 const PlaceMap = dynamic(() => import("@/components/places/PlaceMap"), {
   ssr: false,
@@ -50,7 +51,8 @@ const getPlaceData = (id: string) => {
         timeOfDay: ["Early Morning", "Sunset"]
       },
       averageRating: 4.8,
-      totalReviews: 1247
+      totalReviews: 1247,
+      category: "pyramids",
     },
     "2": {
       id: "2",
@@ -85,7 +87,8 @@ const getPlaceData = (id: string) => {
         timeOfDay: ["Morning", "Afternoon"]
       },
       averageRating: 4.9,
-      totalReviews: 892
+      totalReviews: 892,
+      category: "museum",
     },
     "3": {
       id: "3",
@@ -120,7 +123,8 @@ const getPlaceData = (id: string) => {
         timeOfDay: ["Evening"]
       },
       averageRating: 4.5,
-      totalReviews: 2156
+      totalReviews: 2156,
+      category: "other",
     },
     "4": {
       id: "4",
@@ -155,8 +159,9 @@ const getPlaceData = (id: string) => {
         timeOfDay: ["Sunset", "Evening", "Night"]
       },
       averageRating: 4.3,
-      totalReviews: 678
-    }
+      totalReviews: 678,
+      category: "other",
+    },
   };
 
   return places[id] || null;
@@ -194,13 +199,12 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
     setCurrentImageIndex((prev) => (prev - 1 + place.images.length) % place.images.length);
   };
 
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }).map((_, i) => (
-      <span key={i} className={i < Math.floor(rating) ? "text-yellow-400" : "text-gray-400"}>
-        ★
-      </span>
+  const renderStars = (rating: number) =>
+    Array.from({ length: 5 }).map((_, i) => (
+      <span key={i} className={i < Math.floor(rating) ? "text-yellow-400" : "text-gray-400"}>★</span>
     ));
-  };
+
+  const PlaceIcon = getCategoryIcon(place.category ?? "other");
 
   return (
     <div className="min-h-screen bg-[#3a3428]">
@@ -253,9 +257,12 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
             )}
 
             <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
-              <h1 className="font-cinzel text-4xl md:text-6xl font-bold text-white mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                {place.title}
-              </h1>
+              <div className="flex items-center gap-3 mb-2">
+                <PlaceIcon size={32} className="text-amber-300 shrink-0" />
+                <h1 className="font-cinzel text-4xl md:text-6xl font-bold text-white" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                  {place.title}
+                </h1>
+              </div>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1">
                   {renderStars(place.averageRating)}

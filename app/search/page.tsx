@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { getCategoryIcon } from "@/components/icons/categoryIcons";
 
 type SearchType = "places" | "people";
 
@@ -11,30 +12,35 @@ const mockPlaces = [
     title: "Pyramids of Giza, Cairo, Egypt",
     subtitle: "One of the Seven Wonders of the Ancient World",
     type: "place",
+    category: "pyramids",
   },
   {
     id: "2",
     title: "Khan el-Khalili, Cairo, Egypt",
     subtitle: "Historic bazaar and souq in the Islamic Cairo district",
     type: "place",
+    category: "other",
   },
   {
     id: "3",
     title: "The Egyptian Museum, Cairo, Egypt",
     subtitle: "Home to the world's largest collection of Pharaonic antiquities",
     type: "place",
+    category: "museum",
   },
   {
     id: "4",
     title: "Al-Azhar Mosque, Cairo, Egypt",
     subtitle: "One of the oldest mosques in Cairo, dating back to 970 AD",
     type: "place",
+    category: "mosque",
   },
   {
     id: "5",
     title: "Cairo Citadel, Cairo, Egypt",
     subtitle: "Medieval Islamic fortification with stunning city views",
     type: "place",
+    category: "other",
   },
 ];
 
@@ -241,59 +247,34 @@ export default function SearchPage() {
                     scrollbarColor: '#8b6f47 #e8ddd4'
                   }}
                 >
-                  {filteredSuggestions.map((suggestion) => (
-                    <button
-                      key={suggestion.id}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      className="w-full flex items-start gap-4 px-6 py-4 hover:bg-[#e8ddd4]/50 transition-colors text-left border-b border-[#d4c4b0]/30 last:border-b-0"
-                    >
-                      <div className="flex-shrink-0 mt-1">
-                      {suggestion.type === "place" ? (
-                        <svg
-                          className="w-5 h-5 text-[#8b6f47]"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                        </svg>
-                      ) : (
-                        <svg
-                          className="w-5 h-5 text-[#8b6f47]"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                          />
-                        </svg>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-cinzel text-[#3a3428] font-medium text-base md:text-lg mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                        {suggestion.title}
-                      </p>
-                      <p className="font-cinzel text-[#8b6f47] text-sm md:text-base font-light" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                        {suggestion.subtitle}
-                      </p>
-                    </div>
-                    </button>
-                  ))}
+                  {filteredSuggestions.map((suggestion) => {
+                    const PlaceIcon = suggestion.type === "place" ? getCategoryIcon((suggestion as { category?: string }).category ?? "other") : null;
+                    return (
+                      <button
+                        key={suggestion.id}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="w-full flex items-start gap-4 px-6 py-4 hover:bg-[#e8ddd4]/50 transition-colors text-left border-b border-[#d4c4b0]/30 last:border-b-0"
+                      >
+                        <div className="flex-shrink-0 mt-1">
+                          {suggestion.type === "place" && PlaceIcon ? (
+                            <PlaceIcon size={20} className="text-[#8b6f47]" />
+                          ) : (
+                            <svg className="w-5 h-5 text-[#8b6f47]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-cinzel text-[#3a3428] font-medium text-base md:text-lg mb-1" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                            {suggestion.title}
+                          </p>
+                          <p className="font-cinzel text-[#8b6f47] text-sm md:text-base font-light" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                            {suggestion.subtitle}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}

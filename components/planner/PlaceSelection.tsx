@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { PlaceRecommendation } from "@/utils/planner/recommendation";
 import Image from "next/image";
+import { getCategoryIcon } from "@/components/icons/categoryIcons";
 
 const INITIAL_VISIBLE = 6;
 const SHOW_MORE_STEP = 6;
@@ -111,6 +112,7 @@ export default function PlaceSelection({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {visible.map((place) => {
             const selected = isSelected(place.id);
+            const PlaceIcon = getCategoryIcon(place.category ?? "other");
             return (
               <div
                 key={place.id}
@@ -120,7 +122,7 @@ export default function PlaceSelection({
                 onClick={() => onTogglePlace(place)}
               >
                 <div className="relative h-48 bg-gray-800">
-                  {place.images && place.images.length > 0 ? (
+                  {place.images?.length ? (
                     <Image
                       src={place.images[0]}
                       alt={place.title}
@@ -134,11 +136,9 @@ export default function PlaceSelection({
                       </svg>
                     </div>
                   )}
-                  
                   <div className="absolute top-3 right-3 bg-[#d4af37] text-[#3a3428] px-3 py-1 rounded-full font-cinzel font-bold text-sm">
                     {Math.round(place.matchScore)}% Match
                   </div>
-
                   {selected && (
                     <div className="absolute top-3 left-3 bg-[#d4af37] text-[#3a3428] w-8 h-8 rounded-full flex items-center justify-center">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,11 +147,13 @@ export default function PlaceSelection({
                     </div>
                   )}
                 </div>
-
                 <div className="p-5">
-                  <h3 className="font-cinzel text-xl font-bold text-white mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                    {place.title}
-                  </h3>
+                  <div className="flex items-center gap-2 mb-2">
+                    <PlaceIcon size={20} className="text-[#d4af37] shrink-0" />
+                    <h3 className="font-cinzel text-xl font-bold text-white" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                      {place.title}
+                    </h3>
+                  </div>
                   
                   <p className="font-cinzel text-white/70 text-sm mb-3 line-clamp-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                     {place.description}

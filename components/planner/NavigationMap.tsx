@@ -56,6 +56,7 @@ interface NavigationMapProps {
   steps: NavigationStep[];
   currentStep: number;
   places: PlaceRecommendation[];
+  routeGeometry?: [number, number][];
 }
 
 function MapFollower({ userLocation }: { userLocation: [number, number] }) {
@@ -68,7 +69,7 @@ function MapFollower({ userLocation }: { userLocation: [number, number] }) {
   return null;
 }
 
-export default function NavigationMap({ userLocation, steps, currentStep, places }: NavigationMapProps) {
+export default function NavigationMap({ userLocation, steps, currentStep, places, routeGeometry = [] }: NavigationMapProps) {
   if (typeof window === "undefined") {
     return (
       <div className="w-full h-full bg-gray-900 flex items-center justify-center">
@@ -77,15 +78,14 @@ export default function NavigationMap({ userLocation, steps, currentStep, places
     );
   }
 
-  const routeCoordinates: [number, number][] = steps.map((step) => [
-    step.location[1],
-    step.location[0],
-  ]);
-  const completedRoute = routeCoordinates.slice(0, currentStep + 1);
-  const remainingRoute = routeCoordinates.slice(currentStep);
+  const hasRoadGeometry = routeGeometry.length > 1;
+  const stepCount = Math.max(steps.length, 1);
+  const splitIdx = hasRoadGeometry ? Math.min(Math.floor((currentStep / stepCount) * routeGeometry.length), routeGeometry.length - 1) : 0;
+  const completedRoute = hasRoadGeometry ? routeGeometry.slice(0, splitIdx + 1) : steps.map((s) => [s.location[0], s.location[1]] as [number, number]).slice(0, currentStep + 1);
+  const remainingRoute = hasRoadGeometry ? routeGeometry.slice(splitIdx) : steps.map((s) => [s.location[0], s.location[1]] as [number, number]).slice(currentStep);
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full min-h-screen" style={{ height: "100vh" }}>
       <MapContainer
         center={userLocation}
         zoom={17}

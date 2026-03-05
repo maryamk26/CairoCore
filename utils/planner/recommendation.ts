@@ -15,6 +15,7 @@ export interface PlaceRecommendation {
   kidsFriendly: boolean;
   matchScore: number;
   matchReasons: string[];
+  category?: string;
 }
 
 export function calculatePlaceMatch(
@@ -147,5 +148,6 @@ export function getTopRecommendations(
       kidsFriendly: place.kidsFriendly,
       matchScore: place.matchScore,
       matchReasons: place.matchReasons,
+      ...("category" in place && typeof place.category === "string" && { category: place.category }),
     }));
 }

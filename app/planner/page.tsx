@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AccordionSurvey, { SurveyAnswers } from "@/components/planner/AccordionSurvey";
 import PlaceSelection from "@/components/planner/PlaceSelection";
 import RouteBuilder from "@/components/planner/RouteBuilder";
@@ -8,7 +8,40 @@ import StopSelection from "@/components/planner/StopSelection";
 import { PlaceRecommendation } from "@/utils/planner/recommendation";
 
 type Stage = "survey" | "selection" | "stop" | "route";
-// flow: survey → selection → [stop] → route
+
+const STORAGE_KEY = "planner-state";
+
+function loadState(): Partial<{
+  stage: Stage;
+  preferences: SurveyAnswers | null;
+  recommendations: PlaceRecommendation[];
+  selectedPlaces: PlaceRecommendation[];
+  stopRecommendations: PlaceRecommendation[];
+  selectedStop: PlaceRecommendation | null;
+}> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw) as ReturnType<typeof loadState>;
+  } catch {
+    return {};
+  }
+}
+
+function saveState(state: {
+  stage: Stage;
+  preferences: SurveyAnswers | null;
+  recommendations: PlaceRecommendation[];
+  selectedPlaces: PlaceRecommendation[];
+  stopRecommendations: PlaceRecommendation[];
+  selectedStop: PlaceRecommendation | null;
+}) {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {}
+}
 
 export default function PlannerPage() {
   const [stage, setStage] = useState<Stage>("survey");
@@ -19,6 +52,32 @@ export default function PlannerPage() {
   const [selectedStop, setSelectedStop] = useState<PlaceRecommendation | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasRestored, setHasRestored] = useState(false);
+
+  useEffect(() => {
+    const saved = loadState();
+    if (saved.stage && saved.stage !== "survey") {
+      setStage(saved.stage);
+      if (saved.preferences != null) setPreferences(saved.preferences);
+      if (Array.isArray(saved.recommendations)) setRecommendations(saved.recommendations);
+      if (Array.isArray(saved.selectedPlaces)) setSelectedPlaces(saved.selectedPlaces);
+      if (Array.isArray(saved.stopRecommendations)) setStopRecommendations(saved.stopRecommendations);
+      if (saved.selectedStop != null) setSelectedStop(saved.selectedStop);
+    }
+    setHasRestored(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hasRestored) return;
+    saveState({
+      stage,
+      preferences,
+      recommendations,
+      selectedPlaces,
+      stopRecommendations,
+      selectedStop,
+    });
+  }, [hasRestored, stage, preferences, recommendations, selectedPlaces, stopRecommendations, selectedStop]);
 
   const routeStopType = preferences?.routeStopType as string | undefined;
   const needsStopStep = routeStopType === "coffee_shop" || routeStopType === "restaurant";
@@ -104,6 +163,7 @@ export default function PlannerPage() {
     setStopRecommendations([]);
     setSelectedStop(null);
     setError(null);
+    if (typeof window !== "undefined") sessionStorage.removeItem(STORAGE_KEY);
   };
 
   if (isLoading) {

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { getCategoryIcon } from "@/components/icons/categoryIcons";
 
 const iconRetinaUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png";
 const iconUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png";
@@ -70,6 +71,7 @@ interface Place {
   lat: number;
   lng: number;
   address?: string;
+  category?: string;
 }
 
 interface RouteMapProps {
@@ -195,10 +197,12 @@ export default function RouteMap({ places, height = "500px" }: RouteMapProps) {
             ? createLocationDotIcon()
             : createNumberedIcon(routeNumber, color);
 
+          const CategoryIcon = getCategoryIcon(place.category ?? "other");
           return (
             <Marker key={place.id} position={[place.lat, place.lng]} icon={icon}>
               <Popup>
-                <div className="font-semibold text-sm mb-1">
+                <div className="flex items-center gap-2 font-semibold text-sm mb-1">
+                  <CategoryIcon size={18} className="text-[#8b6f47] shrink-0" />
                   {isStart ? (
                     <>Starting point — {place.title}</>
                   ) : (
@@ -212,7 +216,6 @@ export default function RouteMap({ places, height = "500px" }: RouteMapProps) {
             </Marker>
           );
         })}
-        
         <MapBoundsUpdater places={places} />
       </MapContainer>
     </div>

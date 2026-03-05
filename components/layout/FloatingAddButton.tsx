@@ -12,7 +12,7 @@ export default function FloatingAddButton() {
     return null;
   }
 
-  if (pathname?.startsWith("/sign-in") || pathname?.startsWith("/sign-up") || pathname?.startsWith("/auth") || pathname === "/about" || pathname === "/search") {
+  if (pathname?.startsWith("/sign-in") || pathname?.startsWith("/sign-up") || pathname?.startsWith("/auth") || pathname === "/about" || pathname === "/search" || pathname === "/planner") {
     return null;
   }
 

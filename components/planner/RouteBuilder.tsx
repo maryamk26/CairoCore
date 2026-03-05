@@ -6,6 +6,7 @@ import { PlaceRecommendation } from "@/utils/planner/recommendation";
 import { calculateDistance } from "@/utils/algorithms/distance";
 import { optimizeRouteFromLocation } from "@/utils/algorithms/routeOptimization";
 import LocationSelector from "./LocationSelector";
+import { getCategoryIcon } from "@/components/icons/categoryIcons";
 
 const RouteMap = dynamic(() => import("@/components/places/RouteMap"), {
   ssr: false,
@@ -62,7 +63,7 @@ async function fetchOsrmRoute(
 ): Promise<{ distanceKm: number; durationMinutes: number; profileUsed: string } | null> {
   if (places.length === 0) return null;
   const waypoints = [start, ...places.map((p) => ({ lat: p.latitude, lng: p.longitude }))];
-  const coordinates = waypoints.map((p) => `${p.lng},${p.lat}`).join(";"); // OSRM: lng,lat
+  const coordinates = waypoints.map((p) => `${p.lng},${p.lat}`).join(";");
 
   const profileForRequest = transportMode === "walk" ? "foot" : "car";
   const url = `https://router.project-osrm.org/route/v1/${profileForRequest}/${coordinates}?overview=simplified`;
@@ -146,19 +147,17 @@ export default function RouteBuilder({
   const [orderedPlaces, setOrderedPlaces] = useState(places);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [transportMode, setTransportMode] = useState<string>("");
-  const minutesPerPlace = (() => {
-    const n = Number(minutesPerPlaceProp);
-    return Number.isFinite(n) && n >= 15 && n <= 480 ? n : 90;
-  })();
+  const mins = Number(minutesPerPlaceProp);
+  const minutesPerPlace = Number.isFinite(mins) && mins >= 15 && mins <= 480 ? mins : 90;
   const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
-  const [isNavigationMode, setIsNavigationMode] = useState(false);
   const [liveRoute, setLiveRoute] = useState<{
     distanceKm: number;
     durationMinutes: number;
     forMode: string;
   } | null>(null);
   const [loadingRoute, setLoadingRoute] = useState(false);
+  const [isNavigationMode, setIsNavigationMode] = useState(false);
   const lastStartRef = useRef<{ lat: number; lng: number } | null>(null);
 
   const placesWithStop = useMemo(() => {
@@ -333,36 +332,21 @@ export default function RouteBuilder({
   };
 
   const handleSave = () => {
-    if (onSave) {
-      onSave();
-    }
-    alert("Route saved! (This would save to database in production)");
+    onSave?.();
+    alert("Route saved.");
   };
 
+  const toMapPlace = (place: PlaceRecommendation) => ({
+    id: place.id,
+    title: place.title,
+    lat: place.latitude,
+    lng: place.longitude,
+    address: place.address,
+    category: place.category,
+  });
   const mapPlaces = userLocation
-    ? [
-        {
-          id: 'user-location',
-          title: userLocation.title || 'Your Location',
-          lat: userLocation.lat,
-          lng: userLocation.lng,
-          address: 'Starting Point',
-        },
-        ...placesWithStop.map((place) => ({
-          id: place.id,
-          title: place.title,
-          lat: place.latitude,
-          lng: place.longitude,
-          address: place.address,
-        })),
-      ]
-    : placesWithStop.map((place) => ({
-        id: place.id,
-        title: place.title,
-        lat: place.latitude,
-        lng: place.longitude,
-        address: place.address,
-      }));
+    ? [{ id: "user-location", title: userLocation.title ?? "Your Location", lat: userLocation.lat, lng: userLocation.lng, address: "Starting Point" }, ...placesWithStop.map(toMapPlace)]
+    : placesWithStop.map(toMapPlace);
 
   const requestLocation = () => {
     if ('geolocation' in navigator) {
@@ -387,7 +371,7 @@ export default function RouteBuilder({
 
   const handleYallaClick = () => {
     if (!userLocation) {
-      alert('Please set your starting location first!');
+      alert("Please set your starting location first!");
       return;
     }
     setIsNavigationMode(true);
@@ -640,25 +624,28 @@ export default function RouteBuilder({
               <div className="space-y-2 max-h-[400px] overflow-y-auto">
                 {placesWithStop.map((place, index) => {
                   const isStop = !!routeStop && place.id === routeStop.id;
+                  const RouteIcon = getCategoryIcon(place.category ?? "other");
                   return (
-                  <div
-                    key={place.id}
-                    className={`rounded-lg p-4 ${isStop ? "bg-[#8b6f47] ring-2 ring-[#d4af37]" : "bg-[#8b6f47]"}`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#d4af37] flex items-center justify-center text-[#3a3428] font-bold">
-                        {index + 1}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        {isStop && (
-                          <span className="font-cinzel text-[#d4af37] text-xs font-semibold block mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                            Stop — {routeStopWhen === "beginning" ? "Start" : routeStopWhen === "middle" ? "Mid-route" : "End"}
-                          </span>
-                        )}
-                        <h4 className="font-cinzel text-white font-semibold text-sm mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                          {place.title}
-                        </h4>
+                    <div
+                      key={place.id}
+                      className={`rounded-lg p-4 ${isStop ? "bg-[#8b6f47] ring-2 ring-[#d4af37]" : "bg-[#8b6f47]"}`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#d4af37] flex items-center justify-center text-[#3a3428] font-bold">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          {isStop && (
+                            <span className="font-cinzel text-[#d4af37] text-xs font-semibold block mb-1" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                              Stop — {routeStopWhen === "beginning" ? "Start" : routeStopWhen === "middle" ? "Mid-route" : "End"}
+                            </span>
+                          )}
+                          <div className="flex items-center gap-2 mb-1">
+                            <RouteIcon size={18} className="text-[#d4af37] shrink-0" />
+                            <h4 className="font-cinzel text-white font-semibold text-sm" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                              {place.title}
+                            </h4>
+                          </div>
                         <p className="font-cinzel text-white/60 text-xs mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
                           {place.address}
                         </p>
@@ -675,43 +662,43 @@ export default function RouteBuilder({
                           {place.kidsFriendly && <span title="Kid-friendly">👶</span>}
                           {place.petsFriendly && <span title="Pet-friendly">🐕</span>}
                         </div>
-                      </div>
+                        </div>
 
-                      {!isStop && (
-                      <div className="flex flex-col gap-1">
-                        <button
-                          onClick={() => movePlace(index, "up")}
-                          disabled={index === 0}
-                          className="p-1 text-white/70 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
-                          aria-label="Move up"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => movePlace(index, "down")}
-                          disabled={index === placesWithStop.length - 1}
-                          className="p-1 text-white/70 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
-                          aria-label="Move down"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => removePlace(index)}
-                          className="p-1 text-red-400 hover:text-red-300"
-                          aria-label="Remove"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
+                        {!isStop && (
+                            <div className="flex flex-col gap-1">
+                              <button
+                                onClick={() => movePlace(index, "up")}
+                                disabled={index === 0}
+                                className="p-1 text-white/70 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                                aria-label="Move up"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => movePlace(index, "down")}
+                                disabled={index === placesWithStop.length - 1}
+                                className="p-1 text-white/70 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                                aria-label="Move down"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => removePlace(index)}
+                                className="p-1 text-red-400 hover:text-red-300"
+                                aria-label="Remove"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                          )}
                       </div>
-                      )}
                     </div>
-                  </div>
                   );
                 })}
               </div>
@@ -720,11 +707,12 @@ export default function RouteBuilder({
             <div className="space-y-3">
               {userLocation && placesWithStop.length >= 1 && (
                 <button
+                  type="button"
                   onClick={handleYallaClick}
                   className="w-full px-6 py-4 bg-gradient-to-r from-[#d4af37] to-[#e5bf47] text-[#3a3428] rounded-lg font-cinzel font-bold hover:from-[#e5bf47] hover:to-[#f5cf57] transition-all transform hover:scale-105 shadow-lg text-lg"
                   style={{ fontFamily: 'var(--font-cinzel), serif' }}
                 >
-                  🚀 Yalla! Let's Go
+                  Yalla! Let's Go
                 </button>
               )}
               
