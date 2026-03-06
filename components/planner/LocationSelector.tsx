@@ -13,7 +13,7 @@ interface SavedLocation {
 interface SearchResult {
   id: string;
   place_name: string;
-  center: [number, number]; // lng, lat
+  center: [number, number];
   text: string;
 }
 

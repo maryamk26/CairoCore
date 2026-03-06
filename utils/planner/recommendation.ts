@@ -18,108 +18,98 @@ export interface PlaceRecommendation {
   category?: string;
 }
 
+function normalizeVibe(place: { vibe?: string | string[] | null }): string[] {
+  const v = place.vibe;
+  if (Array.isArray(v)) return v;
+  if (typeof v === "string" && v.trim()) return v.split(",").map((s) => s.trim());
+  return [];
+}
+
+const WEIGHTS = {
+  vibe: 50,
+  budget: 30,
+  companions: 15,
+  timeOfDay: 5,
+};
+
 export function calculatePlaceMatch(
   place: any,
   preferences: SurveyAnswers
 ): { score: number; reasons: string[] } {
   let score = 0;
   const reasons: string[] = [];
-  const maxScore = 100;
+  const placeVibe = normalizeVibe(place);
+  const preferredVibes = (preferences.vibe as string[]) || [];
 
-  const preferredVibes = preferences.vibe as string[];
-  if (preferredVibes && preferredVibes.length > 0) {
-    const matchingVibes = place.vibe.filter((v: string) =>
-      preferredVibes.includes(v)
-    );
-    const vibeScore = (matchingVibes.length / preferredVibes.length) * 40;
+  if (preferredVibes.length > 0) {
+    const matchingVibes = placeVibe.filter((v) => preferredVibes.includes(v));
+    const vibeScore = (matchingVibes.length / preferredVibes.length) * WEIGHTS.vibe;
     score += vibeScore;
-    
     if (matchingVibes.length > 0) {
       reasons.push(`Matches your ${matchingVibes.join(", ")} vibe`);
+    }
+    if (preferredVibes.includes("photography") && placeVibe.includes("photography")) {
+      reasons.push("Great for photography!");
     }
   }
 
   const budget = preferences.budget as string;
-  const entryFee = place.entryFees || 0;
-
+  const entryFee = place.entryFees ?? place.entranceFee ?? 0;
+  let budgetScore = 0;
   if (budget === "low" && entryFee <= 50) {
-    score += 20;
-    if (entryFee === 0) {
-      reasons.push("Free entry - fits your per-place budget");
-    } else {
-      reasons.push("Within your per-place budget");
-    }
+    budgetScore = WEIGHTS.budget;
+    reasons.push(entryFee === 0 ? "Free entry" : "Within your per-place budget");
   } else if (budget === "medium" && entryFee > 50 && entryFee <= 200) {
-    score += 20;
+    budgetScore = WEIGHTS.budget;
     reasons.push("Within your per-place budget");
   } else if (budget === "high" && entryFee > 200) {
-    score += 20;
-    reasons.push("Premium per-place range");
+    budgetScore = WEIGHTS.budget;
+    reasons.push("Premium range");
   } else if (budget === "high" && entryFee <= 200) {
-    score += 15;
+    budgetScore = WEIGHTS.budget * 0.5;
   } else if (budget === "low" && entryFee > 50) {
-    score += 5;
+    budgetScore = WEIGHTS.budget * 0.25;
   } else if (budget === "medium" && (entryFee <= 50 || entryFee > 200)) {
-    score += 5;
+    budgetScore = WEIGHTS.budget * 0.25;
   }
+  score += budgetScore;
 
   const companions = (preferences.companions as string[]) || [];
   let companionScore = 0;
-  
-  if (companions.includes("kids")) {
-    if (place.kidsFriendly) {
-      companionScore += 10;
-      reasons.push("Kid-friendly");
-    } else {
-      companionScore -= 10;
-    }
-  }
-  
-  if (companions.includes("pets")) {
-    if (place.petsFriendly) {
-      companionScore += 10;
-      reasons.push("Pet-friendly");
-    } else {
-      companionScore -= 10;
-    }
-  }
-
-  if (companions.includes("elderly")) {
+  if (companions.includes("kids") && place.kidsFriendly !== false) {
     companionScore += 5;
+    reasons.push("Kid-friendly");
+  } else if (companions.includes("kids") && place.kidsFriendly === false) {
+    companionScore -= 5;
   }
-
-  if (companions.includes("romantic") || companions.includes("partner")) {
-    if (place.vibe.includes("romantic")) {
-      companionScore += 10;
-      reasons.push("Perfect for couples");
-    }
+  if (companions.includes("pets") && place.petsFriendly === true) {
+    companionScore += 5;
+    reasons.push("Pet-friendly");
+  } else if (companions.includes("pets") && place.petsFriendly !== true) {
+    companionScore -= 5;
   }
-
-  score += Math.max(0, Math.min(20, companionScore));
+  if (companions.includes("elderly")) companionScore += 3;
+  if ((companions.includes("romantic") || companions.includes("partner")) && placeVibe.includes("romantic")) {
+    companionScore += 5;
+    reasons.push("Perfect for couples");
+  }
+  score += Math.max(0, Math.min(WEIGHTS.companions, companionScore));
 
   const timeOfDay = (preferences.timeOfDay as string[]) || [];
-  if (timeOfDay.length > 0) {
-    score += 5;
-  }
+  if (timeOfDay.length > 0) score += WEIGHTS.timeOfDay;
 
-  if (preferredVibes?.includes("photography") && place.vibe.includes("photography")) {
-    score += 10;
-    reasons.push("Great for photography!");
-  }
-
-  score = Math.min(maxScore, Math.max(0, score));
-
+  score = Math.max(0, Math.min(100, score));
   return { score, reasons };
 }
 
-const MIN_RECOMMENDATIONS_TO_SHOW = 24;
+const TOP_PLACES_LIMIT = 24;
 
 export function getTopRecommendations(
   places: any[],
   preferences: SurveyAnswers,
   limit?: number
 ): PlaceRecommendation[] {
-  const returnCount = limit ?? MIN_RECOMMENDATIONS_TO_SHOW;
+  const returnCount = limit ?? TOP_PLACES_LIMIT;
 
   const scoredPlaces = places.map((place) => {
     const { score, reasons } = calculatePlaceMatch(place, preferences);
@@ -135,19 +125,19 @@ export function getTopRecommendations(
     .slice(0, returnCount)
     .map((place) => ({
       id: place.id,
-      title: place.title,
-      description: place.description,
-      images: place.images,
+      title: place.title ?? place.name,
+      description: place.description ?? "",
+      images: place.images ?? [],
       latitude: place.latitude,
       longitude: place.longitude,
-      address: place.address,
-      vibe: place.vibe,
-      entryFees: place.entryFees,
-      cameraFees: place.cameraFees,
-      petsFriendly: place.petsFriendly,
-      kidsFriendly: place.kidsFriendly,
+      address: place.address ?? "",
+      vibe: normalizeVibe(place),
+      entryFees: place.entryFees ?? place.entranceFee ?? null,
+      cameraFees: place.cameraFees ?? place.cameraFee ?? null,
+      petsFriendly: place.petsFriendly === true,
+      kidsFriendly: place.kidsFriendly !== false,
       matchScore: place.matchScore,
       matchReasons: place.matchReasons,
-      ...("category" in place && typeof place.category === "string" && { category: place.category }),
+      ...(place.category && { category: place.category }),
     }));
 }

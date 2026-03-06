@@ -96,7 +96,7 @@ async function fetchRoute(places: Place[]): Promise<L.LatLng[][] | null> {
   if (places.length < 2) return null;
 
   try {
-    const coordinates = places.map((place) => `${place.lng},${place.lat}`).join(";"); // OSRM: lng,lat
+    const coordinates = places.map((place) => `${place.lng},${place.lat}`).join(";");
     const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson`;
     
     const response = await fetch(url);

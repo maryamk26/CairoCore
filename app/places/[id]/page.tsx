@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import dynamic from "next/dynamic";
 import { getCategoryIcon } from "@/components/icons/categoryIcons";
 
@@ -15,174 +14,79 @@ const PlaceMap = dynamic(() => import("@/components/places/PlaceMap"), {
   ),
 });
 
-// mock data until API
-const getPlaceData = (id: string) => {
-  const places: Record<string, any> = {
-    "1": {
-      id: "1",
-      title: "Pyramids and Sphinx",
-      description: "The Great Pyramid of Giza and the Great Sphinx are among the most famous monuments in the world. These ancient wonders have stood for over 4,500 years, representing the pinnacle of ancient Egyptian engineering and architecture. The Pyramids of Giza are the only remaining wonder of the Seven Wonders of the Ancient World.",
-      images: [
-        "/images/places/pyramids.jpeg",
-        "/images/places/pyramids.jpeg",
-        "/images/places/pyramids.jpeg"
-      ],
-      location: {
-        address: "Al Haram, Giza Governorate, Egypt",
-        lat: 29.9792,
-        lng: 31.1342
-      },
-      workingHours: {
-        monday: { open: "08:00", close: "17:00" },
-        tuesday: { open: "08:00", close: "17:00" },
-        wednesday: { open: "08:00", close: "17:00" },
-        thursday: { open: "08:00", close: "17:00" },
-        friday: { open: "08:00", close: "17:00" },
-        saturday: { open: "08:00", close: "17:00" },
-        sunday: { open: "08:00", close: "17:00" }
-      },
-      entryFees: 200,
-      cameraFees: 50,
-      vibe: ["historical", "photography", "iconic", "ancient"],
-      petsFriendly: false,
-      kidsFriendly: true,
-      bestTimeToVisit: {
-        season: ["Winter", "Spring"],
-        timeOfDay: ["Early Morning", "Sunset"]
-      },
-      averageRating: 4.8,
-      totalReviews: 1247,
-      category: "pyramids",
-    },
-    "2": {
-      id: "2",
-      title: "Grand Museum",
-      description: "The Grand Egyptian Museum, also known as the Giza Museum, is a world-class institution that houses the largest collection of ancient Egyptian artifacts. This state-of-the-art museum showcases over 100,000 artifacts, including the complete collection of Tutankhamun's treasures.",
-      images: [
-        "/images/places/grandm.jpeg",
-        "/images/places/grandm.jpeg",
-        "/images/places/grandm.jpeg"
-      ],
-      location: {
-        address: "Cairo-Alexandria Desert Rd, Kafr Nassar, Al Giza Desert, Giza Governorate, Egypt",
-        lat: 30.0081,
-        lng: 31.1322
-      },
-      workingHours: {
-        monday: { open: "09:00", close: "18:00" },
-        tuesday: { open: "09:00", close: "18:00" },
-        wednesday: { open: "09:00", close: "18:00" },
-        thursday: { open: "09:00", close: "18:00" },
-        friday: { open: "09:00", close: "18:00" },
-        saturday: { open: "09:00", close: "18:00" },
-        sunday: { open: "09:00", close: "18:00" }
-      },
-      entryFees: 400,
-      cameraFees: 50,
-      vibe: ["museum", "educational", "historical", "family-friendly"],
-      petsFriendly: false,
-      kidsFriendly: true,
-      bestTimeToVisit: {
-        season: ["All Year"],
-        timeOfDay: ["Morning", "Afternoon"]
-      },
-      averageRating: 4.9,
-      totalReviews: 892,
-      category: "museum",
-    },
-    "3": {
-      id: "3",
-      title: "Khan el-Khalili",
-      description: "Khan el-Khalili is a major souk in the historic center of Islamic Cairo. The bazaar district is one of Cairo's main attractions for tourists and Egyptians alike. Established in the 14th century, it's a vibrant marketplace where you can find everything from spices and perfumes to jewelry and traditional crafts.",
-      images: [
-        "/images/places/khan.jpeg",
-        "/images/places/khan.jpeg",
-        "/images/places/khan.jpeg"
-      ],
-      location: {
-        address: "El-Gamaleya, El Gamaliya, Cairo Governorate, Egypt",
-        lat: 30.0479,
-        lng: 31.2626
-      },
-      workingHours: {
-        monday: { open: "09:00", close: "21:00" },
-        tuesday: { open: "09:00", close: "21:00" },
-        wednesday: { open: "09:00", close: "21:00" },
-        thursday: { open: "09:00", close: "21:00" },
-        friday: { open: "09:00", close: "21:00" },
-        saturday: { open: "09:00", close: "21:00" },
-        sunday: { open: "09:00", close: "21:00" }
-      },
-      entryFees: null,
-      cameraFees: null,
-      vibe: ["shopping", "cultural", "historic", "authentic"],
-      petsFriendly: true,
-      kidsFriendly: true,
-      bestTimeToVisit: {
-        season: ["All Year"],
-        timeOfDay: ["Evening"]
-      },
-      averageRating: 4.5,
-      totalReviews: 2156,
-      category: "other",
-    },
-    "4": {
-      id: "4",
-      title: "Cairo Tower",
-      description: "The Cairo Tower is a free-standing concrete tower in Cairo, Egypt. At 187 meters, it was the tallest structure in Egypt and North Africa for 50 years until 1998. The tower offers panoramic views of Cairo and the Nile River, making it one of the city's most iconic landmarks.",
-      images: [
-        "/images/places/cairotower.jpeg",
-        "/images/places/cairotower.jpeg",
-        "/images/places/cairotower.jpeg"
-      ],
-      location: {
-        address: "Zamalek, Cairo Governorate, Egypt",
-        lat: 30.0456,
-        lng: 31.2242
-      },
-      workingHours: {
-        monday: { open: "09:00", close: "00:00" },
-        tuesday: { open: "09:00", close: "00:00" },
-        wednesday: { open: "09:00", close: "00:00" },
-        thursday: { open: "09:00", close: "00:00" },
-        friday: { open: "09:00", close: "00:00" },
-        saturday: { open: "09:00", close: "00:00" },
-        sunday: { open: "09:00", close: "00:00" }
-      },
-      entryFees: 200,
-      cameraFees: null,
-      vibe: ["views", "romantic", "iconic", "modern"],
-      petsFriendly: false,
-      kidsFriendly: true,
-      bestTimeToVisit: {
-        season: ["All Year"],
-        timeOfDay: ["Sunset", "Evening", "Night"]
-      },
-      averageRating: 4.3,
-      totalReviews: 678,
-      category: "other",
-    },
-  };
-
-  return places[id] || null;
+type PlaceData = {
+  id: string;
+  title: string;
+  description: string;
+  images: string[];
+  location: { address: string; lat: number; lng: number };
+  workingHours: string | Record<string, { open: string; close: string }> | null;
+  entryFees: number | null;
+  cameraFees: number | null;
+  vibe: string[];
+  petsFriendly: boolean;
+  kidsFriendly: boolean;
+  bestTimeToVisit: { season?: string[]; timeOfDay?: string[] } | null;
+  category: string;
 };
 
-export default function PlaceProfilePage({ params }: { params: Promise<{ id: string }> }) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+export default function PlaceProfilePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = use(params);
-  const place = getPlaceData(id);
+  const [place, setPlace] = useState<PlaceData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetch(`/api/places/${id}`)
+      .then((res) => {
+        if (!res.ok) return null;
+        return res.json();
+      })
+      .then((data) => {
+        if (!cancelled && data) setPlace(data);
+        else if (!cancelled) setPlace(null);
+      })
+      .catch(() => {
+        if (!cancelled) setPlace(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#3a3428]">
+        <p className="font-cinzel text-white" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+          Loading...
+        </p>
+      </div>
+    );
+  }
 
   if (!place) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#3a3428]">
         <div className="text-center">
-          <h1 className="font-cinzel text-4xl text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+          <h1
+            className="font-cinzel text-4xl text-white mb-4"
+            style={{ fontFamily: "var(--font-cinzel), serif" }}
+          >
             Place Not Found
           </h1>
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="font-cinzel text-white/80 hover:text-white transition-colors"
-            style={{ fontFamily: 'var(--font-cinzel), serif' }}
+            style={{ fontFamily: "var(--font-cinzel), serif" }}
           >
             Return to Home
           </Link>
@@ -192,32 +96,39 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
   }
 
   const nextImage = () => {
+    if (place.images.length === 0) return;
     setCurrentImageIndex((prev) => (prev + 1) % place.images.length);
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + place.images.length) % place.images.length);
+    if (place.images.length === 0) return;
+    setCurrentImageIndex(
+      (prev) => (prev - 1 + place.images.length) % place.images.length
+    );
   };
 
-  const renderStars = (rating: number) =>
-    Array.from({ length: 5 }).map((_, i) => (
-      <span key={i} className={i < Math.floor(rating) ? "text-yellow-400" : "text-gray-400"}>★</span>
-    ));
+  const workingHoursStr =
+    typeof place.workingHours === "string"
+      ? place.workingHours
+      : null;
+  const workingHoursObj =
+    place.workingHours && typeof place.workingHours === "object"
+      ? place.workingHours
+      : null;
 
   const PlaceIcon = getCategoryIcon(place.category ?? "other");
 
   return (
     <div className="min-h-screen bg-[#3a3428]">
       <section className="relative h-[60vh] md:h-[70vh] overflow-hidden">
-        {place.images.length > 0 && (
+        {place.images.length > 0 ? (
           <>
             <img
               src={place.images[currentImageIndex]}
               alt={place.title}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/60"></div>
-
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/60" />
             {place.images.length > 1 && (
               <>
                 <button
@@ -240,39 +151,30 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
                 </button>
               </>
             )}
-
-            {place.images.length > 1 && (
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                {place.images.map((_: string, index: number) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentImageIndex(index)}
-                    className={`h-2 rounded-full transition-all ${
-                      index === currentImageIndex ? "w-8 bg-white" : "w-2 bg-white/50"
-                    }`}
-                    aria-label={`Go to image ${index + 1}`}
-                  />
-                ))}
-              </div>
-            )}
-
             <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
               <div className="flex items-center gap-3 mb-2">
                 <PlaceIcon size={32} className="text-amber-300 shrink-0" />
-                <h1 className="font-cinzel text-4xl md:text-6xl font-bold text-white" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                <h1
+                  className="font-cinzel text-4xl md:text-6xl font-bold text-white"
+                  style={{ fontFamily: "var(--font-cinzel), serif" }}
+                >
                   {place.title}
                 </h1>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1">
-                  {renderStars(place.averageRating)}
-                </div>
-                <span className="text-white/80 font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                  {place.averageRating} ({place.totalReviews} reviews)
-                </span>
-              </div>
             </div>
           </>
+        ) : (
+          <div className="w-full h-full bg-[#5d4e37] flex items-end p-6 md:p-12">
+            <div className="flex items-center gap-3">
+              <PlaceIcon size={32} className="text-amber-300 shrink-0" />
+              <h1
+                className="font-cinzel text-4xl md:text-6xl font-bold text-white"
+                style={{ fontFamily: "var(--font-cinzel), serif" }}
+              >
+                {place.title}
+              </h1>
+            </div>
+          </div>
         )}
       </section>
 
@@ -280,66 +182,51 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             <div className="bg-[#5d4e37] rounded-lg p-6 md:p-8">
-              <h2 className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              <h2
+                className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4"
+                style={{ fontFamily: "var(--font-cinzel), serif" }}
+              >
                 About
               </h2>
-              <p className="font-cinzel text-white/90 leading-relaxed text-lg" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                {place.description}
+              <p
+                className="font-cinzel text-white/90 leading-relaxed text-lg"
+                style={{ fontFamily: "var(--font-cinzel), serif" }}
+              >
+                {place.description || "No description available."}
               </p>
             </div>
 
             <div className="bg-[#5d4e37] rounded-lg p-6 md:p-8">
-              <h2 className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-6" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              <h2
+                className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-6"
+                style={{ fontFamily: "var(--font-cinzel), serif" }}
+              >
                 Location
               </h2>
-
               <div className="mb-6 space-y-4">
                 <div className="bg-[#8b6f47]/30 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <svg className="w-6 h-6 text-white/80 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <div className="flex-1">
-                      <p className="font-cinzel text-white font-semibold text-lg mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                        Address
-                      </p>
-                      <p className="font-cinzel text-white/90 text-base leading-relaxed" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                        {place.location.address}
-                      </p>
-                    </div>
-                  </div>
+                  <p
+                    className="font-cinzel text-white font-semibold text-lg mb-2"
+                    style={{ fontFamily: "var(--font-cinzel), serif" }}
+                  >
+                    Address
+                  </p>
+                  <p
+                    className="font-cinzel text-white/90 text-base leading-relaxed"
+                    style={{ fontFamily: "var(--font-cinzel), serif" }}
+                  >
+                    {place.location.address || "—"}
+                  </p>
                 </div>
-
                 <div className="bg-[#8b6f47]/30 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <svg className="w-6 h-6 text-white/80 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                    </svg>
-                    <div className="flex-1">
-                      <p className="font-cinzel text-white font-semibold text-lg mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                        Coordinates
-                      </p>
-                      <div className="flex flex-col sm:flex-row sm:gap-4 gap-2">
-                        <div>
-                          <span className="font-cinzel text-white/70 text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Latitude: </span>
-                          <span className="font-cinzel text-white/90 font-mono text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                            {place.location.lat.toFixed(6)}°
-                          </span>
-                        </div>
-                        <div>
-                          <span className="font-cinzel text-white/70 text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Longitude: </span>
-                          <span className="font-cinzel text-white/90 font-mono text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                            {place.location.lng.toFixed(6)}°
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <p
+                    className="font-cinzel text-white/70 text-sm font-mono"
+                    style={{ fontFamily: "var(--font-cinzel), serif" }}
+                  >
+                    {place.location.lat.toFixed(6)}°, {place.location.lng.toFixed(6)}°
+                  </p>
                 </div>
-
               </div>
-
               <PlaceMap
                 lat={place.location.lat}
                 lng={place.location.lng}
@@ -350,28 +237,39 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
               />
             </div>
 
-            <div className="bg-[#5d4e37] rounded-lg p-6 md:p-8">
-              <h2 className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                Vibe
-              </h2>
-              <div className="flex flex-wrap gap-3">
-                {place.vibe.map((tag: string) => (
-                  <span
-                    key={tag}
-                    className="px-4 py-2 bg-[#8b6f47] text-white rounded-full font-cinzel text-sm"
-                    style={{ fontFamily: 'var(--font-cinzel), serif' }}
-                  >
-                    {tag}
-                  </span>
-                ))}
+            {place.vibe.length > 0 && (
+              <div className="bg-[#5d4e37] rounded-lg p-6 md:p-8">
+                <h2
+                  className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4"
+                  style={{ fontFamily: "var(--font-cinzel), serif" }}
+                >
+                  Vibe
+                </h2>
+                <div className="flex flex-wrap gap-3">
+                  {place.vibe.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-4 py-2 bg-[#8b6f47] text-white rounded-full font-cinzel text-sm"
+                      style={{ fontFamily: "var(--font-cinzel), serif" }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="bg-[#5d4e37] rounded-lg p-6 md:p-8">
-              <h2 className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-6" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              <h2
+                className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-6"
+                style={{ fontFamily: "var(--font-cinzel), serif" }}
+              >
                 Reviews & Memories
               </h2>
-              <p className="font-cinzel text-white/70 text-center py-8" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              <p
+                className="font-cinzel text-white/70 text-center py-8"
+                style={{ fontFamily: "var(--font-cinzel), serif" }}
+              >
                 Reviews and memories will be displayed here
               </p>
             </div>
@@ -379,127 +277,121 @@ export default function PlaceProfilePage({ params }: { params: Promise<{ id: str
 
           <div className="space-y-6">
             <div className="bg-[#5d4e37] rounded-lg p-6 sticky top-4">
-              <h3 className="font-cinzel text-xl font-bold text-white mb-6" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              <h3
+                className="font-cinzel text-xl font-bold text-white mb-6"
+                style={{ fontFamily: "var(--font-cinzel), serif" }}
+              >
                 Quick Info
               </h3>
-              
               <div className="space-y-4">
                 <div>
-                  <p className="font-cinzel text-white/70 text-sm mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                  <p
+                    className="font-cinzel text-white/70 text-sm mb-2"
+                    style={{ fontFamily: "var(--font-cinzel), serif" }}
+                  >
                     Location
                   </p>
-                  <p className="font-cinzel text-white text-sm leading-relaxed" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                    {place.location.address}
+                  <p
+                    className="font-cinzel text-white text-sm leading-relaxed"
+                    style={{ fontFamily: "var(--font-cinzel), serif" }}
+                  >
+                    {place.location.address || "—"}
                   </p>
-                  <div className="mt-2 pt-2 border-t border-white/10">
-                    <p className="font-cinzel text-white/60 text-xs font-mono" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                      {place.location.lat.toFixed(4)}°, {place.location.lng.toFixed(4)}°
-                    </p>
-                  </div>
+                  <p
+                    className="font-cinzel text-white/60 text-xs font-mono mt-2"
+                    style={{ fontFamily: "var(--font-cinzel), serif" }}
+                  >
+                    {place.location.lat.toFixed(4)}°, {place.location.lng.toFixed(4)}°
+                  </p>
                 </div>
-
-                {place.entryFees && (
+                {place.entryFees != null && (
                   <div>
-                    <p className="font-cinzel text-white/70 text-sm mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                      Entry Fees
+                    <p
+                      className="font-cinzel text-white/70 text-sm mb-1"
+                      style={{ fontFamily: "var(--font-cinzel), serif" }}
+                    >
+                      Entry
                     </p>
-                    <p className="font-cinzel text-white" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                    <p className="font-cinzel text-white" style={{ fontFamily: "var(--font-cinzel), serif" }}>
                       {place.entryFees} EGP
                     </p>
                   </div>
                 )}
-
-                {place.cameraFees && (
+                {place.cameraFees != null && (
                   <div>
-                    <p className="font-cinzel text-white/70 text-sm mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                      Camera Fees
+                    <p
+                      className="font-cinzel text-white/70 text-sm mb-1"
+                      style={{ fontFamily: "var(--font-cinzel), serif" }}
+                    >
+                      Camera
                     </p>
-                    <p className="font-cinzel text-white" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                    <p className="font-cinzel text-white" style={{ fontFamily: "var(--font-cinzel), serif" }}>
                       {place.cameraFees} EGP
                     </p>
                   </div>
                 )}
-
                 <div className="flex gap-4">
-                  {place.petsFriendly && (
-                    <div>
-                      <p className="font-cinzel text-white/70 text-sm mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                        Pets
-                      </p>
-                      <p className="font-cinzel text-green-400" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                        ✓ Allowed
-                      </p>
-                    </div>
-                  )}
-                  {place.kidsFriendly && (
-                    <div>
-                      <p className="font-cinzel text-white/70 text-sm mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                        Kids
-                      </p>
-                      <p className="font-cinzel text-green-400" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                        ✓ Friendly
-                      </p>
-                    </div>
-                  )}
+                  <div>
+                    <p className="font-cinzel text-white/70 text-sm mb-1" style={{ fontFamily: "var(--font-cinzel), serif" }}>Pets</p>
+                    <p className="font-cinzel text-white/90" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                      {place.petsFriendly ? "Allowed" : "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-cinzel text-white/70 text-sm mb-1" style={{ fontFamily: "var(--font-cinzel), serif" }}>Kids</p>
+                    <p className="font-cinzel text-white/90" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                      {place.kidsFriendly ? "Friendly" : "—"}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-[#5d4e37] rounded-lg p-6">
-              <h3 className="font-cinzel text-xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                Working Hours
-              </h3>
-              <div className="space-y-2">
-                {Object.entries(place.workingHours).map(([day, hours]: [string, any]) => (
-                  <div key={day} className="flex justify-between">
-                    <span className="font-cinzel text-white/70 capitalize" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                      {day}
-                    </span>
-                    {hours ? (
-                      <span className="font-cinzel text-white" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                        {hours.open} - {hours.close}
-                      </span>
-                    ) : (
-                      <span className="font-cinzel text-white/50" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                        Closed
-                      </span>
-                    )}
+            {(workingHoursStr || workingHoursObj) && (
+              <div className="bg-[#5d4e37] rounded-lg p-6">
+                <h3
+                  className="font-cinzel text-xl font-bold text-white mb-4"
+                  style={{ fontFamily: "var(--font-cinzel), serif" }}
+                >
+                  Opening hours
+                </h3>
+                {workingHoursStr ? (
+                  <p className="font-cinzel text-white/90" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                    {workingHoursStr}
+                  </p>
+                ) : workingHoursObj ? (
+                  <div className="space-y-2">
+                    {Object.entries(workingHoursObj).map(([day, hours]) => (
+                      <div key={day} className="flex justify-between">
+                        <span className="font-cinzel text-white/70 capitalize" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                          {day}
+                        </span>
+                        <span className="font-cinzel text-white" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                          {hours.open} – {hours.close}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : null}
               </div>
-            </div>
+            )}
 
-            <div className="bg-[#5d4e37] rounded-lg p-6">
-              <h3 className="font-cinzel text-xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                Best Time to Visit
-              </h3>
-              <div className="space-y-3">
-                {place.bestTimeToVisit.season && (
-                  <div>
-                    <p className="font-cinzel text-white/70 text-sm mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                      Season
-                    </p>
-                    <p className="font-cinzel text-white" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                      {place.bestTimeToVisit.season.join(", ")}
-                    </p>
-                  </div>
-                )}
-                {place.bestTimeToVisit.timeOfDay && (
-                  <div>
-                    <p className="font-cinzel text-white/70 text-sm mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                      Time of Day
-                    </p>
-                    <p className="font-cinzel text-white" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-                      {place.bestTimeToVisit.timeOfDay.join(", ")}
-                    </p>
-                  </div>
-                )}
+            {place.bestTimeToVisit?.timeOfDay?.length ? (
+              <div className="bg-[#5d4e37] rounded-lg p-6">
+                <h3
+                  className="font-cinzel text-xl font-bold text-white mb-4"
+                  style={{ fontFamily: "var(--font-cinzel), serif" }}
+                >
+                  Best time to visit
+                </h3>
+                <p className="font-cinzel text-white/90" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                  {place.bestTimeToVisit.timeOfDay.join(", ")}
+                </p>
               </div>
-            </div>
+            ) : null}
           </div>
         </div>
       </section>
     </div>
   );
 }
-

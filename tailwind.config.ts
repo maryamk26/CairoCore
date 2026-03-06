@@ -12,7 +12,6 @@ const config: Config = {
         cinzel: ["var(--font-cinzel)", "serif"],
       },
       colors: {
-        // Earthy Color Palette
         earth: {
           cream: "#f5f1e8",
           beige: "#e8ddd4",

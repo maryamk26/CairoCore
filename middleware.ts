@@ -1,7 +1,6 @@
 import { updateSession } from '@/lib/supabase/middleware'
 import { type NextRequest, NextResponse } from 'next/server'
 
-// no auth required
 const publicRoutes = [
   '/',
   '/sign-in',

@@ -1,42 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getCategoryIcon } from "@/components/icons/categoryIcons";
+
+type PlaceSummary = {
+  id: string;
+  title: string;
+  subtitle: string;
+  type: string;
+  category: string;
+};
 
 export default function Home() {
   const [showModal, setShowModal] = useState(false);
+  const [popularPlaces, setPopularPlaces] = useState<PlaceSummary[]>([]);
 
-  const popularPlaces = [
-    {
-      id: 1,
-      title: "Pyramids and Sphinx",
-      subtitle: "Ancient wonders of the world",
-      image: "/images/places/pyramids.jpeg",
-      category: "pyramids",
-    },
-    {
-      id: 2,
-      title: "Grand Museum",
-      subtitle: "Treasures of ancient Egypt",
-      image: "/images/places/grandm.jpeg",
-      category: "museum",
-    },
-    {
-      id: 3,
-      title: "Khan el-Khalili",
-      subtitle: "Historic bazaar and souk",
-      image: "/images/places/khan.jpeg",
-      category: "other",
-    },
-    {
-      id: 4,
-      title: "Cairo Tower",
-      subtitle: "Iconic landmark of Cairo",
-      image: "/images/places/cairotower.jpeg",
-      category: "other",
-    },
-  ];
+  useEffect(() => {
+    fetch("/api/places")
+      .then((res) => res.json())
+      .then((data) => setPopularPlaces((data.places ?? []).slice(0, 8)))
+      .catch(() => setPopularPlaces([]));
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -79,36 +64,41 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {popularPlaces.map((place) => {
-              const PlaceIcon = getCategoryIcon(place.category ?? "other");
-              return (
-                <Link
-                  key={place.id}
-                  href={`/places/${place.id}`}
-                  className="group overflow-hidden rounded-lg bg-[#5d4e37] hover:bg-[#8b6f47] transition-all duration-300"
-                >
-                  <div className="aspect-[3/4] relative overflow-hidden">
-                    <img
-                      src={place.image}
-                      alt={place.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
-                      <div className="flex items-center gap-2 mb-1">
-                        <PlaceIcon size={20} className="text-amber-300 shrink-0" />
-                        <h3 className="font-cinzel text-white text-xl font-bold" style={{ fontFamily: "var(--font-cinzel), serif" }}>
-                          {place.title}
-                        </h3>
+            {popularPlaces.length === 0 ? (
+              <p className="font-cinzel text-white/70 col-span-full text-center py-8" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                No places yet. Add or import places to see them here.
+              </p>
+            ) : (
+              popularPlaces.map((place) => {
+                const PlaceIcon = getCategoryIcon(place.category ?? "other");
+                return (
+                  <Link
+                    key={place.id}
+                    href={`/places/${place.id}`}
+                    className="group overflow-hidden rounded-lg bg-[#5d4e37] hover:bg-[#8b6f47] transition-all duration-300"
+                  >
+                    <div className="aspect-[3/4] relative overflow-hidden bg-[#8b6f47]/50">
+                      <div
+                        className="w-full h-full bg-cover bg-center group-hover:scale-110 transition-transform duration-500"
+                        style={{ backgroundImage: "url(/images/backgrounds/home1.jpg)" }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <div className="flex items-center gap-2 mb-1">
+                          <PlaceIcon size={20} className="text-amber-300 shrink-0" />
+                          <h3 className="font-cinzel text-white text-xl font-bold" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                            {place.title}
+                          </h3>
+                        </div>
+                        <p className="font-cinzel text-white/90 text-sm line-clamp-2" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                          {place.subtitle}
+                        </p>
                       </div>
-                      <p className="font-cinzel text-white/90 text-sm" style={{ fontFamily: "var(--font-cinzel), serif" }}>
-                        {place.subtitle}
-                      </p>
                     </div>
-                  </div>
-                </Link>
-              );
-            })}
+                  </Link>
+                );
+              })
+            )}
           </div>
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent via-[#3a3428]/50 to-[#3a3428] pointer-events-none"></div>

@@ -1,17 +1,13 @@
-import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { createClient } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const supabase = await createClient()
-    const { data: { user }, error } = await supabase.auth.getUser()
+    const supabase = await createClient();
+    const { data: { user }, error } = await supabase.auth.getUser();
 
     if (!user || error) {
-      return NextResponse.json({
-        authenticated: false,
-        userId: null,
-        user: null,
-      })
+      return NextResponse.json({ authenticated: false, user: null });
     }
 
     return NextResponse.json({
@@ -24,11 +20,8 @@ export async function GET() {
         metadata: user.user_metadata,
         createdAt: user.created_at,
       },
-    })
+    });
   } catch {
-    return NextResponse.json(
-      { authenticated: false, error: 'Failed to check session' },
-      { status: 500 }
-    )
+    return NextResponse.json({ authenticated: false }, { status: 500 });
   }
 }

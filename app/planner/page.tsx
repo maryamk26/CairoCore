@@ -128,13 +128,14 @@ export default function PlannerPage() {
         const res = await fetch(
           `/api/planner/stops?type=${encodeURIComponent(routeStopType)}`
         );
-        if (!res.ok) throw new Error("Failed to load stops");
-        const data = await res.json();
-        setStopRecommendations(data.recommendations ?? []);
+        const data = res.ok ? await res.json() : {};
+        setStopRecommendations(Array.isArray(data.recommendations) ? data.recommendations : []);
         setSelectedStop(null);
         setStage("stop");
       } catch {
-        setError("Failed to load stop options. Please try again.");
+        setStopRecommendations([]);
+        setSelectedStop(null);
+        setStage("stop");
       } finally {
         setIsLoading(false);
       }
@@ -144,7 +145,7 @@ export default function PlannerPage() {
   };
 
   const handleContinueFromStop = () => {
-    if (selectedStop) setStage("route");
+    setStage("route");
   };
 
   const handleBackFromRoute = () => {

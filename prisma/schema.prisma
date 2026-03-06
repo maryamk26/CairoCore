@@ -1,217 +1,40 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model User {
-  id        String   @id @default(cuid())
-  username  String   @unique
+  id        String   @id
   email     String   @unique
-  name      String?
-  avatar    String?
-  bio       String?
-  isPrivate Boolean  @default(false)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  // Relations
-  memories     Memory[]
-  savedPlaces  SavedPlace[]
-  placeReviews PlaceReview[]
-  routePlans   RoutePlan[]
-  createdPlaces Place[] @relation("PlaceCreator")
-  savedLocations SavedLocation[]
+  places Place[]
 
   @@map("users")
 }
 
 model Place {
-  id           String   @id @default(cuid())
-  title        String
-  description  String   @db.Text
-  images       String[] // Array of image URLs
-  latitude     Float
-  longitude    Float
-  address      String
-  vibe         String[] // Array of vibe tags
-  workingHours Json     // Store working hours as JSON
-  entryFees    Float?
-  cameraFees   Float?
-  bestTime     Json     // Store best time to visit as JSON
-  petsFriendly Boolean  @default(false)
-  kidsFriendly Boolean  @default(true)
-  status       String   @default("pending") // approved, pending, rejected
-  createdBy    String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String   @id @default(uuid())
+  name          String
+  description   String?  @db.Text
+  category      String?
+  latitude      Float
+  longitude     Float
+  address       String?
+  openingHours  String?
+  entranceFee   Float?
+  cameraFee     Float?
+  vibe          String?
+  bestVisitTime String?
+  createdBy     String?
+  createdAt     DateTime @default(now())
 
-  // Relations
-  creator      User         @relation("PlaceCreator", fields: [createdBy], references: [id])
-  memories     Memory[]
-  savedPlaces  SavedPlace[]
-  placeReviews PlaceReview[]
-  routePlans   RoutePlanPlace[]
+  user User? @relation(fields: [createdBy], references: [id], onDelete: SetNull)
 
   @@map("places")
 }
-
-model Memory {
-  id        String   @id @default(cuid())
-  userId    String
-  placeId   String
-  images    String[] // Array of image URLs
-  rating    Int      // 1-5 stars
-  pros      String[] // Array of pros
-  cons      String[] // Array of cons
-  comment   String?  @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
-
-  @@map("memories")
-}
-
-model SavedPlace {
-  id        String   @id @default(cuid())
-  userId    String
-  placeId   String
-  createdAt DateTime @default(now())
-
-  // Relations
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, placeId])
-  @@map("saved_places")
-}
-
-model PlaceReview {
-  id        String   @id @default(cuid())
-  userId    String
-  placeId   String
-  rating    Int      // 1-5 stars
-  comment   String?  @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, placeId])
-  @@map("place_reviews")
-}
-
-model RoutePlan {
-  id        String   @id @default(cuid())
-  userId    String
-  date      DateTime
-  createdAt DateTime @default(now())
-
-  // Relations
-  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  places RoutePlanPlace[]
-
-  @@map("route_plans")
-}
-
-model RoutePlanPlace {
-  id                String    @id @default(cuid())
-  routePlanId       String
-  placeId           String
-  order             Int
-  estimatedArrival  DateTime
-  estimatedDeparture DateTime
-
-  // Relations
-  routePlan RoutePlan @relation(fields: [routePlanId], references: [id], onDelete: Cascade)
-  place     Place     @relation(fields: [placeId], references: [id], onDelete: Cascade)
-
-  @@map("route_plan_places")
-}
-
-model Survey {
-  id          String   @id @default(cuid())
-  title       String
-  description String?  @db.Text
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  questions SurveyQuestion[]
-  responses SurveyResponse[]
-
-  @@map("surveys")
-}
-
-model SurveyQuestion {
-  id          String   @id @default(cuid())
-  surveyId    String
-  question    String   @db.Text
-  type        String   // "single_choice", "multiple_choice", "range", "text"
-  options     Json?    // Array of options for choice questions
-  order       Int
-  isRequired  Boolean  @default(true)
-  createdAt   DateTime @default(now())
-
-  // Relations
-  survey  Survey              @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  answers SurveyAnswer[]
-
-  @@map("survey_questions")
-}
-
-model SurveyResponse {
-  id          String   @id @default(cuid())
-  surveyId    String
-  userId      String?  // Optional - can be anonymous
-  completedAt DateTime @default(now())
-
-  // Relations
-  survey  Survey         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  answers SurveyAnswer[]
-
-  @@map("survey_responses")
-}
-
-model SurveyAnswer {
-  id         String   @id @default(cuid())
-  responseId String
-  questionId String
-  answer     Json     // Flexible to store any answer type
-  createdAt  DateTime @default(now())
-
-  // Relations
-  response SurveyResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
-  question SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
-
-  @@map("survey_answers")
-}
-
-model SavedLocation {
-  id        String   @id @default(cuid())
-  userId    String
-  title     String   // e.g., "Home", "Work", "Hotel"
-  address   String?  // Optional address text
-  latitude  Float
-  longitude Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("saved_locations")
-}
-

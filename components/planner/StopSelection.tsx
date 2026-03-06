@@ -89,14 +89,16 @@ export default function StopSelection({
               >
                 Selected: {selectedStop.title}
               </span>
-              <button
-                onClick={onContinue}
-                className="px-6 py-2 bg-[#3a3428] text-[#d4af37] rounded-lg font-cinzel font-semibold hover:bg-[#4a4438] transition-colors"
-                style={{ fontFamily: "var(--font-cinzel), serif" }}
-              >
-                Build My Route →
-              </button>
             </div>
+          )}
+
+          {recommendations.length === 0 && (
+            <p
+              className="font-cinzel text-white/80 mb-6"
+              style={{ fontFamily: "var(--font-cinzel), serif" }}
+            >
+              No {title.toLowerCase()} in the dataset yet. You can continue without a stop.
+            </p>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -270,6 +272,17 @@ export default function StopSelection({
               </button>
             </div>
           )}
+
+          <div className="mt-10 flex justify-center">
+            <button
+              type="button"
+              onClick={onContinue}
+              className="px-8 py-3 bg-[#d4af37] text-[#3a3428] rounded-lg font-cinzel font-bold hover:bg-[#e5bf47] transition-colors"
+              style={{ fontFamily: "var(--font-cinzel), serif" }}
+            >
+              Build My Route →
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -1,204 +1,58 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PlaceRecommendation } from "@/utils/planner/recommendation";
+import { prisma } from "@/lib/prisma";
 
-// mock
-const MOCK_COFFEE_SHOPS: PlaceRecommendation[] = [
-  {
-    id: "cs-1",
-    title: "Cilantro",
-    description: "Popular Egyptian coffee chain with a cozy atmosphere. Great for a quick espresso or working on your laptop.",
-    images: ["/images/backgrounds/searchbg.jpg"],
-    latitude: 30.0444,
-    longitude: 31.2357,
-    address: "Zamalek, Cairo Governorate, Egypt",
-    vibe: ["modern", "romantic"],
-    entryFees: null,
-    cameraFees: null,
-    petsFriendly: false,
-    kidsFriendly: true,
-    matchScore: 92,
-    matchReasons: ["Perfect for a mid-route break", "Central location"],
-  },
-  {
-    id: "cs-2",
-    title: "Beano's",
-    description: "Charming café known for specialty coffee and desserts. A favorite among locals and visitors.",
-    images: ["/images/backgrounds/aboutbg.jpg"],
-    latitude: 30.0479,
-    longitude: 31.2626,
-    address: "Maadi, Cairo Governorate, Egypt",
-    vibe: ["cultural", "romantic"],
-    entryFees: null,
-    cameraFees: null,
-    petsFriendly: true,
-    kidsFriendly: true,
-    matchScore: 88,
-    matchReasons: ["Pet-friendly", "Cozy vibe"],
-  },
-  {
-    id: "cs-3",
-    title: "Sindbad",
-    description: "Traditional Egyptian coffee house with authentic atmosphere. Try the classic ahwa experience.",
-    images: ["/images/backgrounds/home1.jpg"],
-    latitude: 30.0456,
-    longitude: 31.2242,
-    address: "Downtown Cairo, Egypt",
-    vibe: ["cultural", "historical"],
-    entryFees: null,
-    cameraFees: null,
-    petsFriendly: false,
-    kidsFriendly: true,
-    matchScore: 85,
-    matchReasons: ["Authentic Cairo experience", "Historic area"],
-  },
-  {
-    id: "cs-4",
-    title: "Costa Coffee",
-    description: "International chain with reliable coffee and comfortable seating. Ideal for a familiar pit stop.",
-    images: ["/images/backgrounds/authbg.jpg"],
-    latitude: 30.0726,
-    longitude: 31.3456,
-    address: "Nasr City, Cairo Governorate, Egypt",
-    vibe: ["modern"],
-    entryFees: null,
-    cameraFees: null,
-    petsFriendly: false,
-    kidsFriendly: true,
-    matchScore: 82,
-    matchReasons: ["Consistent quality", "Air-conditioned"],
-  },
-  {
-    id: "cs-5",
-    title: "Left Bank",
-    description: "Riverside café with Nile views. Perfect for a relaxing coffee break with a view.",
-    images: ["/images/backgrounds/searchbg.jpg"],
-    latitude: 30.0428,
-    longitude: 31.2244,
-    address: "Zamalek, Cairo Governorate, Egypt",
-    vibe: ["romantic", "modern", "nature"],
-    entryFees: null,
-    cameraFees: null,
-    petsFriendly: false,
-    kidsFriendly: true,
-    matchScore: 90,
-    matchReasons: ["Nile view", "Relaxing atmosphere"],
-  },
-  {
-    id: "cs-6",
-    title: "El Fishawy",
-    description: "Legendary 200-year-old café in Khan el-Khalili. A must-visit for history and coffee lovers.",
-    images: ["/images/places/khan.jpeg"],
-    latitude: 30.0479,
-    longitude: 31.2626,
-    address: "Khan el-Khalili, Cairo Governorate, Egypt",
-    vibe: ["historical", "cultural"],
-    entryFees: null,
-    cameraFees: null,
-    petsFriendly: false,
-    kidsFriendly: true,
-    matchScore: 95,
-    matchReasons: ["Iconic Cairo spot", "Historic bazaar area"],
-  },
-];
+function vibeToArray(v: string | null): string[] {
+  if (!v?.trim()) return [];
+  return v.split(",").map((s) => s.trim());
+}
 
-const MOCK_RESTAURANTS: PlaceRecommendation[] = [
-  {
-    id: "rest-1",
-    title: "Abou El Sid",
-    description: "Upscale Egyptian cuisine in a traditional setting. Famous for molokhia, koshari, and mezze.",
-    images: ["/images/backgrounds/aboutbg.jpg"],
-    latitude: 30.0428,
-    longitude: 31.2244,
-    address: "Zamalek, Cairo Governorate, Egypt",
-    vibe: ["cultural", "romantic"],
-    entryFees: null,
-    cameraFees: null,
+function toRecommendationShape(place: {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string | null;
+  latitude: number;
+  longitude: number;
+  address: string | null;
+  entranceFee: number | null;
+  cameraFee: number | null;
+  vibe: string | null;
+}) {
+  return {
+    id: place.id,
+    title: place.name,
+    description: place.description ?? "",
+    images: [],
+    latitude: place.latitude,
+    longitude: place.longitude,
+    address: place.address ?? "",
+    vibe: vibeToArray(place.vibe),
+    entryFees: place.entranceFee,
+    cameraFees: place.cameraFee,
     petsFriendly: false,
     kidsFriendly: true,
-    matchScore: 93,
-    matchReasons: ["Authentic Egyptian cuisine", "Central location"],
-  },
-  {
-    id: "rest-2",
-    title: "Kazaz",
-    description: "Traditional Egyptian dishes in a family-friendly environment. Great for a hearty lunch stop.",
-    images: ["/images/backgrounds/home1.jpg"],
-    latitude: 30.0478,
-    longitude: 31.2336,
-    address: "Downtown Cairo, Egypt",
-    vibe: ["cultural"],
-    entryFees: null,
-    cameraFees: null,
-    petsFriendly: false,
-    kidsFriendly: true,
-    matchScore: 87,
-    matchReasons: ["Family-friendly", "Quick service"],
-  },
-  {
-    id: "rest-3",
-    title: "Felfela",
-    description: "Landmark restaurant serving Egyptian street food and classics since 1959. A Cairo institution.",
-    images: ["/images/backgrounds/searchbg.jpg"],
-    latitude: 30.0456,
-    longitude: 31.2242,
-    address: "Downtown Cairo, Egypt",
-    vibe: ["cultural", "historical"],
-    entryFees: null,
-    cameraFees: null,
-    petsFriendly: false,
-    kidsFriendly: true,
-    matchScore: 91,
-    matchReasons: ["Cairo institution", "Authentic street food"],
-  },
-  {
-    id: "rest-4",
-    title: "Andrea Restaurant",
-    description: "Nile-side dining with grilled meats and Egyptian favorites. Stunning views and relaxed vibe.",
-    images: ["/images/backgrounds/authbg.jpg"],
-    latitude: 30.0444,
-    longitude: 31.2357,
-    address: "Marioutiya, Giza Governorate, Egypt",
-    vibe: ["nature", "romantic"],
-    entryFees: null,
-    cameraFees: null,
-    petsFriendly: false,
-    kidsFriendly: true,
-    matchScore: 89,
-    matchReasons: ["Nile view", "Grilled specialties"],
-  },
-  {
-    id: "rest-5",
-    title: "Zooba",
-    description: "Modern twist on Egyptian street food. Koshari, taameya, and fresh juices in a trendy setting.",
-    images: ["/images/backgrounds/aboutbg.jpg"],
-    latitude: 30.0479,
-    longitude: 31.2626,
-    address: "Zamalek, Cairo Governorate, Egypt",
-    vibe: ["modern", "cultural"],
-    entryFees: null,
-    cameraFees: null,
-    petsFriendly: false,
-    kidsFriendly: true,
-    matchScore: 86,
-    matchReasons: ["Modern Egyptian", "Quick and tasty"],
-  },
-  {
-    id: "rest-6",
-    title: "Naguib Mahfouz Café & Restaurant",
-    description: "Elegant dining in the heart of Khan el-Khalili. Named after the Nobel laureate, serving traditional dishes.",
-    images: ["/images/places/khan.jpeg"],
-    latitude: 30.0479,
-    longitude: 31.2626,
-    address: "Khan el-Khalili, Cairo Governorate, Egypt",
-    vibe: ["cultural", "historical", "romantic"],
-    entryFees: null,
-    cameraFees: null,
-    petsFriendly: false,
-    kidsFriendly: true,
-    matchScore: 94,
-    matchReasons: ["Historic setting", "Literary heritage"],
-  },
-];
+    matchScore: 0,
+    matchReasons: [] as string[],
+    ...(place.category && { category: place.category }),
+  };
+}
+
+function isCoffeeShop(category: string | null): boolean {
+  if (!category || typeof category !== "string") return false;
+  const lower = category.toLowerCase();
+  return (
+    lower.includes("cafe") ||
+    lower.includes("coffee") ||
+    lower === "catering.cafe" ||
+    lower === "catering.coffee_shop"
+  );
+}
+
+function isRestaurant(category: string | null): boolean {
+  if (!category || typeof category !== "string") return false;
+  const lower = category.toLowerCase();
+  return lower.includes("restaurant") || lower === "catering.restaurant";
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -212,8 +66,27 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const recommendations =
-      type === "coffee_shop" ? MOCK_COFFEE_SHOPS : MOCK_RESTAURANTS;
+    const allPlaces = await prisma.place.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        category: true,
+        latitude: true,
+        longitude: true,
+        address: true,
+        entranceFee: true,
+        cameraFee: true,
+        vibe: true,
+      },
+    });
+
+    const matchFn = type === "coffee_shop" ? isCoffeeShop : isRestaurant;
+    const places = allPlaces
+      .filter((p) => matchFn(p.category))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    const recommendations = places.map(toRecommendationShape);
 
     return NextResponse.json({
       success: true,
