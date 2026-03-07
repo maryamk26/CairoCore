@@ -112,7 +112,6 @@ export default function SearchPage() {
           <div className="text-center mb-8 px-4">
             <p
               className="font-cinzel text-white text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold leading-relaxed"
-              style={{ fontFamily: "var(--font-cinzel), serif" }}
             >
               Find Places & Connect with People
             </p>
@@ -138,7 +137,6 @@ export default function SearchPage() {
                     ? "text-white"
                     : "text-[#5d4e37] hover:text-[#8b6f47]"
                 }`}
-                style={{ fontFamily: "var(--font-cinzel), serif" }}
               >
                 Places
               </button>
@@ -149,7 +147,6 @@ export default function SearchPage() {
                     ? "text-white"
                     : "text-[#5d4e37] hover:text-[#8b6f47]"
                 }`}
-                style={{ fontFamily: "var(--font-cinzel), serif" }}
               >
                 People
               </button>
@@ -171,7 +168,6 @@ export default function SearchPage() {
                       : "Search people..."
                   }
                   className="flex-1 bg-transparent outline-none text-[#3a3428] placeholder:text-[#8b6f47]/60 font-cinzel text-base md:text-lg"
-                  style={{ fontFamily: "var(--font-cinzel), serif" }}
                 />
                 <button
                   type="button"
@@ -249,17 +245,11 @@ export default function SearchPage() {
                           <div className="flex-1 min-w-0">
                             <p
                               className="font-cinzel text-[#3a3428] font-medium text-base md:text-lg mb-1"
-                              style={{
-                                fontFamily: "var(--font-cinzel), serif",
-                              }}
                             >
                               {suggestion.title}
                             </p>
                             <p
                               className="font-cinzel text-[#8b6f47] text-sm md:text-base font-light"
-                              style={{
-                                fontFamily: "var(--font-cinzel), serif",
-                              }}
                             >
                               {suggestion.subtitle}
                             </p>
@@ -271,9 +261,6 @@ export default function SearchPage() {
                     <div className="px-6 py-4 text-center">
                       <p
                         className="font-cinzel text-[#8b6f47]"
-                        style={{
-                          fontFamily: "var(--font-cinzel), serif",
-                        }}
                       >
                         {searchQuery.trim()
                           ? `No ${searchType === "places" ? "places" : "people"} found for "${searchQuery}"`
@@ -296,9 +283,6 @@ export default function SearchPage() {
                 >
                   <p
                     className="font-cinzel text-[#8b6f47] text-center"
-                    style={{
-                      fontFamily: "var(--font-cinzel), serif",
-                    }}
                   >
                     No {searchType === "places" ? "places" : "people"} found
                     matching "{searchQuery}"
@@ -316,7 +300,6 @@ export default function SearchPage() {
           >
             <p
               className="font-cinzel text-white text-base md:text-lg lg:text-xl mb-4 font-semibold"
-              style={{ fontFamily: "var(--font-cinzel), serif" }}
             >
               Popular searches:
             </p>
@@ -331,7 +314,6 @@ export default function SearchPage() {
                       searchInputRef.current?.focus();
                     }}
                     className="px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-[#5d4e37] font-cinzel text-sm hover:bg-white hover:shadow-md transition-all border border-white/30"
-                    style={{ fontFamily: "var(--font-cinzel), serif" }}
                   >
                     {tag}
                   </button>

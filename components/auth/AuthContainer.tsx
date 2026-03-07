@@ -60,8 +60,8 @@ export default function AuthContainer({ initialMode, useAuthRoute }: AuthContain
             }`}
           >
             <div className="mb-6 text-center">
-              <h2 className="text-3xl font-cinzel font-bold text-[#5d4e37] mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Welcome back</h2>
-              <p className="text-[#8b6f47] font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Sign in to continue your adventure</p>
+              <h2 className="text-3xl font-cinzel font-bold text-[#5d4e37] mb-2">Welcome back</h2>
+              <p className="text-[#8b6f47] font-cinzel">Sign in to continue your adventure</p>
             </div>
             <SignInForm />
           </div>
@@ -74,8 +74,8 @@ export default function AuthContainer({ initialMode, useAuthRoute }: AuthContain
             }`}
           >
             <div className="mb-6 text-center">
-              <h2 className="text-3xl font-cinzel font-bold text-[#5d4e37] mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Create account</h2>
-              <p className="text-[#8b6f47] font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Start exploring Cairo's amazing places</p>
+              <h2 className="text-3xl font-cinzel font-bold text-[#5d4e37] mb-2">Create account</h2>
+              <p className="text-[#8b6f47] font-cinzel">Start exploring Cairo's amazing places</p>
             </div>
             <SignUpForm />
           </div>

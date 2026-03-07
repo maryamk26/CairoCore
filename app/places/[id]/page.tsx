@@ -66,7 +66,7 @@ export default function PlaceProfilePage({
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#3a3428]">
-        <p className="font-cinzel text-white" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+        <p className="font-cinzel text-white">
           Loading...
         </p>
       </div>
@@ -79,14 +79,12 @@ export default function PlaceProfilePage({
         <div className="text-center">
           <h1
             className="font-cinzel text-4xl text-white mb-4"
-            style={{ fontFamily: "var(--font-cinzel), serif" }}
           >
             Place Not Found
           </h1>
           <Link
             href="/"
             className="font-cinzel text-white/80 hover:text-white transition-colors"
-            style={{ fontFamily: "var(--font-cinzel), serif" }}
           >
             Return to Home
           </Link>
@@ -156,7 +154,6 @@ export default function PlaceProfilePage({
                 <PlaceIcon size={32} className="text-amber-300 shrink-0" />
                 <h1
                   className="font-cinzel text-4xl md:text-6xl font-bold text-white"
-                  style={{ fontFamily: "var(--font-cinzel), serif" }}
                 >
                   {place.title}
                 </h1>
@@ -169,7 +166,6 @@ export default function PlaceProfilePage({
               <PlaceIcon size={32} className="text-amber-300 shrink-0" />
               <h1
                 className="font-cinzel text-4xl md:text-6xl font-bold text-white"
-                style={{ fontFamily: "var(--font-cinzel), serif" }}
               >
                 {place.title}
               </h1>
@@ -184,13 +180,11 @@ export default function PlaceProfilePage({
             <div className="bg-[#5d4e37] rounded-lg p-6 md:p-8">
               <h2
                 className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4"
-                style={{ fontFamily: "var(--font-cinzel), serif" }}
               >
                 About
               </h2>
               <p
                 className="font-cinzel text-white/90 leading-relaxed text-lg"
-                style={{ fontFamily: "var(--font-cinzel), serif" }}
               >
                 {place.description || "No description available."}
               </p>
@@ -199,7 +193,6 @@ export default function PlaceProfilePage({
             <div className="bg-[#5d4e37] rounded-lg p-6 md:p-8">
               <h2
                 className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-6"
-                style={{ fontFamily: "var(--font-cinzel), serif" }}
               >
                 Location
               </h2>
@@ -207,13 +200,11 @@ export default function PlaceProfilePage({
                 <div className="bg-[#8b6f47]/30 rounded-lg p-4">
                   <p
                     className="font-cinzel text-white font-semibold text-lg mb-2"
-                    style={{ fontFamily: "var(--font-cinzel), serif" }}
                   >
                     Address
                   </p>
                   <p
                     className="font-cinzel text-white/90 text-base leading-relaxed"
-                    style={{ fontFamily: "var(--font-cinzel), serif" }}
                   >
                     {place.location.address || "—"}
                   </p>
@@ -221,7 +212,6 @@ export default function PlaceProfilePage({
                 <div className="bg-[#8b6f47]/30 rounded-lg p-4">
                   <p
                     className="font-cinzel text-white/70 text-sm font-mono"
-                    style={{ fontFamily: "var(--font-cinzel), serif" }}
                   >
                     {place.location.lat.toFixed(6)}°, {place.location.lng.toFixed(6)}°
                   </p>
@@ -241,7 +231,6 @@ export default function PlaceProfilePage({
               <div className="bg-[#5d4e37] rounded-lg p-6 md:p-8">
                 <h2
                   className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-4"
-                  style={{ fontFamily: "var(--font-cinzel), serif" }}
                 >
                   Vibe
                 </h2>
@@ -250,7 +239,6 @@ export default function PlaceProfilePage({
                     <span
                       key={tag}
                       className="px-4 py-2 bg-[#8b6f47] text-white rounded-full font-cinzel text-sm"
-                      style={{ fontFamily: "var(--font-cinzel), serif" }}
                     >
                       {tag}
                     </span>
@@ -262,13 +250,11 @@ export default function PlaceProfilePage({
             <div className="bg-[#5d4e37] rounded-lg p-6 md:p-8">
               <h2
                 className="font-cinzel text-2xl md:text-3xl font-bold text-white mb-6"
-                style={{ fontFamily: "var(--font-cinzel), serif" }}
               >
                 Reviews & Memories
               </h2>
               <p
                 className="font-cinzel text-white/70 text-center py-8"
-                style={{ fontFamily: "var(--font-cinzel), serif" }}
               >
                 Reviews and memories will be displayed here
               </p>
@@ -279,7 +265,6 @@ export default function PlaceProfilePage({
             <div className="bg-[#5d4e37] rounded-lg p-6 sticky top-4">
               <h3
                 className="font-cinzel text-xl font-bold text-white mb-6"
-                style={{ fontFamily: "var(--font-cinzel), serif" }}
               >
                 Quick Info
               </h3>
@@ -287,19 +272,16 @@ export default function PlaceProfilePage({
                 <div>
                   <p
                     className="font-cinzel text-white/70 text-sm mb-2"
-                    style={{ fontFamily: "var(--font-cinzel), serif" }}
                   >
                     Location
                   </p>
                   <p
                     className="font-cinzel text-white text-sm leading-relaxed"
-                    style={{ fontFamily: "var(--font-cinzel), serif" }}
                   >
                     {place.location.address || "—"}
                   </p>
                   <p
                     className="font-cinzel text-white/60 text-xs font-mono mt-2"
-                    style={{ fontFamily: "var(--font-cinzel), serif" }}
                   >
                     {place.location.lat.toFixed(4)}°, {place.location.lng.toFixed(4)}°
                   </p>
@@ -308,11 +290,10 @@ export default function PlaceProfilePage({
                   <div>
                     <p
                       className="font-cinzel text-white/70 text-sm mb-1"
-                      style={{ fontFamily: "var(--font-cinzel), serif" }}
                     >
                       Entry
                     </p>
-                    <p className="font-cinzel text-white" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                    <p className="font-cinzel text-white">
                       {place.entryFees} EGP
                     </p>
                   </div>
@@ -321,25 +302,24 @@ export default function PlaceProfilePage({
                   <div>
                     <p
                       className="font-cinzel text-white/70 text-sm mb-1"
-                      style={{ fontFamily: "var(--font-cinzel), serif" }}
                     >
                       Camera
                     </p>
-                    <p className="font-cinzel text-white" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                    <p className="font-cinzel text-white">
                       {place.cameraFees} EGP
                     </p>
                   </div>
                 )}
                 <div className="flex gap-4">
                   <div>
-                    <p className="font-cinzel text-white/70 text-sm mb-1" style={{ fontFamily: "var(--font-cinzel), serif" }}>Pets</p>
-                    <p className="font-cinzel text-white/90" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                    <p className="font-cinzel text-white/70 text-sm mb-1">Pets</p>
+                    <p className="font-cinzel text-white/90">
                       {place.petsFriendly ? "Allowed" : "—"}
                     </p>
                   </div>
                   <div>
-                    <p className="font-cinzel text-white/70 text-sm mb-1" style={{ fontFamily: "var(--font-cinzel), serif" }}>Kids</p>
-                    <p className="font-cinzel text-white/90" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                    <p className="font-cinzel text-white/70 text-sm mb-1">Kids</p>
+                    <p className="font-cinzel text-white/90">
                       {place.kidsFriendly ? "Friendly" : "—"}
                     </p>
                   </div>
@@ -351,22 +331,21 @@ export default function PlaceProfilePage({
               <div className="bg-[#5d4e37] rounded-lg p-6">
                 <h3
                   className="font-cinzel text-xl font-bold text-white mb-4"
-                  style={{ fontFamily: "var(--font-cinzel), serif" }}
                 >
                   Opening hours
                 </h3>
                 {workingHoursStr ? (
-                  <p className="font-cinzel text-white/90" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                  <p className="font-cinzel text-white/90">
                     {workingHoursStr}
                   </p>
                 ) : workingHoursObj ? (
                   <div className="space-y-2">
                     {Object.entries(workingHoursObj).map(([day, hours]) => (
                       <div key={day} className="flex justify-between">
-                        <span className="font-cinzel text-white/70 capitalize" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                        <span className="font-cinzel text-white/70 capitalize">
                           {day}
                         </span>
-                        <span className="font-cinzel text-white" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                        <span className="font-cinzel text-white">
                           {hours.open} – {hours.close}
                         </span>
                       </div>
@@ -380,11 +359,10 @@ export default function PlaceProfilePage({
               <div className="bg-[#5d4e37] rounded-lg p-6">
                 <h3
                   className="font-cinzel text-xl font-bold text-white mb-4"
-                  style={{ fontFamily: "var(--font-cinzel), serif" }}
                 >
                   Best time to visit
                 </h3>
-                <p className="font-cinzel text-white/90" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                <p className="font-cinzel text-white/90">
                   {place.bestTimeToVisit.timeOfDay.join(", ")}
                 </p>
               </div>

@@ -5,21 +5,9 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { getCategoryIcon } from "@/components/icons/categoryIcons";
+import { setLeafletDefaultIcon } from "@/lib/map/leafletDefaults";
 
-const iconRetinaUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png";
-const iconUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png";
-const shadowUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png";
-
-const DefaultIcon = L.icon({
-  iconUrl,
-  iconRetinaUrl,
-  shadowUrl,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  tooltipAnchor: [16, -28],
-  shadowSize: [41, 41],
-});
+setLeafletDefaultIcon();
 
 function createLocationDotIcon() {
   return L.divIcon({
@@ -63,7 +51,6 @@ function createNumberedIcon(number: number, color: string = "#3388ff") {
   });
 }
 
-L.Marker.prototype.options.icon = DefaultIcon;
 
 interface Place {
   id: string;

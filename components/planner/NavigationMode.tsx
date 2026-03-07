@@ -219,7 +219,7 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
       <div className="fixed inset-0 bg-[#3a3428] z-50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">🗺️</div>
-          <p className="font-cinzel text-white text-xl" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+          <p className="font-cinzel text-white text-xl">
             Calculating route...
           </p>
         </div>
@@ -273,10 +273,10 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
                   )}
                 </div>
                 <div className="flex-1">
-                  <p className="font-cinzel text-xl font-bold text-white" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                  <p className="font-cinzel text-xl font-bold text-white">
                     {formatDistance(currentStepData.distance)}
                   </p>
-                  <p className="font-cinzel text-sm text-white/90" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                  <p className="font-cinzel text-sm text-white/90">
                     {currentStepData.instruction}
                   </p>
                 </div>
@@ -286,7 +286,7 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
         </div>
         <div className="absolute left-4 top-1/2 -translate-y-1/2 z-[60] flex items-center justify-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
           <div className="w-16 h-16 rounded-full border-2 border-white flex items-center justify-center shrink-0" style={{ backgroundColor: '#c4b5fd' }}>
-            <span className="font-cinzel text-lg font-bold text-gray-900" style={{ fontFamily: 'var(--font-cinzel), serif' }}>60</span>
+            <span className="font-cinzel text-lg font-bold text-gray-900">60</span>
           </div>
         </div>
         <div className="absolute left-4 bottom-8 z-[60] w-[calc(100%-2rem)] max-w-sm flex flex-col pointer-events-auto">
@@ -294,29 +294,28 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
             <div className="flex justify-center pt-5 pb-1">
               <DestIcon className="w-10 h-10 text-gray-800" />
             </div>
-            <h2 className="font-cinzel text-xl font-bold text-gray-900 text-center px-2 mb-5 leading-tight" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <h2 className="font-cinzel text-xl font-bold text-gray-900 text-center px-2 mb-5 leading-tight">
               {currentPlace?.title ?? "—"}
             </h2>
             <div className="flex gap-2 px-3 mb-3">
               <div className="flex-1 bg-black text-white rounded-xl py-3 text-center min-w-0">
-                <p className="font-cinzel text-sm font-bold truncate" style={{ fontFamily: 'var(--font-cinzel), serif' }}>{formatDuration(cumulativeToStop.duration)}</p>
+                <p className="font-cinzel text-sm font-bold truncate">{formatDuration(cumulativeToStop.duration)}</p>
               </div>
               <div className="flex-1 rounded-xl py-3 text-center min-w-0" style={{ backgroundColor: '#c4b5fd' }}>
-                <p className="font-cinzel text-sm font-bold text-gray-900 truncate" style={{ fontFamily: 'var(--font-cinzel), serif' }}>{(cumulativeToStop.distance / 1000).toFixed(1)} km</p>
+                <p className="font-cinzel text-sm font-bold text-gray-900 truncate">{(cumulativeToStop.distance / 1000).toFixed(1)} km</p>
               </div>
               <div className="flex-1 rounded-xl py-3 text-center min-w-0" style={{ backgroundColor: '#ddd6fe' }}>
-                <p className="font-cinzel text-sm font-bold text-gray-900 truncate" style={{ fontFamily: 'var(--font-cinzel), serif' }}>{eta ? formatTime(eta) : "—"}</p>
+                <p className="font-cinzel text-sm font-bold text-gray-900 truncate">{eta ? formatTime(eta) : "—"}</p>
               </div>
             </div>
             <div className="flex justify-between text-xs text-gray-700 px-4 mb-5">
-              <span className="font-cinzel uppercase" style={{ fontFamily: 'var(--font-cinzel), serif' }}>distance {(cumulativeToStop.distance / 1000).toFixed(1)} km</span>
-              <span className="font-cinzel uppercase" style={{ fontFamily: 'var(--font-cinzel), serif' }}>finish {eta ? formatTime(eta) : "—"}</span>
+              <span className="font-cinzel uppercase">distance {(cumulativeToStop.distance / 1000).toFixed(1)} km</span>
+              <span className="font-cinzel uppercase">finish {eta ? formatTime(eta) : "—"}</span>
             </div>
             <button
               type="button"
               onClick={handleStartEnd}
               className="mx-4 mt-auto mb-1 py-4 bg-black text-white font-cinzel text-base font-bold rounded-2xl hover:bg-gray-800 transition-colors"
-              style={{ fontFamily: 'var(--font-cinzel), serif' }}
             >
               {isRiding ? "End" : "Start"}
             </button>
@@ -324,7 +323,6 @@ export default function NavigationMode({ startLocation, places, onExit }: Naviga
               type="button"
               onClick={() => { if (watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current); onExit(); }}
               className="py-2 text-gray-500 font-cinzel text-sm hover:text-gray-900 transition-colors"
-              style={{ fontFamily: 'var(--font-cinzel), serif' }}
             >
               Go back
             </button>

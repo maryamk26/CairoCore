@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 
 export default function SignInForm() {
   const [email, setEmail] = useState("");
@@ -11,6 +10,7 @@ export default function SignInForm() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const redirectTo = searchParams.get('redirect') || '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,12 +31,18 @@ export default function SignInForm() {
       }
 
       if (data.session) {
-        window.location.href = redirectTo;
+        router.push(redirectTo);
+        router.refresh();
       } else {
         setError("Something went wrong. Please try again.");
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Invalid email or password");
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg === "Failed to fetch" || msg.includes("fetch") || msg.includes("network")) {
+        setError("Network error. Check your connection, or your Supabase project may be paused (resume it in the Supabase Dashboard).");
+      } else {
+        setError(msg || "Invalid email or password");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -79,7 +85,7 @@ export default function SignInForm() {
     <div className="space-y-6 pb-0">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-        <label htmlFor="email" className="block text-sm font-cinzel font-medium text-[#5d4e37] mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+        <label htmlFor="email" className="block text-sm font-cinzel font-medium text-[#5d4e37] mb-2">
           Email
         </label>
         <input
@@ -89,13 +95,12 @@ export default function SignInForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
           className="w-full px-4 py-3 rounded-full border border-white/50 bg-white/20 backdrop-blur-sm text-[#3a3428] font-cinzel focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/70 transition-all"
-          style={{ fontFamily: 'var(--font-cinzel), serif' }}
           placeholder="Enter your email"
         />
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-cinzel font-medium text-[#5d4e37] mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+        <label htmlFor="password" className="block text-sm font-cinzel font-medium text-[#5d4e37] mb-2">
           Password
         </label>
         <input
@@ -105,27 +110,21 @@ export default function SignInForm() {
           onChange={(e) => setPassword(e.target.value)}
           required
           className="w-full px-4 py-3 rounded-full border border-white/50 bg-white/20 backdrop-blur-sm text-[#3a3428] font-cinzel focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/70 transition-all"
-          style={{ fontFamily: 'var(--font-cinzel), serif' }}
           placeholder="Enter your password"
         />
       </div>
 
-      <div className="flex items-center justify-between">
-        <label className="flex items-center gap-2 text-sm text-[#5d4e37] font-cinzel cursor-pointer" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-          <input 
-            type="checkbox" 
-            className="w-4 h-4 rounded border-white/50 bg-white/20 focus:ring-2 focus:ring-white/50 cursor-pointer" 
-            style={{ accentColor: '#8b6f47' }}
-          />
-          Remember me
-        </label>
-        <Link href="/forgot-password" className="text-sm text-[#8b6f47] hover:text-[#5d4e37] font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
-          Forgot password?
-        </Link>
-      </div>
+      <label className="flex items-center gap-2 text-sm text-[#5d4e37] font-cinzel cursor-pointer">
+        <input
+          type="checkbox"
+          className="w-4 h-4 rounded border-white/50 bg-white/20 focus:ring-2 focus:ring-white/50 cursor-pointer"
+          style={{ accentColor: '#8b6f47' }}
+        />
+        Remember me
+      </label>
 
       {error && (
-        <div className="p-3 rounded-full bg-red-50/50 border border-red-200/50 text-red-700 text-sm font-cinzel backdrop-blur-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+        <div className="p-3 rounded-full bg-red-50/50 border border-red-200/50 text-red-700 text-sm font-cinzel backdrop-blur-sm">
           {error}
         </div>
       )}
@@ -134,7 +133,6 @@ export default function SignInForm() {
         type="submit"
         disabled={isLoading}
         className="w-full py-3 px-4 rounded-full bg-[#8b6f47]/80 backdrop-blur-sm text-white font-cinzel font-medium hover:bg-[#8b6f47] focus:outline-none focus:ring-2 focus:ring-[#8b6f47] focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        style={{ fontFamily: 'var(--font-cinzel), serif' }}
       >
         {isLoading ? "Signing in..." : "Sign In"}
       </button>
@@ -145,7 +143,7 @@ export default function SignInForm() {
           <div className="w-full border-t border-white/40"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-transparent text-[#5d4e37] font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+          <span className="px-2 bg-transparent text-[#5d4e37] font-cinzel">
             or
           </span>
         </div>
@@ -156,7 +154,6 @@ export default function SignInForm() {
         onClick={() => handleSocialSignIn("google")}
         disabled={isLoading}
         className="w-full py-3 px-4 rounded-full border-2 border-white/50 bg-white/30 backdrop-blur-sm text-[#5d4e37] font-cinzel font-medium hover:bg-[#5d4e37]/20 hover:border-[#5d4e37]/40 hover:text-[#3a3428] focus:outline-none focus:ring-2 focus:ring-[#8b6f47] focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        style={{ fontFamily: 'var(--font-cinzel), serif' }}
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

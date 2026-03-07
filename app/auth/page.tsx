@@ -25,7 +25,6 @@ export default async function AuthPage({
         <Link href="/" className="inline-block">
           <h1
             className="text-4xl md:text-5xl font-cinzel font-bold text-[#5d4e37] tracking-tight"
-            style={{ fontFamily: "var(--font-cinzel), serif" }}
           >
             CairoCore
           </h1>
@@ -33,6 +32,15 @@ export default async function AuthPage({
       </div>
 
       <AuthContainer initialMode={mode} useAuthRoute />
+
+      <p className="mt-8 text-center">
+        <Link
+          href="/clear-session"
+          className="text-sm text-[#5d4e37]/80 hover:text-[#5d4e37] underline"
+        >
+          Stuck? Clear session and try again
+        </Link>
+      </p>
     </div>
   );
 }

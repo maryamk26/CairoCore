@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import AccordionSurvey, { SurveyAnswers } from "@/components/planner/AccordionSurvey";
+import AccordionSurvey from "@/components/planner/AccordionSurvey";
+import { SurveyAnswers } from "@/lib/planner/survey";
 import PlaceSelection from "@/components/planner/PlaceSelection";
 import RouteBuilder from "@/components/planner/RouteBuilder";
 import StopSelection from "@/components/planner/StopSelection";
@@ -172,7 +173,7 @@ export default function PlannerPage() {
       <div className="min-h-screen bg-[#3a3428] flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#d4af37] mb-4"></div>
-          <p className="font-cinzel text-white text-xl" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+          <p className="font-cinzel text-white text-xl">
             Finding the perfect places for you...
           </p>
         </div>
@@ -189,16 +190,15 @@ export default function PlannerPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h2 className="font-cinzel text-2xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+          <h2 className="font-cinzel text-2xl font-bold text-white mb-4">
             Oops! Something went wrong
           </h2>
-          <p className="font-cinzel text-white/70 mb-6" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+          <p className="font-cinzel text-white/70 mb-6">
             {error}
           </p>
           <button
             onClick={handleStartOver}
             className="px-6 py-3 bg-[#d4af37] text-[#3a3428] rounded-lg font-cinzel font-bold hover:bg-[#e5bf47] transition-colors"
-            style={{ fontFamily: 'var(--font-cinzel), serif' }}
           >
             Try Again
           </button>

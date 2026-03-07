@@ -59,13 +59,11 @@ export default function StopSelection({
             <div>
               <h1
                 className="font-cinzel text-4xl md:text-5xl font-bold text-white mb-4"
-                style={{ fontFamily: "var(--font-cinzel), serif" }}
               >
                 {title}
               </h1>
               <p
                 className="font-cinzel text-white/80 text-lg"
-                style={{ fontFamily: "var(--font-cinzel), serif" }}
               >
                 Choose one stop to add to your route. We&apos;ll place it at the
                 right moment based on your preference.
@@ -75,7 +73,6 @@ export default function StopSelection({
               type="button"
               onClick={onBack}
               className="shrink-0 px-5 py-2.5 rounded-lg border-2 border-white/60 text-white font-cinzel font-semibold hover:bg-white/10 transition-colors"
-              style={{ fontFamily: "var(--font-cinzel), serif" }}
             >
               Back to places
             </button>
@@ -85,7 +82,6 @@ export default function StopSelection({
             <div className="bg-[#d4af37] text-[#3a3428] rounded-lg p-4 mb-6 flex items-center justify-between">
               <span
                 className="font-cinzel font-semibold"
-                style={{ fontFamily: "var(--font-cinzel), serif" }}
               >
                 Selected: {selectedStop.title}
               </span>
@@ -95,7 +91,6 @@ export default function StopSelection({
           {recommendations.length === 0 && (
             <p
               className="font-cinzel text-white/80 mb-6"
-              style={{ fontFamily: "var(--font-cinzel), serif" }}
             >
               No {title.toLowerCase()} in the dataset yet. You can continue without a stop.
             </p>
@@ -169,13 +164,12 @@ export default function StopSelection({
                   <div className="p-5">
                     <div className="flex items-center gap-2 mb-2">
                       <PlaceIcon size={20} className="text-[#d4af37] shrink-0" />
-                      <h3 className="font-cinzel text-xl font-bold text-white" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                      <h3 className="font-cinzel text-xl font-bold text-white">
                         {place.title}
                       </h3>
                     </div>
                     <p
                       className="font-cinzel text-white/70 text-sm mb-3 line-clamp-2"
-                      style={{ fontFamily: "var(--font-cinzel), serif" }}
                     >
                       {place.description}
                     </p>
@@ -200,9 +194,6 @@ export default function StopSelection({
                             </svg>
                             <span
                               className="font-cinzel text-white/80 text-xs"
-                              style={{
-                                fontFamily: "var(--font-cinzel), serif",
-                              }}
                             >
                               {reason}
                             </span>
@@ -217,9 +208,6 @@ export default function StopSelection({
                           <span
                             key={v}
                             className="px-2 py-1 bg-[#8b6f47] text-white text-xs rounded font-cinzel"
-                            style={{
-                              fontFamily: "var(--font-cinzel), serif",
-                            }}
                           >
                             {v}
                           </span>
@@ -231,14 +219,12 @@ export default function StopSelection({
                       {place.entryFees !== null && place.entryFees > 0 ? (
                         <span
                           className="font-cinzel"
-                          style={{ fontFamily: "var(--font-cinzel), serif" }}
                         >
                           {place.entryFees} EGP
                         </span>
                       ) : (
                         <span
                           className="font-cinzel text-[#d4af37]"
-                          style={{ fontFamily: "var(--font-cinzel), serif" }}
                         >
                           Free entry
                         </span>
@@ -266,7 +252,6 @@ export default function StopSelection({
                   setVisibleCount((c) => Math.min(c + SHOW_MORE_STEP, recommendations.length))
                 }
                 className="px-8 py-3 rounded-lg border-2 border-[#d4af37] text-[#d4af37] font-cinzel font-semibold hover:bg-[#d4af37]/10 transition-colors"
-                style={{ fontFamily: "var(--font-cinzel), serif" }}
               >
                 Show more
               </button>
@@ -278,7 +263,6 @@ export default function StopSelection({
               type="button"
               onClick={onContinue}
               className="px-8 py-3 bg-[#d4af37] text-[#3a3428] rounded-lg font-cinzel font-bold hover:bg-[#e5bf47] transition-colors"
-              style={{ fontFamily: "var(--font-cinzel), serif" }}
             >
               Build My Route →
             </button>

@@ -1,4 +1,4 @@
-import { SurveyAnswers } from "@/components/planner/SurveyComponent";
+import { SurveyAnswers } from "@/lib/planner/survey";
 
 export interface PlaceRecommendation {
   id: string;

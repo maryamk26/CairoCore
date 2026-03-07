@@ -409,17 +409,16 @@ export default function RouteBuilder({
           <button
             onClick={onBack}
             className="mb-4 flex items-center gap-2 text-white/70 hover:text-white transition-colors font-cinzel"
-            style={{ fontFamily: 'var(--font-cinzel), serif' }}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Back to Selection
           </button>
-          <h1 className="font-cinzel text-4xl md:text-5xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+          <h1 className="font-cinzel text-4xl md:text-5xl font-bold text-white mb-4">
             {placesWithStop.length === 1 ? "Your Selected Location" : "Your Optimized Route"}
           </h1>
-          <p className="font-cinzel text-white/80 text-lg" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+          <p className="font-cinzel text-white/80 text-lg">
             {placesWithStop.length === 1 
               ? "View your selected location on the map and add more places if you'd like."
               : "Review and adjust your trip route. Drag to reorder stops."}
@@ -437,10 +436,10 @@ export default function RouteBuilder({
 
       <div className="space-y-6">
         <div className="bg-[#5d4e37] rounded-lg p-6">
-          <h3 className="font-cinzel text-xl font-bold text-white mb-1" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+          <h3 className="font-cinzel text-xl font-bold text-white mb-1">
             Starting point
           </h3>
-          <p className="font-cinzel text-white/70 text-sm mb-4" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+          <p className="font-cinzel text-white/70 text-sm mb-4">
             Choose your starting point so we can calculate travel time and total trip duration. We’re waiting for your choice.
           </p>
           <LocationSelector
@@ -448,21 +447,21 @@ export default function RouteBuilder({
             currentLocation={userLocation}
           />
           {!userLocation && !isLoadingLocation && (
-            <p className="font-cinzel text-white/50 text-xs mt-3" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+            <p className="font-cinzel text-white/50 text-xs mt-3">
               Use “Share my location” or search for an address below.
             </p>
           )}
           {userLocation && (
             <div className="mt-3 p-3 bg-[#8b6f47] rounded">
-              <p className="font-cinzel text-white font-semibold text-sm" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+              <p className="font-cinzel text-white font-semibold text-sm">
                 {userLocation.title || "Your location"}
               </p>
               {userLocation.address && (
-                <p className="font-cinzel text-white/70 text-xs mt-1" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                <p className="font-cinzel text-white/70 text-xs mt-1">
                   {userLocation.address}
                 </p>
               )}
-              <p className="font-cinzel text-white/50 text-xs mt-1" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+              <p className="font-cinzel text-white/50 text-xs mt-1">
                 {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
               </p>
             </div>
@@ -470,10 +469,10 @@ export default function RouteBuilder({
         </div>
 
         <div className="bg-[#5d4e37] rounded-lg p-6">
-          <h3 className="font-cinzel text-xl font-bold text-white mb-1" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+          <h3 className="font-cinzel text-xl font-bold text-white mb-1">
             How you get around
           </h3>
-          <p className="font-cinzel text-white/70 text-sm mb-4" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+          <p className="font-cinzel text-white/70 text-sm mb-4">
             Choose how you’ll travel between stops. We need this to calculate travel time and total trip duration. We’re waiting for your choice.
           </p>
           <div className="flex flex-wrap gap-2">
@@ -487,33 +486,31 @@ export default function RouteBuilder({
                     ? "bg-[#d4af37] text-[#3a3428]"
                     : "bg-[#8b6f47] text-white hover:bg-[#9d7f57]"
                 }`}
-                style={{ fontFamily: "var(--font-cinzel), serif" }}
               >
                 {mode}
               </button>
             ))}
           </div>
           {!transportMode && (
-            <p className="font-cinzel text-white/50 text-xs mt-3" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+            <p className="font-cinzel text-white/50 text-xs mt-3">
               Choose Walk, Car, or Motorcycle above.
             </p>
           )}
         </div>
 
         <div className="bg-[#5d4e37] rounded-lg p-6">
-              <h3 className="font-cinzel text-xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              <h3 className="font-cinzel text-xl font-bold text-white mb-4">
                 Route Summary
               </h3>
 
               {!userLocation && !isLoadingLocation && (
                 <div className="mb-4 p-3 bg-[#d4af37]/20 border border-[#d4af37] rounded-lg">
-                  <p className="font-cinzel text-white text-sm mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                  <p className="font-cinzel text-white text-sm mb-2">
                     Set your starting point and choose how you get around (above) to see travel time and total trip duration.
                   </p>
                   <button
                     onClick={requestLocation}
                     className="w-full px-4 py-2 bg-[#d4af37] text-[#3a3428] rounded font-cinzel font-semibold hover:bg-[#e5bf47] transition-colors text-sm"
-                    style={{ fontFamily: 'var(--font-cinzel), serif' }}
                   >
                     Share my location
                   </button>
@@ -522,7 +519,7 @@ export default function RouteBuilder({
               
               {isLoadingLocation && (
                 <div className="mb-4 p-3 bg-[#8b6f47] rounded-lg text-center">
-                  <p className="font-cinzel text-white text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                  <p className="font-cinzel text-white text-sm">
                     Getting your location...
                   </p>
                 </div>
@@ -535,7 +532,7 @@ export default function RouteBuilder({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </span>
-                  <div className="font-cinzel text-amber-100 text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                  <div className="font-cinzel text-amber-100 text-sm">
                     <p className="font-semibold mb-1">Trip longer than your preferred time</p>
                     <p>
                       Your trip (~{Math.floor(wholeTripMinutes / 60)}h {wholeTripMinutes % 60}m) is longer than your {preferredWindow?.label} window. You might not finish in time, and some places may close earlier—check opening hours before you go.
@@ -548,31 +545,31 @@ export default function RouteBuilder({
                 {userLocation && (tripStats.totalDistance > 0 || loadingRoute) && (
                   <>
                     <div className="flex justify-between">
-                      <span className="font-cinzel text-white/70" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Total Distance</span>
+                      <span className="font-cinzel text-white/70">Total Distance</span>
                       {loadingRoute ? (
-                        <span className="font-cinzel text-white/70 text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Loading route…</span>
+                        <span className="font-cinzel text-white/70 text-sm">Loading route…</span>
                       ) : (
-                        <span className="font-cinzel text-white font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                        <span className="font-cinzel text-white font-semibold">
                           {tripStats.totalDistance} km
                         </span>
                       )}
                     </div>
                 <div className="flex justify-between">
-                  <span className="font-cinzel text-white/70" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Travel time (whole route)</span>
+                  <span className="font-cinzel text-white/70">Travel time (whole route)</span>
                   {loadingRoute ? (
-                    <span className="font-cinzel text-white/70 text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Loading route…</span>
+                    <span className="font-cinzel text-white/70 text-sm">Loading route…</span>
                   ) : (
-                    <span className="font-cinzel text-white font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                    <span className="font-cinzel text-white font-semibold">
                       ~{Math.floor(tripStats.travelTime / 60)}h {tripStats.travelTime % 60}m
                     </span>
                   )}
                 </div>
-                <p className="font-cinzel text-white/50 text-xs" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                <p className="font-cinzel text-white/50 text-xs">
                   {fromLiveMap ? "From live route (OSRM)." : "Estimate (straight-line × road factor); live route unavailable."}
                 </p>
                 <div className="flex justify-between">
-                  <span className="font-cinzel text-white/70" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Time at places</span>
-                  <span className="font-cinzel text-white font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                  <span className="font-cinzel text-white/70">Time at places</span>
+                  <span className="font-cinzel text-white font-semibold">
                     ~{Math.floor((placesWithStop.length * minutesPerPlace) / 60)}h {(placesWithStop.length * minutesPerPlace) % 60}m
                   </span>
                 </div>
@@ -580,37 +577,37 @@ export default function RouteBuilder({
                   </>
                 )}
                 <div className="flex justify-between">
-                  <span className="font-cinzel text-white/70" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Total Stops</span>
-                  <span className="font-cinzel text-white font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                  <span className="font-cinzel text-white/70">Total Stops</span>
+                  <span className="font-cinzel text-white font-semibold">
                     {placesWithStop.length}
                   </span>
                 </div>
                 {placesWithStop.length > 0 && (
                   <div className="flex flex-col gap-0.5">
                     <div className="flex justify-between items-center">
-                      <span className="font-cinzel text-white/70" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                      <span className="font-cinzel text-white/70">
                         Whole trip (travel + time at places)
                       </span>
                       {canCalculateWholeTrip && Number.isFinite(wholeTripMinutes) ? (
-                        <span className="font-cinzel text-white font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                        <span className="font-cinzel text-white font-semibold">
                           ~{Math.floor(wholeTripMinutes / 60)}h {wholeTripMinutes % 60}m
                         </span>
                       ) : (
-                        <span className="font-cinzel text-white/50 text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                        <span className="font-cinzel text-white/50 text-sm">
                           —
                         </span>
                       )}
                     </div>
                     {!canCalculateWholeTrip && (
-                      <p className="font-cinzel text-white/50 text-xs" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                      <p className="font-cinzel text-white/50 text-xs">
                         Set starting point and choose transport above to calculate.
                       </p>
                     )}
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span className="font-cinzel text-white/70" style={{ fontFamily: 'var(--font-cinzel), serif' }}>Total Cost</span>
-                  <span className="font-cinzel text-white font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                  <span className="font-cinzel text-white/70">Total Cost</span>
+                  <span className="font-cinzel text-white font-semibold">
                     {placesWithStop.reduce((sum, place) => sum + (place.entryFees || 0), 0)} EGP
                   </span>
                 </div>
@@ -618,7 +615,7 @@ export default function RouteBuilder({
             </div>
 
             <div className="bg-[#5d4e37] rounded-lg p-6">
-              <h3 className="font-cinzel text-xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              <h3 className="font-cinzel text-xl font-bold text-white mb-4">
                 Your Route
               </h3>
               <div className="space-y-2 max-h-[400px] overflow-y-auto">
@@ -636,26 +633,26 @@ export default function RouteBuilder({
                         </div>
                         <div className="flex-1 min-w-0">
                           {isStop && (
-                            <span className="font-cinzel text-[#d4af37] text-xs font-semibold block mb-1" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                            <span className="font-cinzel text-[#d4af37] text-xs font-semibold block mb-1">
                               Stop — {routeStopWhen === "beginning" ? "Start" : routeStopWhen === "middle" ? "Mid-route" : "End"}
                             </span>
                           )}
                           <div className="flex items-center gap-2 mb-1">
                             <RouteIcon size={18} className="text-[#d4af37] shrink-0" />
-                            <h4 className="font-cinzel text-white font-semibold text-sm" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                            <h4 className="font-cinzel text-white font-semibold text-sm">
                               {place.title}
                             </h4>
                           </div>
-                        <p className="font-cinzel text-white/60 text-xs mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                        <p className="font-cinzel text-white/60 text-xs mb-2">
                           {place.address}
                         </p>
                         <div className="flex items-center gap-2 text-white/70 text-xs">
                           {place.entryFees !== null && place.entryFees > 0 ? (
-                            <span className="font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                            <span className="font-cinzel">
                               {place.entryFees} EGP
                             </span>
                           ) : (
-                            <span className="font-cinzel text-[#d4af37]" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                            <span className="font-cinzel text-[#d4af37]">
                               Free
                             </span>
                           )}
@@ -710,7 +707,6 @@ export default function RouteBuilder({
                   type="button"
                   onClick={handleYallaClick}
                   className="w-full px-6 py-4 bg-gradient-to-r from-[#d4af37] to-[#e5bf47] text-[#3a3428] rounded-lg font-cinzel font-bold hover:from-[#e5bf47] hover:to-[#f5cf57] transition-all transform hover:scale-105 shadow-lg text-lg"
-                  style={{ fontFamily: 'var(--font-cinzel), serif' }}
                 >
                   Yalla! Let's Go
                 </button>
@@ -720,14 +716,12 @@ export default function RouteBuilder({
                 onClick={handleSave}
                 disabled={placesWithStop.length < 1}
                 className="w-full px-6 py-3 bg-[#d4af37] text-[#3a3428] rounded-lg font-cinzel font-bold hover:bg-[#e5bf47] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ fontFamily: 'var(--font-cinzel), serif' }}
               >
                 {placesWithStop.length === 1 ? "Save Location" : "Save Route"}
               </button>
               <button
                 onClick={onBack}
                 className="w-full px-6 py-3 bg-[#8b6f47] text-white rounded-lg font-cinzel font-semibold hover:bg-[#9d7f57] transition-colors"
-                style={{ fontFamily: 'var(--font-cinzel), serif' }}
               >
                 Add More Places
               </button>

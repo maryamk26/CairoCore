@@ -21,19 +21,18 @@ export default function AboutPage() {
         </div>
         <div className="relative z-10 container mx-auto px-4 py-24">
           <div className="max-w-2xl">
-            <p className="text-white text-xl md:text-4xl font-cinzel mb-3" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <p className="text-white text-xl md:text-4xl font-cinzel mb-3">
               IT'S TIME TO
             </p>
-            <h1 className="font-cinzel text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <h1 className="font-cinzel text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
               VISIT CAIRO
             </h1>
-            <p className="text-white text-sm md:text-xl leading-relaxed mb-8 font-cinzel max-w-xl" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <p className="text-white text-sm md:text-xl leading-relaxed mb-8 font-cinzel max-w-xl">
               Crave new adventures, mystical experiences and stunning places? You need to visit Cairo. We make sure that you'll get an experience you'll never forget.
             </p>
             <button
               onClick={() => setShowModal(true)}
               className="inline-block px-8 py-3 border-2 border-white/80 text-white font-cinzel font-medium rounded-full hover:bg-white/10 hover:border-white transition-all backdrop-blur-sm"
-              style={{ fontFamily: 'var(--font-cinzel), serif' }}
             >
               Explore More
             </button>
@@ -63,28 +62,28 @@ export default function AboutPage() {
             </svg>
           </button>
           <div className="mt-4">
-            <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-white mb-6" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-white mb-6">
               What We Do
             </h2>
             
             <div className="space-y-6">
               <div>
-                <h3 className="font-cinzel text-xl font-semibold text-white mb-3" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                <h3 className="font-cinzel text-xl font-semibold text-white mb-3">
                   Your Ultimate Cairo Guide
                 </h3>
-                <p className="text-white/90 leading-relaxed font-cinzel text-lg" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                <p className="text-white/90 leading-relaxed font-cinzel text-lg">
                   Think of us as your bestie who knows all the hidden gems in Cairo. We're a bunch of Cairo enthusiasts who got tired of missing out on the coolest spots in the city. From that insta-worthy cafe you've been searching for to ancient places that'll literally blow your mind.
                 </p>
               </div>
 
               <div>
-                <h3 className="font-cinzel text-xl font-semibold text-white mb-3" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                <h3 className="font-cinzel text-xl font-semibold text-white mb-3">
                   Making Cairo Exploration Effortless
                 </h3>
-                <p className="text-white/90 leading-relaxed font-cinzel text-lg mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                <p className="text-white/90 leading-relaxed font-cinzel text-lg mb-4">
                   We're making Cairo exploration absolutely effortless and way more fun. We've got all the deets on places you need to check out - photos that'll make you want to book a trip right now, honest reviews from real people, and all the insider tips you won't find anywhere else.
                 </p>
-                <p className="text-white/90 leading-relaxed font-cinzel text-lg" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                <p className="text-white/90 leading-relaxed font-cinzel text-lg">
                   Want to share that amazing spot you discovered? Go for it. Planning the perfect day out? We got you covered. Looking to connect with other explorers who are just as obsessed with Cairo as you are? You've come to the right place. Let's explore this city together.
                 </p>
               </div>

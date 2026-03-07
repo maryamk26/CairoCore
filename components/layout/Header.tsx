@@ -54,7 +54,6 @@ export default function Header() {
                 ? 'text-white hover:text-white/80' 
                 : 'text-[#5d4e37] hover:text-[#8b6f47]'
             }`}
-            style={{ fontFamily: 'var(--font-cinzel), serif' }}
           >
             CairoCore
           </Link>
@@ -72,7 +71,6 @@ export default function Header() {
                         ? 'text-white hover:text-white/80'
                         : 'text-[#5d4e37] hover:text-[#8b6f47]'
                     }`}
-                    style={{ fontFamily: 'var(--font-cinzel), serif' }}
                   >
                     {link.label}
                   </Link>
@@ -89,13 +87,11 @@ export default function Header() {
                         ? 'text-white hover:text-white/80'
                         : 'text-[#5d4e37] hover:text-[#8b6f47]'
                     }`}
-                    style={{ fontFamily: 'var(--font-cinzel), serif' }}
                   >
                     {link.label}
                   </Link>
                 );
               }
-              
               return (
                 <Link
                   key={link.href}
@@ -105,7 +101,6 @@ export default function Header() {
                       ? 'text-white hover:text-white/80'
                       : 'text-[#5d4e37] hover:text-[#8b6f47]'
                   }`}
-                  style={{ fontFamily: 'var(--font-cinzel), serif' }}
                 >
                   {link.label}
                 </Link>

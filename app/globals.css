@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 :root {
-  /* Earthy Color Palette */
   --earth-cream: #f5f1e8;
   --earth-beige: #e8ddd4;
   --earth-tan: #d4c4b0;
@@ -26,9 +25,11 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  .font-cinzel {
+    font-family: var(--font-cinzel), serif;
+  }
 }
 
-/* Custom scrollbar styling for search suggestions */
 .overflow-y-auto::-webkit-scrollbar {
   width: 6px;
 }
@@ -47,7 +48,6 @@ body {
   background: #5d4e37;
 }
 
-/* Smooth page transitions */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -70,28 +70,19 @@ body {
   }
 }
 
-/* Smooth transitions for all interactive elements */
 a, button {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Smooth link transitions */
 a {
   transition-property: color, opacity, transform;
 }
 
-/* Prevent layout shift during transitions */
 main {
   position: relative;
   min-height: 100%;
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Optimize transitions */
 * {
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);

@@ -10,8 +10,8 @@ export function useAuth() {
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
       setIsLoading(false);
     });
 
@@ -26,6 +26,24 @@ export function useAuth() {
       subscription.unsubscribe();
     };
   }, [supabase]);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    fetch("/api/auth/session")
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data.authenticated === false) {
+          supabase.auth.signOut();
+          setUser(null);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, supabase]);
 
   return {
     user,

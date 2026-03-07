@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { SurveyAnswers } from "@/lib/planner/survey";
 
-export interface QuestionOption {
+interface QuestionOption {
   value: string;
   label: string;
   icon?: string;
 }
 
-export interface Question {
+interface Question {
   id: string;
   question: string;
   type: "single_choice" | "multiple_choice" | "range";
@@ -17,10 +18,6 @@ export interface Question {
   max?: number;
   step?: number;
   unit?: string;
-}
-
-export interface SurveyAnswers {
-  [questionId: string]: string | string[] | number;
 }
 
 interface AccordionSurveyProps {
@@ -192,20 +189,20 @@ export default function AccordionSurvey({ onComplete, initialAnswers }: Accordio
       <div className="relative z-10 px-4 pt-32 pb-12">
         <div className="container mx-auto max-w-4xl">
           <div className="text-center mb-12">
-            <h1 className="font-cinzel text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <h1 className="font-cinzel text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">
               Plan Your Perfect Trip
             </h1>
-            <p className="font-cinzel text-white text-lg font-bold max-w-2xl mx-auto drop-shadow-md" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <p className="font-cinzel text-white text-lg font-bold max-w-2xl mx-auto drop-shadow-md">
               Answer a few questions to help us create personalized recommendations just for you
             </p>
           </div>
 
           <div className="mb-8">
             <div className="flex justify-between items-center mb-3">
-              <span className="font-cinzel text-white text-base font-bold drop-shadow-md" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              <span className="font-cinzel text-white text-base font-bold drop-shadow-md">
                 {visibleQuestions.filter((q) => isAnswered(q.id)).length} of {visibleQuestions.length} answered
               </span>
-              <span className="font-cinzel text-white text-base font-bold drop-shadow-md" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              <span className="font-cinzel text-white text-base font-bold drop-shadow-md">
                 {Math.round((visibleQuestions.filter((q) => isAnswered(q.id)).length / visibleQuestions.length) * 100)}%
               </span>
             </div>
@@ -244,7 +241,7 @@ export default function AccordionSurvey({ onComplete, initialAnswers }: Accordio
                     }`}>
                       {answered ? "✓" : index + 1}
                     </div>
-                    <span className="font-cinzel text-white font-semibold text-lg" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                    <span className="font-cinzel text-white font-semibold text-lg">
                       {question.question}
                     </span>
                   </div>
@@ -271,7 +268,7 @@ export default function AccordionSurvey({ onComplete, initialAnswers }: Accordio
                                 : "bg-[#5d4e37] text-white hover:bg-[#6d5e47]"
                             }`}
                           >
-                            <span className="font-cinzel font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                            <span className="font-cinzel font-semibold">
                               {option.label}
                             </span>
                           </button>
@@ -305,7 +302,7 @@ export default function AccordionSurvey({ onComplete, initialAnswers }: Accordio
                                     </svg>
                                   )}
                                 </div>
-                                <span className="font-cinzel font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                                <span className="font-cinzel font-semibold">
                                   {option.label}
                                 </span>
                               </div>
@@ -318,10 +315,10 @@ export default function AccordionSurvey({ onComplete, initialAnswers }: Accordio
                     {question.type === "range" && (
                       <div className="space-y-6">
                         <div className="text-center">
-                          <span className="font-cinzel text-5xl font-bold text-[#d4af37]" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                          <span className="font-cinzel text-5xl font-bold text-[#d4af37]">
                             {currentAnswer || question.min || 0}
                           </span>
-                          <span className="font-cinzel text-2xl text-white ml-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                          <span className="font-cinzel text-2xl text-white ml-2">
                             {question.unit}
                           </span>
                         </div>
@@ -343,7 +340,7 @@ export default function AccordionSurvey({ onComplete, initialAnswers }: Accordio
                             }%, #5d4e37 100%)`,
                           }}
                         />
-                        <div className="flex justify-between text-white/70 font-cinzel text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                        <div className="flex justify-between text-white/70 font-cinzel text-sm">
                           <span>{question.min} {question.unit}</span>
                           <span>{question.max} {question.unit}</span>
                         </div>
@@ -361,7 +358,6 @@ export default function AccordionSurvey({ onComplete, initialAnswers }: Accordio
             onClick={handleSubmit}
             disabled={!allAnswered}
             className="px-12 py-4 bg-[#d4af37] text-[#3a3428] rounded-lg font-cinzel font-bold text-lg hover:bg-[#e5bf47] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-            style={{ fontFamily: 'var(--font-cinzel), serif' }}
           >
             {allAnswered ? "Get My Recommendations →" : `Answer ${visibleQuestions.length - visibleQuestions.filter((q) => isAnswered(q.id)).length} More Questions`}
           </button>

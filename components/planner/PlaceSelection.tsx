@@ -63,10 +63,10 @@ export default function PlaceSelection({
         <div className="container mx-auto max-w-7xl">
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="font-cinzel text-4xl md:text-5xl font-bold text-white mb-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <h1 className="font-cinzel text-4xl md:text-5xl font-bold text-white mb-4">
               Your Personalized Recommendations
             </h1>
-            <p className="font-cinzel text-white/80 text-lg" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <p className="font-cinzel text-white/80 text-lg">
               Based on your preferences, we've selected the best places for you. Choose the ones you'd like to visit!
             </p>
           </div>
@@ -74,7 +74,6 @@ export default function PlaceSelection({
             type="button"
             onClick={onBackToSurvey}
             className="shrink-0 px-5 py-2.5 rounded-lg border-2 border-white/60 text-white font-cinzel font-semibold hover:bg-white/10 transition-colors"
-            style={{ fontFamily: 'var(--font-cinzel), serif' }}
           >
             Edit my answers
           </button>
@@ -87,7 +86,7 @@ export default function PlaceSelection({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </span>
-            <p className="font-cinzel text-amber-100 text-sm sm:text-base" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <p className="font-cinzel text-amber-100 text-sm sm:text-base">
               {placesOverBudget.length} place{placesOverBudget.length !== 1 ? "s" : ""} exceed your per-place budget (max {budget === "low" ? "50" : budget === "medium" ? "200" : "—"} EGP per place): {placesOverBudget.map((p) => p.title).join(", ")}.
             </p>
           </div>
@@ -95,14 +94,13 @@ export default function PlaceSelection({
 
         {selectedPlaces.length > 0 && (
           <div className="bg-[#d4af37] text-[#3a3428] rounded-lg p-4 mb-6 flex items-center justify-between">
-            <span className="font-cinzel font-semibold" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <span className="font-cinzel font-semibold">
               {selectedPlaces.length} place{selectedPlaces.length !== 1 ? "s" : ""} selected
             </span>
             <button
               onClick={onContinue}
               disabled={selectedPlaces.length < 1}
               className="px-6 py-2 bg-[#3a3428] text-[#d4af37] rounded-lg font-cinzel font-semibold hover:bg-[#4a4438] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ fontFamily: 'var(--font-cinzel), serif' }}
             >
               {selectedPlaces.length === 1 ? "View Location →" : "Build My Route →"}
             </button>
@@ -150,12 +148,12 @@ export default function PlaceSelection({
                 <div className="p-5">
                   <div className="flex items-center gap-2 mb-2">
                     <PlaceIcon size={20} className="text-[#d4af37] shrink-0" />
-                    <h3 className="font-cinzel text-xl font-bold text-white" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                    <h3 className="font-cinzel text-xl font-bold text-white">
                       {place.title}
                     </h3>
                   </div>
                   
-                  <p className="font-cinzel text-white/70 text-sm mb-3 line-clamp-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                  <p className="font-cinzel text-white/70 text-sm mb-3 line-clamp-2">
                     {place.description}
                   </p>
 
@@ -166,7 +164,7 @@ export default function PlaceSelection({
                           <svg className="w-4 h-4 text-[#d4af37] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                           </svg>
-                          <span className="font-cinzel text-white/80 text-xs" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                          <span className="font-cinzel text-white/80 text-xs">
                             {reason}
                           </span>
                         </div>
@@ -179,7 +177,6 @@ export default function PlaceSelection({
                       <span
                         key={vibe}
                         className="px-2 py-1 bg-[#8b6f47] text-white text-xs rounded font-cinzel"
-                        style={{ fontFamily: 'var(--font-cinzel), serif' }}
                       >
                         {vibe}
                       </span>
@@ -189,11 +186,11 @@ export default function PlaceSelection({
                   <div className="flex items-center justify-between text-white/70 text-sm">
                     <div className="flex items-center gap-2">
                       {place.entryFees !== null && place.entryFees > 0 ? (
-                        <span className="font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                        <span className="font-cinzel">
                           {place.entryFees} EGP
                         </span>
                       ) : (
-                        <span className="font-cinzel text-[#d4af37]" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                        <span className="font-cinzel text-[#d4af37]">
                           Free
                         </span>
                       )}
@@ -215,7 +212,6 @@ export default function PlaceSelection({
               type="button"
               onClick={() => setVisibleCount((c) => c + SHOW_MORE_STEP)}
               className="px-8 py-3 rounded-lg border-2 border-[#d4af37] text-[#d4af37] font-cinzel font-semibold hover:bg-[#d4af37]/10 transition-colors"
-              style={{ fontFamily: "var(--font-cinzel), serif" }}
             >
               Show more
             </button>

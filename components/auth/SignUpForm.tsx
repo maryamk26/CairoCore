@@ -92,7 +92,7 @@ export default function SignUpForm() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="firstName" className="block text-sm font-cinzel font-medium text-[#5d4e37] mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+          <label htmlFor="firstName" className="block text-sm font-cinzel font-medium text-[#5d4e37] mb-2">
             First Name
           </label>
           <input
@@ -102,13 +102,12 @@ export default function SignUpForm() {
             onChange={(e) => setFirstName(e.target.value)}
             required
             className="w-full px-4 py-3 rounded-full border border-white/50 bg-white/20 backdrop-blur-sm text-[#3a3428] font-cinzel focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/70 transition-all"
-            style={{ fontFamily: 'var(--font-cinzel), serif' }}
             placeholder="First name"
           />
         </div>
 
         <div>
-          <label htmlFor="lastName" className="block text-sm font-cinzel font-medium text-[#5d4e37] mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+          <label htmlFor="lastName" className="block text-sm font-cinzel font-medium text-[#5d4e37] mb-2">
             Last Name
           </label>
           <input
@@ -118,14 +117,13 @@ export default function SignUpForm() {
             onChange={(e) => setLastName(e.target.value)}
             required
             className="w-full px-4 py-3 rounded-full border border-white/50 bg-white/20 backdrop-blur-sm text-[#3a3428] font-cinzel focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/70 transition-all"
-            style={{ fontFamily: 'var(--font-cinzel), serif' }}
             placeholder="Last name"
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="email" className="block text-sm font-cinzel font-medium text-[#5d4e37] mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+        <label htmlFor="email" className="block text-sm font-cinzel font-medium text-[#5d4e37] mb-2">
           Email
         </label>
         <input
@@ -135,13 +133,12 @@ export default function SignUpForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
             className="w-full px-4 py-3 rounded-full border border-white/50 bg-white/20 backdrop-blur-sm text-[#3a3428] font-cinzel focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/70 transition-all"
-            style={{ fontFamily: 'var(--font-cinzel), serif' }}
           placeholder="Enter your email"
         />
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-cinzel font-medium text-[#5d4e37] mb-2" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+        <label htmlFor="password" className="block text-sm font-cinzel font-medium text-[#5d4e37] mb-2">
           Password
         </label>
         <input
@@ -151,16 +148,15 @@ export default function SignUpForm() {
           onChange={(e) => setPassword(e.target.value)}
           required
             className="w-full px-4 py-3 rounded-full border border-white/50 bg-white/20 backdrop-blur-sm text-[#3a3428] font-cinzel focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/70 transition-all"
-            style={{ fontFamily: 'var(--font-cinzel), serif' }}
           placeholder="Create a password"
         />
-        <p className="mt-2 text-xs text-[#8b6f47] font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+        <p className="mt-2 text-xs text-[#8b6f47] font-cinzel">
           Must be at least 8 characters long
         </p>
       </div>
 
       {error && (
-        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm font-cinzel">
           {error}
         </div>
       )}
@@ -169,7 +165,6 @@ export default function SignUpForm() {
         type="submit"
         disabled={isLoading}
         className="w-full py-3 px-4 rounded-full bg-[#8b6f47]/80 backdrop-blur-sm text-white font-cinzel font-medium hover:bg-[#8b6f47] focus:outline-none focus:ring-2 focus:ring-[#8b6f47] focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        style={{ fontFamily: 'var(--font-cinzel), serif' }}
       >
         {isLoading ? "Creating account..." : "Sign Up"}
       </button>
@@ -180,7 +175,7 @@ export default function SignUpForm() {
           <div className="w-full border-t border-white/40"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-transparent text-[#5d4e37] font-cinzel" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+          <span className="px-2 bg-transparent text-[#5d4e37] font-cinzel">
             or
           </span>
         </div>
@@ -191,7 +186,6 @@ export default function SignUpForm() {
         onClick={() => handleSocialSignUp("google")}
         disabled={isLoading}
         className="w-full py-3 px-4 rounded-full border-2 border-white/50 bg-white/30 backdrop-blur-sm text-[#5d4e37] font-cinzel font-medium hover:bg-[#5d4e37]/20 hover:border-[#5d4e37]/40 hover:text-[#3a3428] focus:outline-none focus:ring-2 focus:ring-[#8b6f47] focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        style={{ fontFamily: 'var(--font-cinzel), serif' }}
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

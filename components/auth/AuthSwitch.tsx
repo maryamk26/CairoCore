@@ -24,7 +24,6 @@ export default function AuthSwitch({ isSignIn, onSwitch }: AuthSwitchProps) {
               ? "text-white"
               : "text-[#5d4e37] hover:text-[#8b6f47]"
           }`}
-          style={{ fontFamily: 'var(--font-cinzel), serif' }}
         >
           Sign In
         </button>
@@ -35,7 +34,6 @@ export default function AuthSwitch({ isSignIn, onSwitch }: AuthSwitchProps) {
               ? "text-white"
               : "text-[#5d4e37] hover:text-[#8b6f47]"
           }`}
-          style={{ fontFamily: 'var(--font-cinzel), serif' }}
         >
           Sign Up
         </button>

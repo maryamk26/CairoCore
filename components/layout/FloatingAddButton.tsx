@@ -18,9 +18,9 @@ export default function FloatingAddButton() {
 
   return (
     <Link
-      href="/places/new"
+      href="/search"
       className="fixed bottom-8 right-8 z-50 w-14 h-14 bg-[#8b6f47] hover:bg-[#5d4e37] text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110"
-      aria-label="Add new place"
+      aria-label="Discover places"
     >
       <svg
         className="w-6 h-6"

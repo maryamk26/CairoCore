@@ -11,11 +11,53 @@ datasource db {
 model User {
   id        String   @id
   email     String   @unique
+  name      String?
+  username  String?
   createdAt DateTime @default(now())
 
-  places Place[]
+  places     Place[]
+  folders    Folder[]
+  following  Follow[]   @relation("Following")
+  followers  Follow[]   @relation("Followers")
 
   @@map("users")
+}
+
+model Follow {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
+
+model Folder {
+  id        String   @id @default(uuid())
+  name      String
+  userId    String
+  createdAt DateTime @default(now())
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  savedPlaces SavedPlace[]
+
+  @@map("folders")
+}
+
+model SavedPlace {
+  id        String   @id @default(uuid())
+  folderId  String
+  placeId   String
+  createdAt DateTime @default(now())
+
+  folder Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  place  Place  @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@unique([folderId, placeId])
+  @@map("saved_places")
 }
 
 model Place {
@@ -34,7 +76,8 @@ model Place {
   createdBy     String?
   createdAt     DateTime @default(now())
 
-  user User? @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  user        User?         @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  savedIn     SavedPlace[]
 
   @@map("places")
 }

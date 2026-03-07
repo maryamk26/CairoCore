@@ -197,7 +197,6 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
       <button
         onClick={() => setIsOpen(true)}
         className="w-full px-4 py-2 bg-[#d4af37] text-[#3a3428] rounded font-cinzel font-semibold hover:bg-[#e5bf47] transition-colors text-sm"
-        style={{ fontFamily: 'var(--font-cinzel), serif' }}
       >
         {currentLocation ? 'Change Starting Location' : 'Set Starting Location'}
       </button>
@@ -207,7 +206,7 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
   return (
     <div className="bg-[#8b6f47] rounded-lg p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="font-cinzel text-white font-bold text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+        <h4 className="font-cinzel text-white font-bold text-sm">
           Select Starting Location
         </h4>
         <button
@@ -228,7 +227,6 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
               ? 'bg-[#d4af37] text-[#3a3428]'
               : 'bg-[#5d4e37] text-white hover:bg-[#6d5e47]'
           }`}
-          style={{ fontFamily: 'var(--font-cinzel), serif' }}
         >
           Current
         </button>
@@ -239,7 +237,6 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
               ? 'bg-[#d4af37] text-[#3a3428]'
               : 'bg-[#5d4e37] text-white hover:bg-[#6d5e47]'
           }`}
-          style={{ fontFamily: 'var(--font-cinzel), serif' }}
         >
           Search
         </button>
@@ -250,7 +247,6 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
               ? 'bg-[#d4af37] text-[#3a3428]'
               : 'bg-[#5d4e37] text-white hover:bg-[#6d5e47]'
           }`}
-          style={{ fontFamily: 'var(--font-cinzel), serif' }}
         >
           Saved
         </button>
@@ -258,14 +254,13 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
 
       {mode === "browser" && (
         <div className="space-y-2">
-          <p className="font-cinzel text-white/80 text-xs" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+          <p className="font-cinzel text-white/80 text-xs">
             Use your device's current location
           </p>
           <button
             onClick={handleBrowserLocation}
             disabled={isLoadingBrowser}
             className="w-full px-4 py-3 bg-[#d4af37] text-[#3a3428] rounded font-cinzel font-bold hover:bg-[#e5bf47] transition-colors disabled:opacity-50"
-            style={{ fontFamily: 'var(--font-cinzel), serif' }}
           >
             {isLoadingBrowser ? 'Getting Location...' : 'Use Current Location'}
           </button>
@@ -275,7 +270,7 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
       {mode === "search" && (
         <div className="space-y-3">
           <div>
-            <label className="font-cinzel text-white text-xs mb-1 block" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <label className="font-cinzel text-white text-xs mb-1 block">
               Search for a place or address
             </label>
             <input
@@ -284,7 +279,6 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="e.g., Cairo Tower, Zamalek..."
               className="w-full px-3 py-2 rounded bg-[#5d4e37] text-white placeholder-white/50 font-cinzel text-sm"
-              style={{ fontFamily: 'var(--font-cinzel), serif' }}
               autoFocus
             />
           </div>
@@ -296,26 +290,26 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
               onChange={(e) => setShouldSave(e.target.checked)}
               className="w-4 h-4 rounded"
             />
-            <span className="font-cinzel text-white text-xs" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <span className="font-cinzel text-white text-xs">
               Save for future use
             </span>
           </label>
 
           <div className="max-h-[300px] overflow-y-auto space-y-2">
             {isSearching && (
-              <p className="font-cinzel text-white/70 text-xs text-center py-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              <p className="font-cinzel text-white/70 text-xs text-center py-4">
                 Searching...
               </p>
             )}
             
             {!isSearching && searchQuery.length > 0 && searchQuery.length < 3 && (
-              <p className="font-cinzel text-white/70 text-xs text-center py-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              <p className="font-cinzel text-white/70 text-xs text-center py-4">
                 Type at least 3 characters to search
               </p>
             )}
             
             {!isSearching && searchQuery.length >= 3 && searchResults.length === 0 && (
-              <p className="font-cinzel text-white/70 text-xs text-center py-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+              <p className="font-cinzel text-white/70 text-xs text-center py-4">
                 No results found. Try a different search.
               </p>
             )}
@@ -326,10 +320,10 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
                 onClick={() => handleSearchResultSelect(result)}
                 className="w-full p-3 bg-[#5d4e37] hover:bg-[#6d5e47] rounded text-left transition-colors"
               >
-                <p className="font-cinzel text-white font-semibold text-sm mb-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                <p className="font-cinzel text-white font-semibold text-sm mb-1">
                   {result.text}
                 </p>
-                <p className="font-cinzel text-white/60 text-xs" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                <p className="font-cinzel text-white/60 text-xs">
                   {result.place_name}
                 </p>
               </button>
@@ -341,11 +335,11 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
       {mode === "saved" && (
         <div className="space-y-2">
           {isLoadingSaved ? (
-            <p className="font-cinzel text-white/70 text-xs text-center py-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <p className="font-cinzel text-white/70 text-xs text-center py-4">
               Loading saved locations...
             </p>
           ) : savedLocations.length === 0 ? (
-            <p className="font-cinzel text-white/70 text-xs text-center py-4" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+            <p className="font-cinzel text-white/70 text-xs text-center py-4">
               No saved locations yet. Add one manually!
             </p>
           ) : (
@@ -358,15 +352,15 @@ export default function LocationSelector({ onLocationSelect, currentLocation }: 
                   onClick={() => handleSavedLocation(location)}
                   className="flex-1 text-left hover:opacity-80 transition-opacity"
                 >
-                  <p className="font-cinzel text-white font-semibold text-sm" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                  <p className="font-cinzel text-white font-semibold text-sm">
                     {location.title}
                   </p>
                   {location.address && (
-                    <p className="font-cinzel text-white/60 text-xs mt-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                    <p className="font-cinzel text-white/60 text-xs mt-1">
                       {location.address}
                     </p>
                   )}
-                  <p className="font-cinzel text-white/50 text-xs mt-1" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+                  <p className="font-cinzel text-white/50 text-xs mt-1">
                     {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
                   </p>
                 </button>
